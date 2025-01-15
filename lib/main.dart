@@ -1,28 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  _MainAppState createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MyApp> {
+  ThemeMode themeMode = ThemeMode.system;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      title: 'Scouting Home Page',
+      theme: ThemeData.from(colorScheme: lightColorScheme),
+      darkTheme: ThemeData.from(colorScheme: darkColorScheme),
+      themeMode: themeMode,
+      home: MyHomePage(
+        onThemeChanged: (ThemeMode mode) {
+          setState(() {
+            themeMode = mode;
+          });
+        },
+        title: "meow",
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
+
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  final Function(ThemeMode) onThemeChanged;
+
+  const MyHomePage({super.key, required this.title, required this.onThemeChanged});
 
   final String title;
 
