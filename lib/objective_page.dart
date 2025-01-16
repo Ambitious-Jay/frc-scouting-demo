@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 
 class ObjectivePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
@@ -13,43 +14,77 @@ class ObjectivePage extends StatefulWidget {
 }
 
 class _ObjectivePageState extends State<ObjectivePage> {
+  ThemeMode themeMode = ThemeMode.system;
+  // counters
   int l4Counter = 0;
   int l2l3Counter = 0;
   int l1Counter = 0;
   int netCounter = 0;
   int processorCounter = 0;
+  bool isCounterPositive = true;
+  String counter = "-";
 
-  void incrementL4() {
+  //methods to update counters up or down based on negative toggle
+  void updateL4() {
     setState(() {
-      l4Counter++;
+      if (isCounterPositive) {
+        l4Counter++;
+      } else if (l4Counter > 0) {
+        l4Counter--;
+      }
     });
   }
 
-  void incrementL2L3() {
+  void updateL2L3() {
     setState(() {
-      l2l3Counter++;
+      if (isCounterPositive) {
+        l2l3Counter++;
+      } else if (l2l3Counter > 0) {
+        l2l3Counter--;
+      }
     });
   }
 
-  void incrementL1() {
+  void updateL1() {
     setState(() {
-      l1Counter++;
+      if (isCounterPositive) {
+        l1Counter++;
+      } else if (l1Counter > 0) {
+        l1Counter--;
+      }
     });
   }
 
-  void incrementNet() {
+  void updateNet() {
     setState(() {
-      netCounter++;
+      if (isCounterPositive) {
+        netCounter++;
+      } else if (netCounter > 0) {
+        netCounter--;
+      }
     });
   }
 
-  void incrementProcessor() {
+  void updateProcessor() {
     setState(() {
-      processorCounter++;
+      if (isCounterPositive) {
+        processorCounter++;
+      } else if (processorCounter > 0) {
+        processorCounter--;
+      }
     });
   }
 
-  void toggleNegative() {}
+  void toggleNegative() {
+    setState(() {
+      isCounterPositive = !isCounterPositive;
+      if (isCounterPositive) {
+        counter = "-";
+      } else {
+        counter = "+";
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,32 +95,79 @@ class _ObjectivePageState extends State<ObjectivePage> {
       ),
       body: Center(
           child: Row(
-        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           SizedBox(
               width: MediaQuery.of(context).size.width * 0.3,
-              child: const Image( //reef photo
+              child: const Image(
+                //reef photo
                 image: AssetImage('assets/reef.png'),
                 fit: BoxFit.contain,
               )),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              TextButton(onPressed: incrementL4, child: const Text("L4")),
-              TextButton(onPressed: incrementL2L3, child: const Text("L2/3")),
-              TextButton(onPressed: incrementL1, child: const Text("L1")),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
+                      minimumSize: const Size.square(70),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5))),
+                  onPressed: updateL4,
+                  child: Text('$l4Counter')),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
+                      minimumSize: const Size.square(70),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5))),
+                  onPressed: updateL2L3,
+                  child: Text('$l2l3Counter')),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
+                      minimumSize: const Size.square(70),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5))),
+                  onPressed: updateL1,
+                  child: Text('$l1Counter')),
             ],
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              TextButton(onPressed: incrementNet, child: const Text("Net")),
-              TextButton(
-                  onPressed: incrementProcessor,
-                  child: const Text("Processor")),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
+                      minimumSize: const Size.square(70),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5))),
+                  onPressed: updateNet,
+                  child: Text('$netCounter')),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
+                      minimumSize: const Size.square(70),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5))),
+                  onPressed: updateProcessor,
+                  child: Text('$processorCounter')),
             ],
           ),
-          TextButton(onPressed: toggleNegative, child: const Text("+/-")),
+          ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  minimumSize: const Size.square(70),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5))),
+              onPressed: toggleNegative,
+              child: Text(counter)),
         ],
       )),
     );
