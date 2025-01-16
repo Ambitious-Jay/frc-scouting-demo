@@ -1,97 +1,126 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:frc1148_2025_scouting_app/SQLServerSocket/DartClient/lib/sqlconnection.dart';
-// import 'package:frc1148_2025_scouting_app/SQLServerSocket/DartClient/lib/table.dart';
 
-SqlConnection? globalConn;
+import 'package:frc1148_2025_scouting_app/SQLServerSocket/DartClient/lib/sqlconnection.dart';
+
+/// Tracks each WebSocket client and its own SqlConnection.
+/// This design supports multiple clients connecting, so each client
+/// has its own distinct connection rather than one global connection.
+final Map<WebSocket, SqlConnection?> _connections = {};
 
 Future<void> main() async {
-  final server = await HttpServer.bind(InternetAddress.anyIPv4, 10980);
-  print(
-      'WebSocket bridging server running on ws://${server.address.host}:${server.port}');
+  HttpServer? server;
 
+  try {
+    // Binds to port 10980 on all IPv4 interfaces
+    server = await HttpServer.bind(InternetAddress.anyIPv4, 10980);
+    print(
+        'WebSocket bridging server running on ws://${server.address.host}:${server.port}');
+  } catch (e, st) {
+    print('Error binding server on port 10980: $e\n$st');
+    return;
+  }
+
+  // Listens for incoming HttpRequests
   await for (HttpRequest request in server) {
+    // Checks if the incoming request is a valid WebSocket upgrade request
     if (WebSocketTransformer.isUpgradeRequest(request)) {
-      // Start timing the WebSocket handshake
       final handshakeStopwatch = Stopwatch()..start();
 
-      final ws = await WebSocketTransformer.upgrade(request);
+      WebSocket? ws;
+      try {
+        // Attempts to upgrade the request to a WebSocket
+        ws = await WebSocketTransformer.upgrade(request);
+      } catch (e, st) {
+        print('Error upgrading connection to WebSocket: $e\n$st');
+        request.response.statusCode = HttpStatus.internalServerError;
+        await request.response.close();
+        continue;
+      }
 
-      // Stop timing after the handshake completes
       handshakeStopwatch.stop();
       final handshakeMs = handshakeStopwatch.elapsedMilliseconds;
-      print('New WebSocket connection: ${ws.hashCode}, '
-          'handshake took $handshakeMs ms');
+      print(
+          'New WebSocket client: ${ws.hashCode}, handshake took $handshakeMs ms');
 
-      final buffer = StringBuffer();
+      // Store a null SqlConnection for this client until they send "open"
+      _connections[ws] = null;
 
+      // Listens for messages from this WebSocket client
+      // and handles them in _handleRawData.
       ws.listen(
-        (data) async {
-          // data is "length\r\njson"
-          buffer.write(data);
-          final content = buffer.toString();
-          final idx = content.indexOf('\r\n');
-          if (idx > 0) {
-            final len = int.parse(content.substring(0, idx));
-            final cmd = content.substring(idx + 2);
-            if (cmd.length == len) {
-              buffer.clear();
-              try {
-                final message = jsonDecode(cmd);
-                if (message is Map) {
-                  await _handleMessage(ws, message.cast<String, dynamic>());
-                }
-              } catch (e, st) {
-                print('Error parsing JSON: $e\n$st');
-                _sendReply(ws, {
-                  "type": "error",
-                  "error": "Invalid JSON: $e",
-                  "elapsedMs": 0
-                });
-              }
-            }
-          }
-        },
-        onError: (err) => print('WebSocket error: $err'),
-        onDone: () => print('WebSocket closed: ${ws.hashCode}'),
+        (data) => _handleRawData(ws!, data),
+        onError: (err) =>
+            print('WebSocket error from client ${ws.hashCode}: $err'),
+        onDone: () => _onClientDone(ws!),
       );
     } else {
+      // Forbid non-WebSocket requests
       request.response.statusCode = HttpStatus.forbidden;
       await request.response.close();
     }
   }
 }
 
+/// Reads "length\r\njson" from the client, decodes the JSON,
+/// and hands off to _handleMessage for actual logic.
+void _handleRawData(WebSocket ws, dynamic data) {
+  try {
+    final raw = data.toString();
+    final idx = raw.indexOf('\r\n');
+    if (idx <= 0) return; // Ignore malformed data
+    final len = int.parse(raw.substring(0, idx));
+    final jsonPart = raw.substring(idx + 2);
+
+    if (jsonPart.length != len) return; // Length mismatch, ignore
+
+    final msg = jsonDecode(jsonPart);
+    if (msg is Map<String, dynamic>) {
+      _handleMessage(ws, msg);
+    }
+  } catch (e, st) {
+    print('Error processing data from client ${ws.hashCode}: $e\n$st');
+    _sendReply(ws, {
+      "type": "error",
+      "error": "Invalid message: $e",
+      "elapsedMs": 0,
+    });
+  }
+}
+
+/// Handles "open", "query", and "close" commands for each WebSocket client.
+/// Each WebSocket has its own entry in _connections.
 Future<void> _handleMessage(WebSocket ws, Map<String, dynamic> msg) async {
   final type = msg["type"];
-  final text = msg["text"] ?? "";
+  final text = (msg["text"] ?? "") as String;
 
   switch (type) {
     case "open":
       {
-        print('Client requests "open" with connStr="$text"');
-        globalConn?.close();
+        print('Client ${ws.hashCode} requests "open" with connStr="$text"');
+        // If there's an existing connection, close it to avoid conflicts
+        await _closeConnectionFor(ws);
 
-        globalConn = SqlConnection(
+        final conn = SqlConnection(
           text,
-          address:
-              "100.121.101.39", // your .NET bridging server machine name / IP
-          port: 10981, // .NET bridging server's port
+          address: "100.121.101.39",
+          port: 10981,
         );
+        _connections[ws] = conn;
 
-        // Time how long it takes to open the SQL connection
         final stopwatch = Stopwatch()..start();
         try {
-          await globalConn!.open();
+          await conn.open();
           stopwatch.stop();
-          print('globalConn connected: ${globalConn!.connected}');
+          print('Client ${ws.hashCode} connected to DB: ${conn.connected}');
           _sendReply(ws, {
             "type": "ok",
             "elapsedMs": stopwatch.elapsedMilliseconds,
           });
         } catch (e) {
           stopwatch.stop();
-          print('Error opening connection: $e');
+          print('Error opening connection for client ${ws.hashCode}: $e');
+          _connections[ws] = null;
           _sendReply(ws, {
             "type": "error",
             "error": e.toString(),
@@ -103,53 +132,26 @@ Future<void> _handleMessage(WebSocket ws, Map<String, dynamic> msg) async {
 
     case "query":
       {
-        if (globalConn == null || !globalConn!.connected) {
+        final conn = _connections[ws];
+        if (conn == null || !conn.connected) {
           _sendReply(ws, {
             "type": "error",
-            "error": "No open connection.",
+            "error": "No open connection for this client.",
             "elapsedMs": 0
           });
           return;
         }
-        print('Client requests "query" => $text');
+        print('Client ${ws.hashCode} requests "query": $text');
 
-        // Time how long the query takes
         final stopwatch = Stopwatch()..start();
         try {
-          // Actually call the raw-socket .NET bridging
-          final rows = await globalConn!.query(text);
-
+          // Calls .query(...) on that client's SqlConnection
+          final rows = await conn.query(text);
           stopwatch.stop();
-          print('Query completed in ${stopwatch.elapsedMilliseconds} ms.');
 
-          // Example: Print rows in console in a nice table format
-          if (rows.isEmpty) {
-            print('[Query] No rows returned.');
-          } else if (rows.first is Map<String, dynamic>) {
-            final firstRow = rows.first as Map<String, dynamic>;
-            final columns = firstRow.keys.toList();
+          print(
+              'Query for client ${ws.hashCode} took ${stopwatch.elapsedMilliseconds} ms, returned ${rows.length} rows.');
 
-            // Print column headers
-            print(columns.join(' | '));
-            // Print a separator
-            print('-' * (columns.join(' | ').length));
-
-            // Print each row
-            for (final row in rows) {
-              final rowMap = row as Map<String, dynamic>;
-              final rowData = columns.map((col) {
-                final val = rowMap[col];
-                return val == null ? 'NULL' : val.toString();
-              }).toList();
-              print(rowData.join(' | '));
-            }
-          } else {
-            // If it's not a list of maps, just print raw
-            print('[Query] Got ${rows.length} rows (not Map-based).');
-            print(rows);
-          }
-
-          // Respond to Flutter with the rows + elapsed time
           _sendReply(ws, {
             "type": "query",
             "rows": rows,
@@ -157,7 +159,7 @@ Future<void> _handleMessage(WebSocket ws, Map<String, dynamic> msg) async {
           });
         } catch (e, st) {
           stopwatch.stop();
-          print('Error in query: $e\n$st');
+          print('Error in query for client ${ws.hashCode}: $e\n$st');
           _sendReply(ws, {
             "type": "error",
             "error": e.toString(),
@@ -169,16 +171,10 @@ Future<void> _handleMessage(WebSocket ws, Map<String, dynamic> msg) async {
 
     case "close":
       {
-        print('Client requests "close"');
-        // Time how long closing takes
+        print('Client ${ws.hashCode} requests "close"');
         final stopwatch = Stopwatch()..start();
-
-        if (globalConn != null && globalConn!.connected) {
-          await globalConn!.close();
-          globalConn = null;
-        }
+        await _closeConnectionFor(ws);
         stopwatch.stop();
-
         _sendReply(ws, {
           "type": "ok",
           "elapsedMs": stopwatch.elapsedMilliseconds,
@@ -187,6 +183,7 @@ Future<void> _handleMessage(WebSocket ws, Map<String, dynamic> msg) async {
       break;
 
     default:
+      // Unknown command
       _sendReply(ws, {
         "type": "error",
         "error": "Unknown message type: $type",
@@ -196,9 +193,33 @@ Future<void> _handleMessage(WebSocket ws, Map<String, dynamic> msg) async {
   }
 }
 
-/// Helper to send length‐prefixed JSON back to Flutter
+/// Closes the connection for a particular WebSocket client if it's open.
+Future<void> _closeConnectionFor(WebSocket ws) async {
+  final conn = _connections[ws];
+  if (conn != null && conn.connected) {
+    try {
+      await conn.close();
+    } catch (e) {
+      print('Error closing connection for client ${ws.hashCode}: $e');
+    }
+  }
+  _connections[ws] = null;
+}
+
+/// Called when the client WebSocket is done (onDone). Removes from map.
+void _onClientDone(WebSocket ws) {
+  print('WebSocket closed: ${ws.hashCode}');
+  _closeConnectionFor(ws);
+  _connections.remove(ws);
+}
+
+/// Sends a JSON reply in "length\r\njson" format to the specified client.
 void _sendReply(WebSocket ws, Map<String, dynamic> msg) {
   final encoded = jsonEncode(msg);
   final prefix = '${encoded.length}\r\n';
-  ws.add(prefix + encoded);
+  try {
+    ws.add(prefix + encoded);
+  } catch (e) {
+    print('Error sending reply to client ${ws.hashCode}: $e');
+  }
 }
