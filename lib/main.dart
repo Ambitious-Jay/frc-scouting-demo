@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
-import 'package:frc1148_2025_scouting_app/objective_page.dart'; 
+import 'package:frc1148_2025_scouting_app/objective_page.dart';
 
 void main() {
   runApp(const MyApp());

@@ -13,6 +13,44 @@ class ObjectivePage extends StatefulWidget {
 }
 
 class _ObjectivePageState extends State<ObjectivePage> {
+  int l4Counter = 0;
+  int l2l3Counter = 0;
+  int l1Counter = 0;
+  int netCounter = 0;
+  int processorCounter = 0;
+
+  void incrementL4() {
+    setState(() {
+      l4Counter++;
+    });
+  }
+
+  void incrementL2L3() {
+    setState(() {
+      l2l3Counter++;
+    });
+  }
+
+  void incrementL1() {
+    setState(() {
+      l1Counter++;
+    });
+  }
+
+  void incrementNet() {
+    setState(() {
+      netCounter++;
+    });
+  }
+
+  void incrementProcessor() {
+    setState(() {
+      processorCounter++;
+    });
+  }
+
+  void toggleNegative() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,24 +58,34 @@ class _ObjectivePageState extends State<ObjectivePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Objective Page'),
       ),
-      body: const Center(
+      body: Center(
           child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Image(image: AssetImage('assets/reef.png')),
+          SizedBox(
+              width: MediaQuery.of(context).size.width * 0.3,
+              child: const Image( //reef photo
+                image: AssetImage('assets/reef.png'),
+                fit: BoxFit.contain,
+              )),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text("mimimi l4"),
-              Text("mimimi l2 and l3"),
-              Text("mimimi trough")
+              TextButton(onPressed: incrementL4, child: const Text("L4")),
+              TextButton(onPressed: incrementL2L3, child: const Text("L2/3")),
+              TextButton(onPressed: incrementL1, child: const Text("L1")),
             ],
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [Text("mimimi net"), Text("mimimi processor")],
+            children: [
+              TextButton(onPressed: incrementNet, child: const Text("Net")),
+              TextButton(
+                  onPressed: incrementProcessor,
+                  child: const Text("Processor")),
+            ],
           ),
-          Text("mimimi negative toggle")
+          TextButton(onPressed: toggleNegative, child: const Text("+/-")),
         ],
       )),
     );
