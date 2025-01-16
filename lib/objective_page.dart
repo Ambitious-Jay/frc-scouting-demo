@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/labeled_button.dart';
 
 class ObjectivePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
@@ -107,67 +108,100 @@ class _ObjectivePageState extends State<ObjectivePage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: const Size.square(70),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5))),
-                  onPressed: updateL4,
-                  child: Text('$l4Counter')),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: const Size.square(70),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5))),
-                  onPressed: updateL2L3,
-                  child: Text('$l2l3Counter')),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: const Size.square(70),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5))),
-                  onPressed: updateL1,
-                  child: Text('$l1Counter')),
+              // ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //         backgroundColor: Theme.of(context).colorScheme.primary,
+              //         foregroundColor: Theme.of(context).colorScheme.secondary,
+              //         minimumSize: const Size.square(70),
+              //         shape: RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(5))),
+              //     onPressed: updateL4,
+              //     child: Text('$l4Counter')),
+              LabeledButton(
+                  label: "L4",
+                  buttonContent: l4Counter,
+                  functionOnTap: updateL4),
+              // ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //         backgroundColor: Theme.of(context).colorScheme.primary,
+              //         foregroundColor: Theme.of(context).colorScheme.secondary,
+              //         minimumSize: const Size.square(70),
+              //         shape: RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(5))),
+              //     onPressed: updateL2L3,
+              //     child: Text('$l2l3Counter')),
+              LabeledButton(
+                  label: "L2/L3",
+                  buttonContent: l2l3Counter,
+                  functionOnTap: updateL2L3),
+              // ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //         backgroundColor: Theme.of(context).colorScheme.primary,
+              //         foregroundColor: Theme.of(context).colorScheme.secondary,
+              //         minimumSize: const Size.square(70),
+              //         shape: RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(5))),
+              //     onPressed: updateL1,
+              //     child: Text('$l1Counter')),
+              LabeledButton(
+                  label: "L1",
+                  buttonContent: l1Counter,
+                  functionOnTap: updateL1),
             ],
           ),
+          const SizedBox(width: 10),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: const Size.square(70),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5))),
-                  onPressed: updateNet,
-                  child: Text('$netCounter')),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: const Size.square(70),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5))),
-                  onPressed: updateProcessor,
-                  child: Text('$processorCounter')),
+              // ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //         backgroundColor: Theme.of(context).colorScheme.primary,
+              //         foregroundColor: Theme.of(context).colorScheme.secondary,
+              //         minimumSize: const Size.square(70),
+              //         shape: RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(5))),
+              //     onPressed: updateNet,
+              //     child: Text('$netCounter')),
+              LabeledButton(
+                  label: "Net",
+                  buttonContent: netCounter,
+                  functionOnTap: updateNet),
+              // ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //         backgroundColor: Theme.of(context).colorScheme.primary,
+              //         foregroundColor: Theme.of(context).colorScheme.secondary,
+              //         minimumSize: const Size.square(70),
+              //         shape: RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(5))),
+              //     onPressed: updateProcessor,
+              //     child: Text('$processorCounter')),
+              LabeledButton(
+                  label: "Processor",
+                  buttonContent: processorCounter,
+                  functionOnTap: updateProcessor),
             ],
           ),
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.secondary,
-                  minimumSize: const Size.square(70),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5))),
-              onPressed: toggleNegative,
-              child: Text(counter)),
+          Column(
+            children: [
+              const Spacer(),
+              // ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //         backgroundColor: Theme.of(context).colorScheme.primary,
+              //         foregroundColor: Theme.of(context).colorScheme.secondary,
+              //         minimumSize: const Size.square(70),
+              //         shape: RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(5))),
+              //     onPressed: toggleNegative,
+              //     child: Text(counter)),
+              LabeledButton(
+                  label: "Toggle +/-",
+                  buttonContent: counter,
+                  functionOnTap: toggleNegative),
+              const SizedBox(
+                height: 20,
+              )
+            ],
+          )
         ],
       )),
     );
