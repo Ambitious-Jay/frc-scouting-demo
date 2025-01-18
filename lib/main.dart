@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/auto_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,23 +23,24 @@ class _MainAppState extends State<MyApp> {
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      home: MyHomePage(
-        onThemeChanged: (ThemeMode mode) {
-          setState(() {
-            themeMode = mode;
-          });
-        },
-        title: "meow",
+      home: const AutoPage(
+        // onThemeChanged: (ThemeMode mode) {
+        //   setState(() {
+        //     themeMode = mode;
+        //   });
+        // },
+        teamName: "1148",
+        id: "Andrew Jo"
       ),
     );
   }
 }
 
-
 class MyHomePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
 
-  const MyHomePage({super.key, required this.title, required this.onThemeChanged});
+  const MyHomePage(
+      {super.key, required this.title, required this.onThemeChanged});
 
   final String title;
 
