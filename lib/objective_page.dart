@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
-import 'package:frc1148_2025_scouting_app/labeled_button.dart';
+// import 'package:frc1148_2025_scouting_app/labeled_button.dart';
 
 class ObjectivePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
@@ -23,7 +23,19 @@ class _ObjectivePageState extends State<ObjectivePage> {
   int netCounter = 0;
   int processorCounter = 0;
   bool isCounterPositive = true;
-  String counter = "-";
+
+  // method to get toggle icon
+  Icon get signIcon {
+    IconData iconData;
+    if (isCounterPositive) {
+      iconData = Icons.add;
+    } else {
+      iconData = Icons.remove;
+    }
+    return Icon(iconData,
+        color: Theme.of(context).colorScheme.primary,
+        size: MediaQuery.of(context).size.width * 0.1);
+  }
 
   //methods to update counters up or down based on negative toggle
   void updateL4() {
@@ -79,11 +91,6 @@ class _ObjectivePageState extends State<ObjectivePage> {
   void toggleNegative() {
     setState(() {
       isCounterPositive = !isCounterPositive;
-      if (isCounterPositive) {
-        counter = "-";
-      } else {
-        counter = "+";
-      }
     });
   }
 
@@ -95,115 +102,246 @@ class _ObjectivePageState extends State<ObjectivePage> {
         title: const Text('Objective Page'),
       ),
       body: Center(
-          child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          child: Column(
+        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          SizedBox(
-              width: MediaQuery.of(context).size.width * 0.3,
-              child: const Image(
-                //reef photo
-                image: AssetImage('assets/reef.png'),
-                fit: BoxFit.contain,
-              )),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Row(
+            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // ElevatedButton(
-              //     style: ElevatedButton.styleFrom(
-              //         backgroundColor: Theme.of(context).colorScheme.primary,
-              //         foregroundColor: Theme.of(context).colorScheme.secondary,
-              //         minimumSize: const Size.square(70),
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(5))),
-              //     onPressed: updateL4,
-              //     child: Text('$l4Counter')),
-              LabeledButton(
-                  label: "L4",
-                  buttonContent: l4Counter,
-                  functionOnTap: updateL4),
-              // ElevatedButton(
-              //     style: ElevatedButton.styleFrom(
-              //         backgroundColor: Theme.of(context).colorScheme.primary,
-              //         foregroundColor: Theme.of(context).colorScheme.secondary,
-              //         minimumSize: const Size.square(70),
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(5))),
-              //     onPressed: updateL2L3,
-              //     child: Text('$l2l3Counter')),
-              LabeledButton(
-                  label: "L2/L3",
-                  buttonContent: l2l3Counter,
-                  functionOnTap: updateL2L3),
-              // ElevatedButton(
-              //     style: ElevatedButton.styleFrom(
-              //         backgroundColor: Theme.of(context).colorScheme.primary,
-              //         foregroundColor: Theme.of(context).colorScheme.secondary,
-              //         minimumSize: const Size.square(70),
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(5))),
-              //     onPressed: updateL1,
-              //     child: Text('$l1Counter')),
-              LabeledButton(
-                  label: "L1",
-                  buttonContent: l1Counter,
-                  functionOnTap: updateL1),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.375,
+                  child: const Image(
+                    //reef photo
+                    image: AssetImage('assets/reef.png'),
+                    fit: BoxFit.contain,
+                  )),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.05,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // SizedBox(
+                  //   height: MediaQuery.of(context).size.height * 0.05,
+                  // ),
+                  Padding(
+                    padding: EdgeInsets.all(
+                        MediaQuery.of(context).size.width * 0.01),
+                    child: Text("L4",
+                        style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.1)),
+                  ),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          // minimumSize: const Size.square(70),
+                          minimumSize: Size(
+                              MediaQuery.of(context).size.width * 0.5,
+                              MediaQuery.of(context).size.height * 0.15),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5))),
+                      onPressed: updateL4,
+                      child: Text('$l4Counter',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.15))),
+                  // LabeledButton(
+                  //     label: "L4",
+                  //     buttonContent: l4Counter,
+                  //     functionOnTap: updateL4),
+                  // const Spacer(),
+                  // SizedBox(
+                  //   height: MediaQuery.of(context).size.height * 0.075,
+                  // ),
+                  Padding(
+                    padding: EdgeInsets.all(
+                        MediaQuery.of(context).size.width * 0.01),
+                    child: Text("L2 & L3",
+                        style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.1)),
+                  ),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          // minimumSize: const Size.square(70),
+                          minimumSize: Size(
+                              MediaQuery.of(context).size.width * 0.5,
+                              MediaQuery.of(context).size.height * 0.15),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5))),
+                      onPressed: updateL2L3,
+                      child: Text('$l2l3Counter',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.15))),
+                  // LabeledButton(
+                  //     label: "L2/L3",
+                  //     buttonContent: l2l3Counter,
+                  //     functionOnTap: updateL2L3),
+                  // const Spacer(),
+                  Padding(
+                    padding: EdgeInsets.all(
+                        MediaQuery.of(context).size.width * 0.01),
+                    child: Text("L1",
+                        style: TextStyle(
+                            fontSize: MediaQuery.of(context).size.width * 0.1)),
+                  ),
+                  // SizedBox(
+                  //   height: MediaQuery.of(context).size.height * 0.075,
+                  // ),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          // minimumSize: const Size.square(70),
+                          minimumSize: Size(
+                              MediaQuery.of(context).size.width * 0.5,
+                              MediaQuery.of(context).size.height * 0.15),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5))),
+                      onPressed: updateL1,
+                      child: Text('$l1Counter',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.15))),
+                  // LabeledButton(
+                  //     label: "L1",
+                  //     buttonContent: l1Counter,
+                  //     functionOnTap: updateL1),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.075,
+                  ),
+                ],
+              ),
             ],
           ),
-          const SizedBox(width: 10),
-          Column(
+          // SizedBox(
+          //   height: MediaQuery.of(context).size.height * 0.0375,
+          // ),
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // ElevatedButton(
-              //     style: ElevatedButton.styleFrom(
-              //         backgroundColor: Theme.of(context).colorScheme.primary,
-              //         foregroundColor: Theme.of(context).colorScheme.secondary,
-              //         minimumSize: const Size.square(70),
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(5))),
-              //     onPressed: updateNet,
-              //     child: Text('$netCounter')),
-              LabeledButton(
-                  label: "Net",
-                  buttonContent: netCounter,
-                  functionOnTap: updateNet),
-              // ElevatedButton(
-              //     style: ElevatedButton.styleFrom(
-              //         backgroundColor: Theme.of(context).colorScheme.primary,
-              //         foregroundColor: Theme.of(context).colorScheme.secondary,
-              //         minimumSize: const Size.square(70),
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(5))),
-              //     onPressed: updateProcessor,
-              //     child: Text('$processorCounter')),
-              LabeledButton(
-                  label: "Processor",
-                  buttonContent: processorCounter,
-                  functionOnTap: updateProcessor),
-            ],
-          ),
-          Column(
-            children: [
-              const Spacer(),
-              // ElevatedButton(
-              //     style: ElevatedButton.styleFrom(
-              //         backgroundColor: Theme.of(context).colorScheme.primary,
-              //         foregroundColor: Theme.of(context).colorScheme.secondary,
-              //         minimumSize: const Size.square(70),
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(5))),
-              //     onPressed: toggleNegative,
-              //     child: Text(counter)),
-              LabeledButton(
-                  label: "Toggle +/-",
-                  buttonContent: counter,
-                  functionOnTap: toggleNegative),
-              const SizedBox(
-                height: 20,
-              )
+              Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.width * 0.0125),
+                    child: Text("Net",
+                        style: TextStyle(
+                            fontSize:
+                                MediaQuery.of(context).size.width * 0.05)),
+                  ),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          minimumSize: Size(
+                              MediaQuery.of(context).size.height * 0.125,
+                              MediaQuery.of(context).size.height * 0.125),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5))),
+                      onPressed: updateNet,
+                      child: Text('$netCounter',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.1))),
+                ],
+              ),
+              // LabeledButton(
+              //     label: "Net",
+              //     buttonContent: netCounter,
+              //     functionOnTap: updateNet),
+              Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.width * 0.0125),
+                    child: Text("Processor",
+                        style: TextStyle(
+                            fontSize:
+                                MediaQuery.of(context).size.width * 0.05)),
+                  ),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          minimumSize: Size(
+                              MediaQuery.of(context).size.height * 0.125,
+                              MediaQuery.of(context).size.height * 0.125),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5))),
+                      onPressed: updateProcessor,
+                      child: Text('$processorCounter',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.1))),
+                ],
+              ),
+              // LabeledButton(
+              //     label: "Processor",
+              //     buttonContent: processorCounter,
+              //     functionOnTap: updateProcessor),
+              Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.width * 0.0125),
+                    child: Text("+/-",
+                        style: TextStyle(
+                            fontSize:
+                                MediaQuery.of(context).size.width * 0.075)),
+                  ),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          minimumSize: Size.square(
+                            MediaQuery.of(context).size.height * 0.1,
+                          ),
+                          // minimumSize: Size(
+                          //     MediaQuery.of(context).size.height * 0.075,
+                          //     MediaQuery.of(context).size.height * 0.075),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5))),
+                      onPressed: toggleNegative,
+                      child: signIcon),
+                ],
+              ),
             ],
           )
         ],
       )),
+      bottomNavigationBar: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+            // shape: RectangleBorder(
+            //   borderRadius: BorderRadius.zero, // Makes it completely rectangular
+            // ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            foregroundColor: Theme.of(context).colorScheme.secondary,
+            iconColor: Theme.of(context).colorScheme.secondary),
+        iconAlignment: IconAlignment.end,
+        onPressed: () {
+          // PLACEHOLDER
+        },
+        icon: const Icon(Icons.arrow_forward_rounded),
+        label: const Text('Submit'),
+      ),
     );
   }
 }
