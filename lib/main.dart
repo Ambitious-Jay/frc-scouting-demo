@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/team_stats_list.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,14 +23,15 @@ class _MainAppState extends State<MyApp> {
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      home: MyHomePage(
-        onThemeChanged: (ThemeMode mode) {
-          setState(() {
-            themeMode = mode;
-          });
-        },
-        title: "meow",
-      ),
+      // home: MyHomePage(
+      //   onThemeChanged: (ThemeMode mode) {
+      //     setState(() {
+      //       themeMode = mode;
+      //     });
+      //   },
+      //   title: "meow",
+      // ),
+      home: TeamStatsList(teamName: "meow"),
     );
   }
 }
