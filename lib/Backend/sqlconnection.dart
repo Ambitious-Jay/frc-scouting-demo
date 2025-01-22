@@ -1,5 +1,3 @@
-library sql_server_socket;
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';

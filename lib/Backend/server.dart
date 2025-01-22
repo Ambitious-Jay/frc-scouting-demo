@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:frc1148_2025_scouting_app/SQLServerSocket/DartClient/lib/sqlconnection.dart';
+import 'package:frc1148_2025_scouting_app/Backend/sqlconnection.dart';
 
 /// Tracks each WebSocket client and its own SqlConnection.
 /// This design supports multiple clients connecting, so each client
