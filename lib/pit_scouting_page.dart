@@ -3,11 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'color_scheme.dart';
 
+// general
+String robotWeight = "";
+String driveType = "";
+List<String> driveOptions = ['Swerve', 'Tank', 'Mechanum', 'Other'];
+String motorType = "";
+int motorNum = 0;
+
 // intake
 bool intakeStation = false;
 bool coralGround = false;
 bool algaeGround = false; // not pushing
 bool algaeReefControlled = false; // not just knocking it off
+String bumperQuality = ""; // subjective
 
 // scoring
 bool levelOne = false;
@@ -16,15 +24,8 @@ bool levelThree = false;
 bool levelFour = false;
 bool processor = false;
 bool net = false;
-List<String> climbType = ['Shallow', 'Deep', 'No Hang'];
-
-// general
-String robotWeight = "";
-List<String> driveType = ['Swerve', 'Tank', 'Mechanum', 'Other'];
-String motorType = "";
-
-// subjective
-int bumperQuality = 0;
+String climbType = "";
+List<String> climbOptions = ['Shallow', 'Deep', 'No Hang'];
 
 // auto
 int coralPoints = 0;
@@ -48,21 +49,27 @@ class _PitScouting extends State<PitScouting> {
   late TextEditingController _controller5;
   late TextEditingController _controller6;
   final List<String> entries = <String>[
-    'Enter Robot Weight (lbs)', //maybe not, add can score in trap
-    'Can score in Amp',
-    'Can score in speaker',
-    'Enter Robot bumper quality (1-5), 5 is best',
-    'Maneuverability on field Capability(under stage)',
-    'Can Robot climb',
-    'Can score Trap',
-    'Intake from ground',
-    'Intake from source',
-    'Robot speed',
-    'How many motors',
-    'Subsystem for scoring in speaker',
-    'How do they pass',
-    'Under or over bumper intake',
-    'Tank or swerve drive',
+    'Robot weight (lbs): ',
+    'Type of drive: ',
+    'Type of motor: ',
+    'Number of motors: ',
+    'Bumper quality: ',
+    // ---
+    'Can pick up coral from Coral Station: ',
+    'Can pick up coral from ground: ',
+    'Can pick up algae from ground (not just pushing): ',
+    'Can remove algae from reef (controlled, not just knocking off): ',
+    // ---
+    'Can score coral onto L1: ',
+    'Can score coral onto L2: ',
+    'Can score coral onto L3: ', 
+    'Can score coral onto L4: ', 
+    'Can score in processor: ',
+    'Can score into net: ',
+    'Type of Climb: ',
+    // ---
+    'Coral scored during Autonomous: ',
+    'Can robot move off of starting line during Autonomous: ',
   ];
 
   void initState() {
@@ -123,8 +130,9 @@ class _PitScouting extends State<PitScouting> {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Pit Scouting",
+          // ignore: deprecated_member_use
           textScaleFactor: 1.5,
         ),
         elevation: 21,
@@ -155,7 +163,7 @@ class _PitScouting extends State<PitScouting> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         launch(
-                            'https://drive.google.com/drive/folders/17r61d7tOUQLiKA4cnEW15pXioTIKt-yK?usp=drive_link');
+                            'https://drive.google.com/drive/folders/17r61d7tOUQLiKA4cnEW15pXioTIKt-yK?usp=drive_link'); // REPLACE WITH 2025 
                       },
                   ),
                 ],
@@ -173,7 +181,7 @@ class _PitScouting extends State<PitScouting> {
                     entries[0],
                     textScaleFactor: 1.5,
                   ),
-                  SizedBox(
+                  SizedBox( // ========================= ROBOT WEIGHT ========
                     width: width / 3,
                     child: TextField(
                       controller: _controller1,
@@ -201,7 +209,33 @@ class _PitScouting extends State<PitScouting> {
               ),
             ),
           ),
-          SizedBox(
+          SizedBox( // ==================================== drive type ==============
+            height: height / 3.5,
+            child: Center( 
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(entries[13], textScaleFactor: 1.5),
+                  DropdownButton<String>(
+                    value: driveType.isNotEmpty ? driveType : null,
+                    hint: Text('Select Intake Type'),
+                    items: driveOptions.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        driveType = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox( // STOPPED HERE ------------------------------------
             height: height / 3.5,
             //color: Colors.red[400],
             child: Center(
@@ -213,7 +247,7 @@ class _PitScouting extends State<PitScouting> {
                     textScaleFactor: 1.5,
                   ),
                   Checkbox(
-                    value: CapablityOne,
+                    value: ,
                     //color: Colors.amber[700],
                     onChanged: (newValue) {
                       setState(() {
@@ -562,27 +596,27 @@ class _PitScouting extends State<PitScouting> {
           //   child: const Icon(Icons.camera_alt),
           // ),
 
-          ElevatedButton(
+          ElevatedButton( // SUBMISSION BUTTON =============================
             onPressed: () async {
-              await _submitForm(0, 0);
+              // await _submitForm(0, 0);
 
-              await updateTeamUColumn(widget.teamName);
+              // await updateTeamUColumn(widget.teamName);
 
-              robotWeight = "";
-              CapablityOne = false;
-              CapablityTwo = false;
-              bumperQuality = "";
-              fieldCapability = false;
-              climb = false;
-              trap = false;
-              ground = false;
-              source = false;
-              robotSpeed = "";
-              numMotors = "";
-              scoreInSpeaker = "";
-              howTheyPass = "";
-              intakeType = "";
-              driveType = "";
+              // robotWeight = "";
+              // CapablityOne = false;
+              // CapablityTwo = false;
+              // bumperQuality = "";
+              // fieldCapability = false;
+              // climb = false;
+              // trap = false;
+              // ground = false;
+              // source = false;
+              // robotSpeed = "";
+              // numMotors = "";
+              // scoreInSpeaker = "";
+              // howTheyPass = "";
+              // intakeType = "";
+              // driveType = "";
 
               // Navigator.push(
               //     context,
@@ -596,3 +630,4 @@ class _PitScouting extends State<PitScouting> {
       )),
     );
   }
+}
