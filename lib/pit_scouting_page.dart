@@ -8,14 +8,14 @@ String robotWeight = "";
 String driveType = "";
 List<String> driveOptions = ['Swerve', 'Tank', 'Mechanum', 'Other'];
 String motorType = "";
-int motorNum = 0;
+String motorNum = "";
+String bumperQuality = ""; // subjective
 
 // intake
 bool intakeStation = false;
 bool coralGround = false;
 bool algaeGround = false; // not pushing
 bool algaeReefControlled = false; // not just knocking it off
-String bumperQuality = ""; // subjective
 
 // scoring
 bool levelOne = false;
@@ -209,322 +209,13 @@ class _PitScouting extends State<PitScouting> {
               ),
             ),
           ),
-          SizedBox( // ==================================== drive type ==============
-            height: height / 3.5,
-            child: Center( 
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(entries[13], textScaleFactor: 1.5),
-                  DropdownButton<String>(
-                    value: driveType.isNotEmpty ? driveType : null,
-                    hint: Text('Select Intake Type'),
-                    items: driveOptions.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        driveType = newValue!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox( // STOPPED HERE ------------------------------------
-            height: height / 3.5,
-            //color: Colors.red[400],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[1],
-                    textScaleFactor: 1.5,
-                  ),
-                  Checkbox(
-                    value: ,
-                    //color: Colors.amber[700],
-                    onChanged: (newValue) {
-                      setState(() {
-                        CapablityOne = newValue!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            //color: Colors.red[300],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[2],
-                    textScaleFactor: 1.5,
-                  ),
-                  Checkbox(
-                    value: CapablityTwo,
-                    //color: Colors.amber[700],
-                    onChanged: (newValue) {
-                      setState(() {
-                        CapablityTwo = newValue!;
-                      });
-                    },
-                  )
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            //color: Colors.red[300],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[3],
-                    textScaleFactor: 1.5,
-                  ),
-                  SizedBox(
-                    width: width / 3,
-                    child: TextField(
-                      controller: _controller2,
-                      onChanged: (String value) {
-                        setState(() {
-                          bumperQuality = value;
-                        });
-                        print("Current value: $value");
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            //color: Colors.red[300],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[4],
-                    textScaleFactor: 1.5,
-                  ),
-                  Checkbox(
-                    value: fieldCapability,
-                    //color: Colors.amber[700],
-                    onChanged: (newValue) {
-                      setState(() {
-                        fieldCapability = newValue!;
-                      });
-                    },
-                  )
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            //color: Colors.red[400],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[5],
-                    textScaleFactor: 1.5,
-                  ),
-                  Checkbox(
-                    value: climb,
-                    //color: Colors.amber[700],
-                    onChanged: (newValue) {
-                      setState(() {
-                        climb = newValue!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            //color: Colors.red[400],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[6],
-                    textScaleFactor: 1.5,
-                  ),
-                  Checkbox(
-                    value: trap,
-                    //color: Colors.amber[700],
-                    onChanged: (newValue) {
-                      setState(() {
-                        trap = newValue!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            //color: Colors.red[400],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[7],
-                    textScaleFactor: 1.5,
-                  ),
-                  Checkbox(
-                    value: ground,
-                    //color: Colors.amber[700],
-                    onChanged: (newValue) {
-                      setState(() {
-                        ground = newValue!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            //color: Colors.red[400],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    entries[8],
-                    textScaleFactor: 1.5,
-                  ),
-                  Checkbox(
-                    value: source,
-                    //color: Colors.amber[700],
-                    onChanged: (newValue) {
-                      setState(() {
-                        source = newValue!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
           SizedBox(
             height: height / 3.5,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(entries[9], textScaleFactor: 1.5),
-                  SizedBox(
-                    width: width / 3,
-                    child: TextField(
-                      controller: _controller3,
-                      onChanged: (String value) {
-                        setState(() {
-                          robotSpeed = value;
-                        });
-                        print("Current value: $value");
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            child: Center(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(entries[10], textScaleFactor: 1.5),
-                SizedBox(
-                  width: width / 3,
-                  child: TextField(
-                    controller: _controller4,
-                    onChanged: (String value) {
-                      setState(() {
-                        numMotors = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            )),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(entries[11], textScaleFactor: 1.5),
-                  SizedBox(
-                    width: width / 3,
-                    child: TextField(
-                      controller: _controller5,
-                      onChanged: (String value) {
-                        setState(() {
-                          scoreInSpeaker = value;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(entries[12], textScaleFactor: 1.5),
-                  SizedBox(
-                    width: width / 3,
-                    child: TextField(
-                      controller: _controller6,
-                      onChanged: (String value) {
-                        setState(() {
-                          howTheyPass = value;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: height / 3.5,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(entries[14], textScaleFactor: 1.5),
+                  Text(entries[1], textScaleFactor: 1.5),
                   DropdownButton<String>(
                     value: driveType.isNotEmpty ? driveType : null,
                     hint: Text('Select Drive Type'),
@@ -546,23 +237,96 @@ class _PitScouting extends State<PitScouting> {
           ),
           SizedBox(
             height: height / 3.5,
+            //color: Colors.red[400],
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(entries[13], textScaleFactor: 1.5),
-                  DropdownButton<String>(
-                    value: intakeType.isNotEmpty ? intakeType : null,
-                    hint: Text('Select Intake Type'),
-                    items: intakeOptions.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                  Text(
+                    entries[2],
+                    textScaleFactor: 1.5,
+                  ),
+                  TextField(
+                    controller: _controller2,
+                    //color: Colors.amber[700],
+                    onChanged: (String value) {
+                        setState(() {
+                         motorType = value;
+                        });
+                        print("Current value: $value");
+                      },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[3],
+                    textScaleFactor: 1.5,
+                  ),
+                  TextField(
+                    controller: _controller3,
+                    //color: Colors.amber[700],
+                    onChanged: (String value) {
+                        setState(() {
+                         motorNum = value;
+                        });
+                        print("Current value: $value");
+                      },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[4],
+                    textScaleFactor: 1.5,
+                  ),
+                  TextField(
+                    controller: _controller4,
+                    //color: Colors.amber[700],
+                    onChanged: (String value) {
+                        setState(() {
+                         bumperQuality = value;
+                        });
+                        print("Current value: $value");
+                      },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[5],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: intakeStation,
+                    //color: Colors.amber[700],
                     onChanged: (newValue) {
                       setState(() {
-                        intakeType = newValue!;
+                        intakeStation = newValue!;
                       });
                     },
                   ),
@@ -570,7 +334,296 @@ class _PitScouting extends State<PitScouting> {
               ),
             ),
           ),
-
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[6],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: coralGround,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        coralGround = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[7],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: algaeGround,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        algaeGround = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[8],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: algaeReefControlled,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        algaeReefControlled = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[9],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: levelOne,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        levelOne = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[10],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: levelTwo,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        levelTwo = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[11],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: levelThree,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        levelThree = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[12],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: levelFour,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        levelFour = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[13],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: processor,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        processor = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[14],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: net,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        net = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(entries[15], textScaleFactor: 1.5),
+                  DropdownButton<String>(
+                    value: climbType.isNotEmpty ? climbType : null,
+                    hint: Text('Select Climb Type'),
+                    items: climbOptions.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        climbType = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[16],
+                    textScaleFactor: 1.5,
+                  ),
+                  TextField(
+                    //color: Colors.amber[700],
+                    onChanged: (String value) {
+                        setState(() {
+                         coralPoints = int.tryParse(value) ?? 0;
+                        });
+                        print("Current value: $value");
+                      },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: height / 3.5,
+            //color: Colors.red[400],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    entries[17],
+                    textScaleFactor: 1.5,
+                  ),
+                  Checkbox(
+                    value: leavesStartLine,
+                    //color: Colors.amber[700],
+                    onChanged: (newValue) {
+                      setState(() {
+                        leavesStartLine = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
           // Container (
           //   height: height / 10,
           //   width: width,
