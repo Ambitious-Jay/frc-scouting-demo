@@ -64,6 +64,11 @@ class _LoginPageState extends State<LoginPage>
         setState(() {
           _status = LoginStatus.failure;
         });
+        Future.delayed(const Duration(seconds: 3), () {
+          setState(() {
+            _status = LoginStatus.idle;
+          });
+          });
       },
       onDone: () {
         print('[LoginPage] WebSocket connection closed during login.');
@@ -110,6 +115,11 @@ class _LoginPageState extends State<LoginPage>
       setState(() {
         _status = LoginStatus.failure;
       });
+      Future.delayed(const Duration(seconds: 3), () {
+          setState(() {
+            _status = LoginStatus.idle;
+          });
+          });
     }
   }
 
@@ -128,12 +138,22 @@ class _LoginPageState extends State<LoginPage>
         setState(() {
           _status = LoginStatus.failure;
         });
+        Future.delayed(const Duration(seconds: 3), () {
+          setState(() {
+            _status = LoginStatus.idle;
+          });
+          });
       }
     } catch (e) {
       print('[LoginPage] Error handling server message during login: $e');
       setState(() {
         _status = LoginStatus.failure;
       });
+      Future.delayed(const Duration(seconds: 3), () {
+          setState(() {
+            _status = LoginStatus.idle;
+          });
+          });
     }
   }
 
@@ -149,6 +169,11 @@ class _LoginPageState extends State<LoginPage>
           // No matching name found
           setState(() {
             _status = LoginStatus.failure;
+          });
+          Future.delayed(const Duration(seconds: 3), () {
+          setState(() {
+            _status = LoginStatus.idle;
+          });
           });
         } else {
           // Name found
@@ -182,6 +207,11 @@ class _LoginPageState extends State<LoginPage>
         setState(() {
           _status = LoginStatus.failure;
         });
+        Future.delayed(const Duration(seconds: 3), () {
+          setState(() {
+            _status = LoginStatus.idle;
+          });
+          });
         break;
 
       default:
@@ -189,6 +219,11 @@ class _LoginPageState extends State<LoginPage>
         setState(() {
           _status = LoginStatus.failure;
         });
+        Future.delayed(const Duration(seconds: 3), () {
+          setState(() {
+            _status = LoginStatus.idle;
+          });
+          });
         break;
     }
   }
