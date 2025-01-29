@@ -46,8 +46,6 @@ class _PitScouting extends State<PitScouting> {
   late TextEditingController _controller2;
   late TextEditingController _controller3;
   late TextEditingController _controller4;
-  late TextEditingController _controller5;
-  late TextEditingController _controller6;
   final List<String> entries = <String>[
     'Robot weight (lbs): ',
     'Type of drive: ',
@@ -62,8 +60,8 @@ class _PitScouting extends State<PitScouting> {
     // ---
     'Can score coral onto L1: ',
     'Can score coral onto L2: ',
-    'Can score coral onto L3: ', 
-    'Can score coral onto L4: ', 
+    'Can score coral onto L3: ',
+    'Can score coral onto L4: ',
     'Can score in processor: ',
     'Can score into net: ',
     'Type of Climb: ',
@@ -78,8 +76,6 @@ class _PitScouting extends State<PitScouting> {
     _controller2 = TextEditingController();
     _controller3 = TextEditingController();
     _controller4 = TextEditingController();
-    _controller5 = TextEditingController();
-    _controller6 = TextEditingController();
   }
 
   /*Future<void> _submitForm(column, row) async {
@@ -163,16 +159,23 @@ class _PitScouting extends State<PitScouting> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         launch(
-                            'https://drive.google.com/drive/folders/17r61d7tOUQLiKA4cnEW15pXioTIKt-yK?usp=drive_link'); // REPLACE WITH 2025 
+                            'https://drive.google.com/drive/folders/17r61d7tOUQLiKA4cnEW15pXioTIKt-yK?usp=drive_link'); // REPLACE WITH 2025
                       },
                   ),
                 ],
               ),
             ),
           ),
+          const Center(
+            // HEADER ========================
+            child: Text(
+              "\nGeneral Robot Information",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+          ),
           SizedBox(
             height: height / 3.5,
-            //color: Colors.red[300],
+            // color: Colors.red[300],
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -181,8 +184,9 @@ class _PitScouting extends State<PitScouting> {
                     entries[0],
                     textScaleFactor: 1.5,
                   ),
-                  SizedBox( // ========================= ROBOT WEIGHT ========
-                    width: width / 3,
+                  SizedBox(
+                    // ========================= ROBOT WEIGHT ========
+                    width: width / 7,
                     child: TextField(
                       controller: _controller1,
                       onChanged: (String value) {
@@ -191,7 +195,6 @@ class _PitScouting extends State<PitScouting> {
                         });
                         print("Current value: $value");
                       },
-
                       // decoration: const InputDecoration(
                       //   enabledBorder: UnderlineInputBorder(
                       //     borderSide: BorderSide(color: Colors.red)
@@ -246,16 +249,19 @@ class _PitScouting extends State<PitScouting> {
                     entries[2],
                     textScaleFactor: 1.5,
                   ),
-                  TextField(
-                    controller: _controller2,
-                    //color: Colors.amber[700],
-                    onChanged: (String value) {
+                  SizedBox(
+                    width: width / 3,
+                    child: TextField(
+                      controller: _controller2,
+                      //color: Colors.amber[700],
+                      onChanged: (String value) {
                         setState(() {
-                         motorType = value;
+                          motorType = value;
                         });
                         print("Current value: $value");
                       },
-                  ),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -271,15 +277,18 @@ class _PitScouting extends State<PitScouting> {
                     entries[3],
                     textScaleFactor: 1.5,
                   ),
-                  TextField(
-                    controller: _controller3,
-                    //color: Colors.amber[700],
-                    onChanged: (String value) {
+                  SizedBox(
+                    width: width / 3,
+                    child: TextField(
+                      controller: _controller3,
+                      //color: Colors.amber[700],
+                      onChanged: (String value) {
                         setState(() {
-                         motorNum = value;
+                          motorNum = value;
                         });
                         print("Current value: $value");
                       },
+                    ),
                   ),
                 ],
               ),
@@ -296,18 +305,27 @@ class _PitScouting extends State<PitScouting> {
                     entries[4],
                     textScaleFactor: 1.5,
                   ),
-                  TextField(
-                    controller: _controller4,
-                    //color: Colors.amber[700],
-                    onChanged: (String value) {
-                        setState(() {
-                         bumperQuality = value;
-                        });
-                        print("Current value: $value");
-                      },
-                  ),
+                  SizedBox(
+                      width: width / 3,
+                      child: TextField(
+                        controller: _controller4,
+                        //color: Colors.amber[700],
+                        onChanged: (String value) {
+                          setState(() {
+                            bumperQuality = value;
+                          });
+                          print("Current value: $value");
+                        },
+                      )),
                 ],
               ),
+            ),
+          ),
+          const Center(
+            // HEADER ===================================================================
+            child: Text(
+              "Intake Information",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
           SizedBox(
@@ -404,6 +422,13 @@ class _PitScouting extends State<PitScouting> {
                   ),
                 ],
               ),
+            ),
+          ),
+          const Center(
+            // HEADER ========================
+            child: Text(
+              "Scoring Information",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
           SizedBox(
@@ -576,6 +601,13 @@ class _PitScouting extends State<PitScouting> {
               ),
             ),
           ),
+          const Center(
+            // HEADER ========================
+            child: Text(
+              "Autonomous",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+          ),
           SizedBox(
             height: height / 3.5,
             //color: Colors.red[400],
@@ -590,11 +622,11 @@ class _PitScouting extends State<PitScouting> {
                   TextField(
                     //color: Colors.amber[700],
                     onChanged: (String value) {
-                        setState(() {
-                         coralPoints = int.tryParse(value) ?? 0;
-                        });
-                        print("Current value: $value");
-                      },
+                      setState(() {
+                        coralPoints = int.tryParse(value) ?? 0;
+                      });
+                      print("Current value: $value");
+                    },
                   ),
                 ],
               ),
@@ -649,7 +681,8 @@ class _PitScouting extends State<PitScouting> {
           //   child: const Icon(Icons.camera_alt),
           // ),
 
-          ElevatedButton( // SUBMISSION BUTTON =============================
+          ElevatedButton(
+            // SUBMISSION BUTTON =============================
             onPressed: () async {
               // await _submitForm(0, 0);
 
