@@ -34,7 +34,7 @@ class _ObjectivePageState extends State<ObjectivePage> {
     }
     return Icon(iconData,
         color: Theme.of(context).colorScheme.primary,
-        size: MediaQuery.of(context).size.width * 0.1);
+        size: MediaQuery.of(context).size.height * 0.45 * 0.1);
   }
 
   //methods to update counters up or down based on negative toggle
@@ -96,6 +96,7 @@ class _ObjectivePageState extends State<ObjectivePage> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -109,27 +110,25 @@ class _ObjectivePageState extends State<ObjectivePage> {
             // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.375,
+                  width: height * 0.45 * 0.375,
                   child: const Image(
                     //reef photo
                     image: AssetImage('assets/reef.png'),
                     fit: BoxFit.contain,
                   )),
               SizedBox(
-                width: MediaQuery.of(context).size.width * 0.05,
+                width: height * 0.45 * 0.05,
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   // SizedBox(
-                  //   height: MediaQuery.of(context).size.height * 0.05,
+                  //   height: height * 0.05,
                   // ),
                   Padding(
-                    padding: EdgeInsets.all(
-                        MediaQuery.of(context).size.width * 0.01),
+                    padding: EdgeInsets.all(height * 0.45 * 0.01),
                     child: Text("L4",
-                        style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.1)),
+                        style: TextStyle(fontSize: height * 0.45 * 0.1)),
                   ),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -138,30 +137,24 @@ class _ObjectivePageState extends State<ObjectivePage> {
                           foregroundColor:
                               Theme.of(context).colorScheme.secondary,
                           // minimumSize: const Size.square(70),
-                          minimumSize: Size(
-                              MediaQuery.of(context).size.width * 0.5,
-                              MediaQuery.of(context).size.height * 0.15),
+                          minimumSize: Size(height * 0.225, height * 0.15),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
                       onPressed: updateL4,
                       child: Text('$l4Counter',
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.15))),
+                          style: TextStyle(fontSize: height * 0.45 * 0.15))),
                   // LabeledButton(
                   //     label: "L4",
                   //     buttonContent: l4Counter,
                   //     functionOnTap: updateL4),
                   // const Spacer(),
                   // SizedBox(
-                  //   height: MediaQuery.of(context).size.height * 0.075,
+                  //   height: height * 0.075,
                   // ),
                   Padding(
-                    padding: EdgeInsets.all(
-                        MediaQuery.of(context).size.width * 0.01),
+                    padding: EdgeInsets.all(height * 0.45 * 0.01),
                     child: Text("L2 & L3",
-                        style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.1)),
+                        style: TextStyle(fontSize: height * 0.45 * 0.1)),
                   ),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -170,30 +163,24 @@ class _ObjectivePageState extends State<ObjectivePage> {
                           foregroundColor:
                               Theme.of(context).colorScheme.secondary,
                           // minimumSize: const Size.square(70),
-                          minimumSize: Size(
-                              MediaQuery.of(context).size.width * 0.5,
-                              MediaQuery.of(context).size.height * 0.15),
+                          minimumSize: Size(height * 0.45 * 0.5, height * 0.15),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
                       onPressed: updateL2L3,
                       child: Text('$l2l3Counter',
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.15))),
+                          style: TextStyle(fontSize: height * 0.45 * 0.15))),
                   // LabeledButton(
                   //     label: "L2/L3",
                   //     buttonContent: l2l3Counter,
                   //     functionOnTap: updateL2L3),
                   // const Spacer(),
                   Padding(
-                    padding: EdgeInsets.all(
-                        MediaQuery.of(context).size.width * 0.01),
+                    padding: EdgeInsets.all(height * 0.45 * 0.01),
                     child: Text("L1",
-                        style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width * 0.1)),
+                        style: TextStyle(fontSize: height * 0.45 * 0.1)),
                   ),
                   // SizedBox(
-                  //   height: MediaQuery.of(context).size.height * 0.075,
+                  //   height: height * 0.075,
                   // ),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -202,29 +189,25 @@ class _ObjectivePageState extends State<ObjectivePage> {
                           foregroundColor:
                               Theme.of(context).colorScheme.secondary,
                           // minimumSize: const Size.square(70),
-                          minimumSize: Size(
-                              MediaQuery.of(context).size.width * 0.5,
-                              MediaQuery.of(context).size.height * 0.15),
+                          minimumSize: Size(height * 0.45 * 0.5, height * 0.15),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
                       onPressed: updateL1,
                       child: Text('$l1Counter',
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.15))),
+                          style: TextStyle(fontSize: height * 0.45 * 0.15))),
                   // LabeledButton(
                   //     label: "L1",
                   //     buttonContent: l1Counter,
                   //     functionOnTap: updateL1),
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.075,
+                    height: height * 0.075,
                   ),
                 ],
               ),
             ],
           ),
           // SizedBox(
-          //   height: MediaQuery.of(context).size.height * 0.0375,
+          //   height: height * 0.0375,
           // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -232,12 +215,9 @@ class _ObjectivePageState extends State<ObjectivePage> {
               Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).size.width * 0.0125),
+                    padding: EdgeInsets.only(bottom: height * 0.45 * 0.0125),
                     child: Text("Net",
-                        style: TextStyle(
-                            fontSize:
-                                MediaQuery.of(context).size.width * 0.05)),
+                        style: TextStyle(fontSize: height * 0.45 * 0.05)),
                   ),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -245,16 +225,12 @@ class _ObjectivePageState extends State<ObjectivePage> {
                               Theme.of(context).colorScheme.primary,
                           foregroundColor:
                               Theme.of(context).colorScheme.secondary,
-                          minimumSize: Size(
-                              MediaQuery.of(context).size.height * 0.125,
-                              MediaQuery.of(context).size.height * 0.125),
+                          minimumSize: Size(height * 0.125, height * 0.125),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
                       onPressed: updateNet,
                       child: Text('$netCounter',
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.1))),
+                          style: TextStyle(fontSize: height * 0.45 * 0.1))),
                 ],
               ),
               // LabeledButton(
@@ -264,12 +240,9 @@ class _ObjectivePageState extends State<ObjectivePage> {
               Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).size.width * 0.0125),
+                    padding: EdgeInsets.only(bottom: height * 0.45 * 0.0125),
                     child: Text("Processor",
-                        style: TextStyle(
-                            fontSize:
-                                MediaQuery.of(context).size.width * 0.05)),
+                        style: TextStyle(fontSize: height * 0.025)),
                   ),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -277,16 +250,12 @@ class _ObjectivePageState extends State<ObjectivePage> {
                               Theme.of(context).colorScheme.primary,
                           foregroundColor:
                               Theme.of(context).colorScheme.secondary,
-                          minimumSize: Size(
-                              MediaQuery.of(context).size.height * 0.125,
-                              MediaQuery.of(context).size.height * 0.125),
+                          minimumSize: Size(height * 0.125, height * 0.125),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
                       onPressed: updateProcessor,
                       child: Text('$processorCounter',
-                          style: TextStyle(
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.1))),
+                          style: TextStyle(fontSize: height * 0.45 * 0.1))),
                 ],
               ),
               // LabeledButton(
@@ -296,12 +265,9 @@ class _ObjectivePageState extends State<ObjectivePage> {
               Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).size.width * 0.0125),
+                    padding: EdgeInsets.only(bottom: height * 0.45 * 0.0125),
                     child: Text("+/-",
-                        style: TextStyle(
-                            fontSize:
-                                MediaQuery.of(context).size.width * 0.075)),
+                        style: TextStyle(fontSize: height * 0.45 * 0.075)),
                   ),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -310,10 +276,10 @@ class _ObjectivePageState extends State<ObjectivePage> {
                           foregroundColor:
                               Theme.of(context).colorScheme.primary,
                           minimumSize: Size.square(
-                            MediaQuery.of(context).size.height * 0.1,
+                            height * 0.1,
                           ),
                           // minimumSize: Size(
-                          //     MediaQuery.of(context).size.height * 0.075,
+                          //     height * 0.075,
                           //     MediaQuery.of(context).size.height * 0.075),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
