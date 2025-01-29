@@ -54,6 +54,18 @@ class _AutoPageState extends State<AutoPage> {
     });
   }
 
+  Icon get signIcon {
+    IconData iconData;
+    if (doIncrement) {
+      iconData = Icons.add;
+    } else {
+      iconData = Icons.remove;
+    }
+    return Icon(iconData,
+        color: Theme.of(context).colorScheme.primary,
+        size: MediaQuery.of(context).size.width * 0.1);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -375,7 +387,7 @@ class _AutoPageState extends State<AutoPage> {
                                   doIncrement = !doIncrement;
                                 });
                               },
-                              child: Container()),
+                              child: signIcon),
                         ],
                       ),
                     ],
