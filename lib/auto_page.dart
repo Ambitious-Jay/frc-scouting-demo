@@ -105,7 +105,7 @@ class _AutoPageState extends State<AutoPage> {
                                           })
                                 ])),
                         Positioned(
-                          left: fieldWidth / 4,
+                          left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
                           top: fieldHeight / 4 - 25,
                           // top: 0,
                           child: Column(
@@ -127,7 +127,7 @@ class _AutoPageState extends State<AutoPage> {
                                 ]
                               ),
                               SizedBox(
-                                height: max(0, fieldHeight * 5 / 12 - 50)
+                                height: fieldHeight / 2 - 50
                               ),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
