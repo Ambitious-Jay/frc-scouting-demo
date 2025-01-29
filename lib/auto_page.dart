@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+class IntegerWrapper {
+  int value = 0;
+  IntegerWrapper(this.value);
+}
+
 class AutoPage extends StatefulWidget {
   const AutoPage(
       {Key? key,
@@ -24,11 +29,13 @@ class _AutoPageState extends State<AutoPage> {
   bool inRightZone = false;
   bool fieldFlipped = false;
 
-  int l4Counter = 0;
-  int l2l3Counter = 0;
-  int l1Counter = 0;
-  int netCounter = 0;
-  int processorCounter = 0;
+  IntegerWrapper l4Counter = IntegerWrapper(0);
+  IntegerWrapper l2l3Counter = IntegerWrapper(0);
+  IntegerWrapper l1Counter = IntegerWrapper(0);
+  IntegerWrapper netCounter = IntegerWrapper(0);
+  IntegerWrapper processorCounter = IntegerWrapper(0);
+
+  bool doIncrement = true;
 
   double min(double valOne, double valTwo) {
     return valOne > valTwo ? valTwo : valOne;
@@ -36,6 +43,15 @@ class _AutoPageState extends State<AutoPage> {
 
   double max(double valOne, double valTwo) {
     return valOne > valTwo ? valOne : valTwo;
+  }
+
+  void updateCounter(IntegerWrapper counter, bool doIncrement) {
+    setState(() {
+      int inc = doIncrement ? 1 : -1;
+      if (counter.value + inc >= 0) {
+        counter.value += inc;
+      }
+    });
   }
 
   @override
@@ -151,41 +167,8 @@ class _AutoPageState extends State<AutoPage> {
                                                 })
                                       ]),
                                 ])),
-                        // Positioned(
-                        //     top: fieldHeight / 4 - 36,
-                        //     left: fieldWidth / 4,
-                        //     child: Column(
-                        //         mainAxisAlignment: MainAxisAlignment.end,
-                        //         crossAxisAlignment: CrossAxisAlignment.center,
-                        //         children: [
-                        //           const Text("Left"),
-                        //           Checkbox(
-                        //               value: inLeftZone,
-                        //               onChanged: (bool? value) => {
-                        //                     setState(() {
-                        //                       inLeftZone = value!;
-                        //                     })
-                        //                   })
-                        //         ])),
-                        // Positioned(
-                        //     top: 3 * fieldHeight / 4 - 36,
-                        //     left: fieldWidth / 4,
-                        //     child: Column(
-                        //         mainAxisAlignment: MainAxisAlignment.end,
-                        //         crossAxisAlignment: CrossAxisAlignment.center,
-                        //         children: [
-                        //           const Text("Right"),
-                        //           Checkbox(
-                        //               value: inRightZone,
-                        //               onChanged: (bool? value) => {
-                        //                     setState(() {
-                        //                       inRightZone = value!;
-                        //                     })
-                        //                   })
-                        //         ])),
                       ])),
                   Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       SizedBox(
                           width: MediaQuery.of(context).size.width * 0.375,
@@ -200,9 +183,6 @@ class _AutoPageState extends State<AutoPage> {
                       Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          // SizedBox(
-                          //   height: MediaQuery.of(context).size.height * 0.05,
-                          // ),
                           Padding(
                             padding: EdgeInsets.all(
                                 MediaQuery.of(context).size.width * 0.01),
@@ -225,20 +205,13 @@ class _AutoPageState extends State<AutoPage> {
                                           0.15),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
-                              onPressed: () => {},
-                              child: Text('$l4Counter',
+                              onPressed: () =>
+                                  updateCounter(l4Counter, doIncrement),
+                              child: Text('${l4Counter.value}',
                                   style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
                                               0.15))),
-                          // LabeledButton(
-                          //     label: "L4",
-                          //     buttonContent: l4Counter,
-                          //     functionOnTap: updateL4),
-                          // const Spacer(),
-                          // SizedBox(
-                          //   height: MediaQuery.of(context).size.height * 0.075,
-                          // ),
                           Padding(
                             padding: EdgeInsets.all(
                                 MediaQuery.of(context).size.width * 0.01),
@@ -261,17 +234,13 @@ class _AutoPageState extends State<AutoPage> {
                                           0.15),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
-                              onPressed: () => {},
-                              child: Text('$l2l3Counter',
+                              onPressed: () =>
+                                  updateCounter(l2l3Counter, doIncrement),
+                              child: Text('${l2l3Counter.value}',
                                   style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
                                               0.15))),
-                          // LabeledButton(
-                          //     label: "L2/L3",
-                          //     buttonContent: l2l3Counter,
-                          //     functionOnTap: updateL2L3),
-                          // const Spacer(),
                           Padding(
                             padding: EdgeInsets.all(
                                 MediaQuery.of(context).size.width * 0.01),
@@ -281,32 +250,25 @@ class _AutoPageState extends State<AutoPage> {
                                         MediaQuery.of(context).size.width *
                                             0.1)),
                           ),
-                          // SizedBox(
-                          //   height: MediaQuery.of(context).size.height * 0.075,
-                          // ),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                   backgroundColor:
                                       Theme.of(context).colorScheme.primary,
                                   foregroundColor:
                                       Theme.of(context).colorScheme.secondary,
-                                  // minimumSize: const Size.square(70),
                                   minimumSize: Size(
                                       MediaQuery.of(context).size.width * 0.5,
                                       MediaQuery.of(context).size.height *
                                           0.15),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
-                              onPressed: () => {},
-                              child: Text('$l1Counter',
+                              onPressed: () =>
+                                  updateCounter(l1Counter, doIncrement),
+                              child: Text('${l1Counter.value}',
                                   style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
                                               0.15))),
-                          // LabeledButton(
-                          //     label: "L1",
-                          //     buttonContent: l1Counter,
-                          //     functionOnTap: updateL1),
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.075,
                           ),
@@ -314,9 +276,6 @@ class _AutoPageState extends State<AutoPage> {
                       ),
                     ],
                   ),
-                  // SizedBox(
-                  //   height: MediaQuery.of(context).size.height * 0.0375,
-                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -345,18 +304,15 @@ class _AutoPageState extends State<AutoPage> {
                                           0.125),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
-                              onPressed: () => {},
-                              child: Text('$netCounter',
+                              onPressed: () =>
+                                  updateCounter(netCounter, doIncrement),
+                              child: Text('${netCounter.value}',
                                   style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
                                               0.1))),
                         ],
                       ),
-                      // LabeledButton(
-                      //     label: "Net",
-                      //     buttonContent: netCounter,
-                      //     functionOnTap: updateNet),
                       Column(
                         children: [
                           Padding(
@@ -382,18 +338,15 @@ class _AutoPageState extends State<AutoPage> {
                                           0.125),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
-                              onPressed: () => {},
-                              child: Text('$processorCounter',
+                              onPressed: () =>
+                                  updateCounter(processorCounter, doIncrement),
+                              child: Text('${processorCounter.value}',
                                   style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
                                               0.1))),
                         ],
                       ),
-                      // LabeledButton(
-                      //     label: "Processor",
-                      //     buttonContent: processorCounter,
-                      //     functionOnTap: updateProcessor),
                       Column(
                         children: [
                           Padding(
@@ -415,12 +368,13 @@ class _AutoPageState extends State<AutoPage> {
                                   minimumSize: Size.square(
                                     MediaQuery.of(context).size.height * 0.1,
                                   ),
-                                  // minimumSize: Size(
-                                  //     MediaQuery.of(context).size.height * 0.075,
-                                  //     MediaQuery.of(context).size.height * 0.075),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
-                              onPressed: () => {},
+                              onPressed: () {
+                                setState(() {
+                                  doIncrement = !doIncrement;
+                                });
+                              },
                               child: Container()),
                         ],
                       ),
