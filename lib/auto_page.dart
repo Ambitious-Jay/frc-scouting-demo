@@ -20,13 +20,20 @@ class _AutoPageState extends State<AutoPage> {
   ThemeMode themeMode = ThemeMode.system;
   bool isBlue = true;
   bool inCenterZone = false;
-  bool fieldFlipped = false;
   bool inLeftZone = false;
   bool inRightZone = false;
+  bool fieldFlipped = false;
+
+  int l4Counter = 0;
+  int l2l3Counter = 0;
+  int l1Counter = 0;
+  int netCounter = 0;
+  int processorCounter = 0;
 
   double min(double valOne, double valTwo) {
     return valOne > valTwo ? valTwo : valOne;
   }
+
   double max(double valOne, double valTwo) {
     return valOne > valTwo ? valOne : valTwo;
   }
@@ -43,6 +50,7 @@ class _AutoPageState extends State<AutoPage> {
     AssetImage bg = isBlue
         ? const AssetImage('assets/reefscape_blue_field.jpg')
         : const AssetImage('assets/reefscape_red_field.jpg');
+    AssetImage reefImg = const AssetImage('assets/reef.png');
     return Scaffold(
         appBar: AppBar(
           backgroundColor: colorScheme.primary,
@@ -77,20 +85,22 @@ class _AutoPageState extends State<AutoPage> {
                       alignment: Alignment.center,
                       child: Stack(alignment: Alignment.center, children: [
                         SizedBox(
-                            width: fieldWidth,
-                            height: fieldHeight,
-                            child: Transform.rotate(
+                          width: fieldWidth,
+                          height: fieldHeight,
+                          child: Transform.rotate(
                               angle: fieldFlipped ? 3.14159265 : 0,
                               child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: bg, fit: BoxFit.fitWidth)),
-                              )
-                            ),
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: bg, fit: BoxFit.fitWidth)),
+                              )),
                         ),
                         Positioned(
                             top: fieldHeight / 2 - 25,
-                            right: (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) - 25,
+                            right: (fieldFlipped
+                                    ? fieldWidth * 4 / 5
+                                    : fieldWidth / 4) -
+                                25,
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -105,48 +115,42 @@ class _AutoPageState extends State<AutoPage> {
                                           })
                                 ])),
                         Positioned(
-                          left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
-                          top: fieldHeight / 4 - 25,
-                          // top: 0,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children:[
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                            left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
+                            top: fieldHeight / 4 - 25,
+                            // top: 0,
+                            child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text("Left"),
-                                  Checkbox(
-                                    value: inLeftZone,
-                                    onChanged: (bool? value) => {
-                                      setState(() {
-                                        inLeftZone = value!;
-                                      })
-                                    }
-                                  )
-                                ]
-                              ),
-                              SizedBox(
-                                height: fieldHeight / 2 - 50
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Text("Right"),
-                                  Checkbox(
-                                    value: inRightZone,
-                                    onChanged: (bool? value) => {
-                                      setState(() {
-                                        inRightZone = value!;
-                                      })
-                                    }
-                                  )
-                                ]
-                              ),
-                            ]
-                          )
-                        ),
+                                  Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        const Text("Left"),
+                                        Checkbox(
+                                            value: inLeftZone,
+                                            onChanged: (bool? value) => {
+                                                  setState(() {
+                                                    inLeftZone = value!;
+                                                  })
+                                                })
+                                      ]),
+                                  SizedBox(height: fieldHeight / 2 - 50),
+                                  Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        const Text("Right"),
+                                        Checkbox(
+                                            value: inRightZone,
+                                            onChanged: (bool? value) => {
+                                                  setState(() {
+                                                    inRightZone = value!;
+                                                  })
+                                                })
+                                      ]),
+                                ])),
                         // Positioned(
                         //     top: fieldHeight / 4 - 36,
                         //     left: fieldWidth / 4,
@@ -180,12 +184,248 @@ class _AutoPageState extends State<AutoPage> {
                         //                   })
                         //         ])),
                       ])),
-                  const SizedBox(
-                      width: 50,
-                      height: 1500,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(color: Colors.red),
-                      ))
+                  Row(
+                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.375,
+                          child: Image(
+                            //reef photo
+                            image: reefImg,
+                            fit: BoxFit.contain,
+                          )),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.05,
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // SizedBox(
+                          //   height: MediaQuery.of(context).size.height * 0.05,
+                          // ),
+                          Padding(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.01),
+                            child: Text("L4",
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.1)),
+                          ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  // minimumSize: const Size.square(70),
+                                  minimumSize: Size(
+                                      MediaQuery.of(context).size.width * 0.5,
+                                      MediaQuery.of(context).size.height *
+                                          0.15),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5))),
+                              onPressed: () => {},
+                              child: Text('$l4Counter',
+                                  style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.15))),
+                          // LabeledButton(
+                          //     label: "L4",
+                          //     buttonContent: l4Counter,
+                          //     functionOnTap: updateL4),
+                          // const Spacer(),
+                          // SizedBox(
+                          //   height: MediaQuery.of(context).size.height * 0.075,
+                          // ),
+                          Padding(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.01),
+                            child: Text("L2 & L3",
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.1)),
+                          ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  // minimumSize: const Size.square(70),
+                                  minimumSize: Size(
+                                      MediaQuery.of(context).size.width * 0.5,
+                                      MediaQuery.of(context).size.height *
+                                          0.15),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5))),
+                              onPressed: () => {},
+                              child: Text('$l2l3Counter',
+                                  style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.15))),
+                          // LabeledButton(
+                          //     label: "L2/L3",
+                          //     buttonContent: l2l3Counter,
+                          //     functionOnTap: updateL2L3),
+                          // const Spacer(),
+                          Padding(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.01),
+                            child: Text("L1",
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.1)),
+                          ),
+                          // SizedBox(
+                          //   height: MediaQuery.of(context).size.height * 0.075,
+                          // ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  // minimumSize: const Size.square(70),
+                                  minimumSize: Size(
+                                      MediaQuery.of(context).size.width * 0.5,
+                                      MediaQuery.of(context).size.height *
+                                          0.15),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5))),
+                              onPressed: () => {},
+                              child: Text('$l1Counter',
+                                  style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.15))),
+                          // LabeledButton(
+                          //     label: "L1",
+                          //     buttonContent: l1Counter,
+                          //     functionOnTap: updateL1),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.075,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // SizedBox(
+                  //   height: MediaQuery.of(context).size.height * 0.0375,
+                  // ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                bottom:
+                                    MediaQuery.of(context).size.width * 0.0125),
+                            child: Text("Net",
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.05)),
+                          ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  minimumSize: Size(
+                                      MediaQuery.of(context).size.height *
+                                          0.125,
+                                      MediaQuery.of(context).size.height *
+                                          0.125),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5))),
+                              onPressed: () => {},
+                              child: Text('$netCounter',
+                                  style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.1))),
+                        ],
+                      ),
+                      // LabeledButton(
+                      //     label: "Net",
+                      //     buttonContent: netCounter,
+                      //     functionOnTap: updateNet),
+                      Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                bottom:
+                                    MediaQuery.of(context).size.width * 0.0125),
+                            child: Text("Processor",
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.05)),
+                          ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  minimumSize: Size(
+                                      MediaQuery.of(context).size.height *
+                                          0.125,
+                                      MediaQuery.of(context).size.height *
+                                          0.125),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5))),
+                              onPressed: () => {},
+                              child: Text('$processorCounter',
+                                  style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.1))),
+                        ],
+                      ),
+                      // LabeledButton(
+                      //     label: "Processor",
+                      //     buttonContent: processorCounter,
+                      //     functionOnTap: updateProcessor),
+                      Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                bottom:
+                                    MediaQuery.of(context).size.width * 0.0125),
+                            child: Text("+/-",
+                                style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.075)),
+                          ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  minimumSize: Size.square(
+                                    MediaQuery.of(context).size.height * 0.1,
+                                  ),
+                                  // minimumSize: Size(
+                                  //     MediaQuery.of(context).size.height * 0.075,
+                                  //     MediaQuery.of(context).size.height * 0.075),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5))),
+                              onPressed: () => {},
+                              child: Container()),
+                        ],
+                      ),
+                    ],
+                  )
                 ]))));
   }
 }
