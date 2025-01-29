@@ -75,15 +75,23 @@ class _TeamStatsList extends State<TeamStatsList> {
                     child: Column(
                   children: [
                     Expanded(
-                      child: Text(
-                        "Auto Table",
-                        style: TextStyle(fontSize: height * 0.0175),
+                      // child: Text(
+                      //   "Auto Table",
+                      //   style: TextStyle(fontSize: height * 0.0175),
+                      // ),
+                      child: ElevatedButton(
+                        onPressed: () async {},
+                        child: const Text("Auto Table", style: TextStyle(color: Colors.lightBlue,decoration: TextDecoration.underline, decorationColor: Colors.lightBlue)),
                       ),
                     ),
                     Expanded(
-                      child: Text(
-                        "Preset Comments",
-                        style: TextStyle(fontSize: height * 0.0175),
+                      // child: Text(
+                      //   "Preset Comments",
+                      //   style: TextStyle(fontSize: height * 0.0175),
+                      // ),
+                      child: ElevatedButton(
+                        onPressed: () async {},
+                        child: const Text("Preset Comments", style: TextStyle(color: Colors.lightBlue,decoration:TextDecoration.underline, decorationColor: Colors.lightBlue)),
                       ),
                     ),
                   ],
