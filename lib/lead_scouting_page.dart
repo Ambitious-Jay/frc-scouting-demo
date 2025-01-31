@@ -46,7 +46,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
             children: [
               // First Row
               SizedBox(
-                height: height * 0.2,
+                height: height * 0.3,
                 width: width,
                 child: Column(
                   children: [
@@ -55,7 +55,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                       width: width,
                       alignment: Alignment.center,
                       child: const Text(
-                        'Compatability',
+                        'Compatibility',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -125,7 +125,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
 
               // Second Row
               SizedBox(
-                height: height * 0.2,
+                height: height * 0.3,
                 width: width,
                 child: Column(
                   children: [
@@ -204,7 +204,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
 
               // Third Row
               SizedBox(
-                height: height * 0.2,
+                height: height * 0.3,
                 width: width,
                 child: Column(
                   children: [
@@ -278,31 +278,48 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                   ],
                 ),
               ),
-              Container(
-                width: width,
-                height: height * 1 / 13,
-                //color Colors.amber[300],
-                alignment: AlignmentDirectional.center,
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  // await _submitSection();
-                  // setState(() {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute
-                  //     (
-                  //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
-                  //     })
-                  //     )
-                  //   );
-                  // });
-                },
-                child: const Text("Next",
-                    style: TextStyle(color: colors.myOnPrimary)),
-              )
+              // Container(
+              //   width: width,
+              //   height: height * 1 / 13,
+              //   //color Colors.amber[300],
+              //   alignment: AlignmentDirectional.center,
+              // ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     // await _submitSection();
+              //     // setState(() {
+              //     //   Navigator.push(
+              //     //     context,
+              //     //     MaterialPageRoute
+              //     //     (
+              //     //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
+              //     //     })
+              //     //     )
+              //     //   );
+              //     // });
+              //   },
+              //   child: const Text("Next",
+              //       style: TextStyle(color: colors.myOnPrimary)),
+              // )
             ],
           ),
+        ),
+        bottomNavigationBar: ElevatedButton(
+          onPressed: () async {
+            // await _submitSection();
+            // setState(() {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute
+            //     (
+            //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
+            //     })
+            //     )
+            //   );
+            // });
+          },
+          child:
+              const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
         ));
   }
 }
