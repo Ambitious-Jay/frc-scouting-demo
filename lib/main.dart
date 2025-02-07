@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/objective_page.dart';
 
 import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
@@ -52,6 +53,14 @@ class _MainAppState extends State<MyApp> {
       //   id: "Andrew Jo"
       // ),
       // home: PitScouting(teamName: "teamName"),
+      // home: ObjectivePage(
+      //   key: const Key('objective_page'),
+      //   onThemeChanged: (ThemeMode mode) {
+      //     setState(() {
+      //       themeMode = mode;
+      //     });
+      //   },
+      // ),
     );
   }
 }
