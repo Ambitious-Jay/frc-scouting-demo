@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+
 import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
 import 'package:frc1148_2025_scouting_app/team_stats_list.dart';
 import 'package:frc1148_2025_scouting_app/preset_comment.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
+
+import 'package:frc1148_2025_scouting_app/endgame.dart';
+
 
 void main() {
   runApp(const MyApp());
