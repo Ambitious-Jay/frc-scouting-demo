@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/scatter_plot.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,28 +18,69 @@ class _MainAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, Map<String, double>> teamData = {
+      "254": {
+        // The Cheesy Poofs
+        "avgAutoPoints": 14.2, // Average points scored in auto
+        "avgTeleopPoints": 43.5, // Average points scored in teleop
+        "avgCycleTime": 11.8, // Average time per game piece cycle
+        "defenseRating": 2.1, // Subjective defense rating (1-3)
+        "autoConsistency": 0.92, // Standard deviation of auto performance
+        "climbSuccessRate": 0.95, // Percentage of successful climbs
+        "pickupSuccessRate": 0.98, // Percentage of successful piece pickups
+        "maxMatchScore": 89, // Highest single match score
+      },
+      "1678": {
+        // Citrus Circuits
+        "avgAutoPoints": 13.8,
+        "avgTeleopPoints": 42.1,
+        "avgCycleTime": 12.2,
+        "defenseRating": 1.8,
+        "autoConsistency": 0.94,
+        "climbSuccessRate": 0.90,
+        "pickupSuccessRate": 0.95,
+        "maxMatchScore": 85,
+      },
+      "118": {
+        // Robonauts
+        "avgAutoPoints": 12.5,
+        "avgTeleopPoints": 38.4,
+        "avgCycleTime": 13.1,
+        "defenseRating": 2.4,
+        "autoConsistency": 0.88,
+        "climbSuccessRate": 0.85,
+        "pickupSuccessRate": 0.92,
+        "maxMatchScore": 78,
+      },
+      "148": {
+        // Robowranglers
+        "avgAutoPoints": 13.2,
+        "avgTeleopPoints": 41.8,
+        "avgCycleTime": 12.5,
+        "defenseRating": 1.5,
+        "autoConsistency": 0.91,
+        "climbSuccessRate": 0.88,
+        "pickupSuccessRate": 0.94,
+        "maxMatchScore": 82,
+      },
+    };
     return MaterialApp(
       title: 'Scouting Home Page',
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      home: MyHomePage(
-        onThemeChanged: (ThemeMode mode) {
-          setState(() {
-            themeMode = mode;
-          });
-        },
-        title: "meow",
+      home: FlexibleScatterPlot(
+        teamData: teamData,
       ),
     );
   }
 }
 
-
 class MyHomePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
 
-  const MyHomePage({super.key, required this.title, required this.onThemeChanged});
+  const MyHomePage(
+      {super.key, required this.title, required this.onThemeChanged});
 
   final String title;
 
