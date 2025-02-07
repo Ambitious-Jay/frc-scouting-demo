@@ -4,6 +4,7 @@ import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
 import 'package:frc1148_2025_scouting_app/team_stats_list.dart';
 import 'package:frc1148_2025_scouting_app/preset_comment.dart';
+import 'package:frc1148_2025_scouting_app/auto_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,15 +38,25 @@ class _MainAppState extends State<MyApp> {
       //     });
       //   },
       // ),
+      // home: const AutoPage(
+      //   // onThemeChanged: (ThemeMode mode) {
+      //   //   setState(() {
+      //   //     themeMode = mode;
+      //   //   });
+      //   // },
+      //   teamName: "1148",
+      //   id: "Andrew Jo"
+      // ),
+
     );
   }
 }
 
-
 class MyHomePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
 
-  const MyHomePage({super.key, required this.title, required this.onThemeChanged});
+  const MyHomePage(
+      {super.key, required this.title, required this.onThemeChanged});
 
   final String title;
 
