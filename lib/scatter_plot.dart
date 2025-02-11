@@ -259,6 +259,15 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+class TeamSpotData {
+  final String team;
+  final double x;
+  final double y;
+  final Color color;
+
+  TeamSpotData(this.team, this.x, this.y, this.color);
+}
+
 class FlexibleScatterPlot extends StatefulWidget {
   final Map<String, Map<String, double>> teamData;
 
@@ -272,10 +281,38 @@ class FlexibleScatterPlot extends StatefulWidget {
 }
 
 class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
-  // Store team-to-color assignments
-  final Map<String, Color> selectedTeams = {};
+  late Map<String, Color> teamsMap = {};
+  double? xMin, xMax, yMin, yMax;
 
-  // Keep track of which colors are available to use
+  final Map<String, String> metricDisplayNames = {
+    'avgAutoPoints': 'Average Auto Points',
+    'avgTeleopPoints': 'Average Teleop Points',
+    'avgCycleTime': 'Average Cycle Time',
+    'defenseRating': 'Defense Rating',
+    'autoConsistency': 'Auto Consistency',
+    'climbSuccessRate': 'Climb Success Rate',
+    'pickupSuccessRate': 'Pickup Success Rate',
+    'maxMatchScore': 'Maximum Match Score'
+  };
+
+  String getDisplayName(String metric) {
+    return metricDisplayNames[metric] ?? _generateDisplayName(metric);
+  }
+
+  String _generateDisplayName(String metric) {
+    final words = metric
+        .replaceAllMapped(
+          RegExp(r'([A-Z])|(_)'),
+          (Match m) => ' ${m.group(0)}',
+        )
+        .split(' ');
+
+    return words
+        .where((word) => word.isNotEmpty)
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+
   final List<Color> availableColors = [
     Colors.blue,
     Colors.red,
@@ -289,31 +326,71 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
 
   String? selectedXMetric;
   String? selectedYMetric;
+  List<TeamSpotData> teamSpots = [];
 
-  // Get the next available color and remove it from the pool
+  @override
+  void initState() {
+    super.initState();
+    teamsMap = {};
+    for (String team in widget.teamData.keys) {
+      teamsMap[team] = getNextColor();
+    }
+
+    final metrics = availableMetrics;
+    if (metrics.length >= 2) {
+      selectedXMetric = metrics[0];
+      selectedYMetric = metrics[1];
+    }
+  }
+
   Color getNextColor() {
     if (availableColors.isEmpty) {
-      // If we run out of colors, generate a new one
-      // This ensures we never have duplicates even with many teams
-      return Colors.primaries[selectedTeams.length % Colors.primaries.length];
+      return Colors.primaries[teamsMap.length % Colors.primaries.length];
     }
     return availableColors.removeAt(0);
   }
 
-  // Handle team selection/deselection
-  void toggleTeam(String team, bool selected) {
-    setState(() {
-      if (selected) {
-        selectedTeams[team] = getNextColor();
-      } else {
-        // Put the color back in the available pool when removing a team
-        availableColors.insert(0, selectedTeams[team]!);
-        selectedTeams.remove(team);
+  void calculateRanges() {
+    if (selectedXMetric == null || selectedYMetric == null) return;
+
+    xMin = double.infinity;
+    xMax = double.negativeInfinity;
+    yMin = double.infinity;
+    yMax = double.negativeInfinity;
+
+    for (var teamMetrics in widget.teamData.values) {
+      final xValue = teamMetrics[selectedXMetric];
+      final yValue = teamMetrics[selectedYMetric];
+
+      if (xValue != null) {
+        xMin = xMin!.compareTo(xValue) <= 0 ? xMin : xValue;
+        xMax = xMax!.compareTo(xValue) >= 0 ? xMax : xValue;
       }
-    });
+      if (yValue != null) {
+        yMin = yMin!.compareTo(yValue) <= 0 ? yMin : yValue;
+        yMax = yMax!.compareTo(yValue) >= 0 ? yMax : yValue;
+      }
+    }
   }
 
-  // Rest of the implementation remains the same
+  int getDecimalPlaces(double range) {
+    if (range < 0.01) return 4;
+    if (range < 0.1) return 3;
+    if (range < 1) return 2;
+    if (range < 10) return 1;
+    return 0;
+  }
+
+  int getAxisDecimalPlaces(bool isXAxis) {
+    if (isXAxis) {
+      if (xMin == null || xMax == null) return 2;
+      return getDecimalPlaces(xMax! - xMin!);
+    } else {
+      if (yMin == null || yMax == null) return 2;
+      return getDecimalPlaces(yMax! - yMin!);
+    }
+  }
+
   List<String> get availableMetrics {
     Set<String> metrics = {};
     for (var teamMetrics in widget.teamData.values) {
@@ -322,35 +399,27 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
     return metrics.toList()..sort();
   }
 
-  double getMinValue(String? metric) {
-    if (metric == null) return 0;
-    double min = double.infinity;
-    for (var team in selectedTeams.keys) {
-      final value = widget.teamData[team]?[metric];
-      if (value != null && value < min) {
-        min = value;
-      }
-    }
-    return min.isFinite ? min : 0;
+  List<String> get availableYMetrics {
+    return availableMetrics
+        .where((metric) => metric != selectedXMetric)
+        .toList();
   }
 
-  double getMaxValue(String? metric) {
-    if (metric == null) return 0;
-    double max = double.negativeInfinity;
-    for (var team in selectedTeams.keys) {
-      final value = widget.teamData[team]?[metric];
-      if (value != null && value > max) {
-        max = value;
-      }
-    }
-    return max.isFinite ? max : 0;
+  List<String> get availableXMetrics {
+    return availableMetrics
+        .where((metric) => metric != selectedYMetric)
+        .toList();
   }
 
   List<ScatterSpot> getScatterSpots() {
     List<ScatterSpot> spots = [];
+    teamSpots.clear();
+
     if (selectedXMetric == null || selectedYMetric == null) return spots;
 
-    for (String team in selectedTeams.keys) {
+    calculateRanges();
+
+    for (String team in teamsMap.keys) {
       final teamMetrics = widget.teamData[team];
       if (teamMetrics == null) continue;
 
@@ -359,14 +428,21 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
 
       if (xValue == null || yValue == null) continue;
 
+      teamSpots.add(TeamSpotData(
+        team,
+        xValue,
+        yValue,
+        teamsMap[team]!,
+      ));
+
       spots.add(
         ScatterSpot(
           xValue,
           yValue,
           dotPainter: FlDotCirclePainter(
-            color: selectedTeams[team]!,
+            color: teamsMap[team]!,
             strokeWidth: 1,
-            strokeColor: selectedTeams[team]!.withOpacity(0.5),
+            strokeColor: teamsMap[team]!.withOpacity(0.5),
             radius: 8,
           ),
           show: true,
@@ -385,8 +461,8 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Select Teams to Compare:',
+            const Text(
+              'Select Metrics to Compare:',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -394,32 +470,12 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
               ),
             ),
             const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: widget.teamData.keys.map((team) {
-                  final isSelected = selectedTeams.containsKey(team);
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: FilterChip(
-                      label: Text('Team $team'),
-                      selected: isSelected,
-                      selectedColor: isSelected
-                          ? selectedTeams[team]?.withOpacity(0.3)
-                          : null,
-                      onSelected: (selected) => toggleTeam(team, selected),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: Theme(
                     data: Theme.of(context).copyWith(
-                      inputDecorationTheme: InputDecorationTheme(
+                      inputDecorationTheme: const InputDecorationTheme(
                         labelStyle: TextStyle(color: Colors.white70),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.white24),
@@ -431,16 +487,16 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
                     ),
                     child: DropdownButtonFormField<String>(
                       dropdownColor: Colors.grey[850],
-                      style: TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
                         labelText: 'X-Axis Metric',
                         border: OutlineInputBorder(),
                       ),
                       value: selectedXMetric,
-                      items: availableMetrics.map((metric) {
+                      items: availableXMetrics.map((metric) {
                         return DropdownMenuItem(
                           value: metric,
-                          child: Text(metric),
+                          child: Text(getDisplayName(metric)),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -455,7 +511,7 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
                 Expanded(
                   child: Theme(
                     data: Theme.of(context).copyWith(
-                      inputDecorationTheme: InputDecorationTheme(
+                      inputDecorationTheme: const InputDecorationTheme(
                         labelStyle: TextStyle(color: Colors.white70),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.white24),
@@ -467,16 +523,16 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
                     ),
                     child: DropdownButtonFormField<String>(
                       dropdownColor: Colors.grey[850],
-                      style: TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
                         labelText: 'Y-Axis Metric',
                         border: OutlineInputBorder(),
                       ),
                       value: selectedYMetric,
-                      items: availableMetrics.map((metric) {
+                      items: availableYMetrics.map((metric) {
                         return DropdownMenuItem(
                           value: metric,
-                          child: Text(metric),
+                          child: Text(getDisplayName(metric)),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -490,90 +546,81 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
               ],
             ),
             const SizedBox(height: 16),
-            if (selectedTeams.isNotEmpty)
-              Row(
-                children: [
-                  ...selectedTeams.entries.map((entry) => Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: entry.value,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Team ${entry.key}',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )),
-                ],
-              ),
-            const SizedBox(height: 16),
-            if (selectedXMetric != null &&
-                selectedYMetric != null &&
-                selectedTeams.isNotEmpty)
+            if (selectedXMetric != null && selectedYMetric != null)
               Expanded(
                 child: ScatterChart(
                   ScatterChartData(
+                    scatterTouchData: ScatterTouchData(
+                      enabled: true,
+                      touchTooltipData: ScatterTouchTooltipData(
+                        getTooltipItems: (ScatterSpot touchedSpot) {
+                          final teamSpot = teamSpots.firstWhere(
+                            (ts) =>
+                                ts.x == touchedSpot.x && ts.y == touchedSpot.y,
+                            orElse: () =>
+                                TeamSpotData('Unknown', 0, 0, Colors.grey),
+                          );
+                          return ScatterTooltipItem(
+                            'Team ${teamSpot.team}\n'
+                            '${getDisplayName(selectedXMetric!)}: ${teamSpot.x.toStringAsFixed(getAxisDecimalPlaces(true))}\n'
+                            '${getDisplayName(selectedYMetric!)}: ${teamSpot.y.toStringAsFixed(getAxisDecimalPlaces(false))}',
+                            textStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                      mouseCursorResolver: (event, response) {
+                        return response == null || response.touchedSpot == null
+                            ? MouseCursor.defer
+                            : SystemMouseCursors.click;
+                      },
+                    ),
                     scatterSpots: getScatterSpots(),
-                    minX: getMinValue(selectedXMetric) - 0.5,
-                    maxX: getMaxValue(selectedXMetric) + 0.5,
-                    minY: getMinValue(selectedYMetric) - 0.5,
-                    maxY: getMaxValue(selectedYMetric) + 0.5,
                     titlesData: FlTitlesData(
                       bottomTitles: AxisTitles(
                         axisNameWidget: Text(
-                          selectedXMetric!,
-                          style: TextStyle(color: Colors.white70),
+                          getDisplayName(selectedXMetric!),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 30,
                           getTitlesWidget: (value, meta) => Text(
-                            value.toStringAsFixed(1),
-                            style:
-                                TextStyle(color: Colors.white60, fontSize: 10),
+                            value.toStringAsFixed(getAxisDecimalPlaces(true)),
+                            style: const TextStyle(
+                                color: Colors.white60, fontSize: 10),
                           ),
                         ),
                       ),
                       leftTitles: AxisTitles(
                         axisNameWidget: Text(
-                          selectedYMetric!,
-                          style: TextStyle(color: Colors.white70),
+                          getDisplayName(selectedYMetric!),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 40,
                           getTitlesWidget: (value, meta) => Text(
-                            value.toStringAsFixed(1),
-                            style:
-                                TextStyle(color: Colors.white60, fontSize: 10),
+                            value.toStringAsFixed(getAxisDecimalPlaces(false)),
+                            style: const TextStyle(
+                                color: Colors.white60, fontSize: 10),
                           ),
                         ),
                       ),
-                      topTitles: AxisTitles(),
-                      rightTitles: AxisTitles(),
+                      topTitles: const AxisTitles(),
+                      rightTitles: const AxisTitles(),
                     ),
                     gridData: FlGridData(
                       show: true,
                       drawHorizontalLine: true,
                       drawVerticalLine: true,
-                      getDrawingHorizontalLine: (value) => FlLine(
+                      getDrawingHorizontalLine: (value) => const FlLine(
                         color: Colors.white10,
                         strokeWidth: 1,
                       ),
-                      getDrawingVerticalLine: (value) => FlLine(
+                      getDrawingVerticalLine: (value) => const FlLine(
                         color: Colors.white10,
                         strokeWidth: 1,
                       ),

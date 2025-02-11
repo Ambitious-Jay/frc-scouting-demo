@@ -21,14 +21,14 @@ class _MainAppState extends State<MyApp> {
     final Map<String, Map<String, double>> teamData = {
       "254": {
         // The Cheesy Poofs
-        "avgAutoPoints": 14.2, // Average points scored in auto
-        "avgTeleopPoints": 43.5, // Average points scored in teleop
-        "avgCycleTime": 11.8, // Average time per game piece cycle
-        "defenseRating": 2.1, // Subjective defense rating (1-3)
-        "autoConsistency": 0.92, // Standard deviation of auto performance
-        "climbSuccessRate": 0.95, // Percentage of successful climbs
-        "pickupSuccessRate": 0.98, // Percentage of successful piece pickups
-        "maxMatchScore": 89, // Highest single match score
+        "avgAutoPoints": 14.2,
+        "avgTeleopPoints": 43.5,
+        "avgCycleTime": 11.8,
+        "defenseRating": 2.1,
+        "autoConsistency": 0.92,
+        "climbSuccessRate": 0.95,
+        "pickupSuccessRate": 0.98,
+        "maxMatchScore": 89,
       },
       "1678": {
         // Citrus Circuits
@@ -63,6 +63,182 @@ class _MainAppState extends State<MyApp> {
         "pickupSuccessRate": 0.94,
         "maxMatchScore": 82,
       },
+      "2056": {
+        // OP Robotics
+        "avgAutoPoints": 13.9,
+        "avgTeleopPoints": 42.8,
+        "avgCycleTime": 11.9,
+        "defenseRating": 2.2,
+        "autoConsistency": 0.93,
+        "climbSuccessRate": 0.92,
+        "pickupSuccessRate": 0.96,
+        "maxMatchScore": 87,
+      },
+      "1323": {
+        // MadTown Robotics
+        "avgAutoPoints": 13.1,
+        "avgTeleopPoints": 40.2,
+        "avgCycleTime": 12.8,
+        "defenseRating": 2.0,
+        "autoConsistency": 0.90,
+        "climbSuccessRate": 0.87,
+        "pickupSuccessRate": 0.93,
+        "maxMatchScore": 81,
+      },
+      "1114": {
+        // Simbotics
+        "avgAutoPoints": 13.6,
+        "avgTeleopPoints": 41.5,
+        "avgCycleTime": 12.3,
+        "defenseRating": 1.9,
+        "autoConsistency": 0.92,
+        "climbSuccessRate": 0.89,
+        "pickupSuccessRate": 0.94,
+        "maxMatchScore": 83,
+      },
+      "3310": {
+        // Black Hawk Robotics
+        "avgAutoPoints": 12.8,
+        "avgTeleopPoints": 39.7,
+        "avgCycleTime": 12.9,
+        "defenseRating": 2.3,
+        "autoConsistency": 0.89,
+        "climbSuccessRate": 0.86,
+        "pickupSuccessRate": 0.91,
+        "maxMatchScore": 79,
+      },
+      "971": {
+        // Spartan Robotics
+        "avgAutoPoints": 13.5,
+        "avgTeleopPoints": 41.2,
+        "avgCycleTime": 12.4,
+        "defenseRating": 1.7,
+        "autoConsistency": 0.91,
+        "climbSuccessRate": 0.88,
+        "pickupSuccessRate": 0.93,
+        "maxMatchScore": 82,
+      },
+      "195": {
+        // CyberKnights
+        "avgAutoPoints": 13.0,
+        "avgTeleopPoints": 40.5,
+        "avgCycleTime": 12.6,
+        "defenseRating": 2.0,
+        "autoConsistency": 0.90,
+        "climbSuccessRate": 0.87,
+        "pickupSuccessRate": 0.92,
+        "maxMatchScore": 80,
+      },
+      "2767": {
+        // Stryke Force
+        "avgAutoPoints": 12.9,
+        "avgTeleopPoints": 39.8,
+        "avgCycleTime": 12.7,
+        "defenseRating": 2.2,
+        "autoConsistency": 0.89,
+        "climbSuccessRate": 0.86,
+        "pickupSuccessRate": 0.91,
+        "maxMatchScore": 78,
+      },
+      "33": {
+        // Killer Bees
+        "avgAutoPoints": 13.3,
+        "avgTeleopPoints": 40.9,
+        "avgCycleTime": 12.4,
+        "defenseRating": 1.8,
+        "autoConsistency": 0.90,
+        "climbSuccessRate": 0.88,
+        "pickupSuccessRate": 0.93,
+        "maxMatchScore": 81,
+      },
+      "1241": {
+        // THEORY6
+        "avgAutoPoints": 12.7,
+        "avgTeleopPoints": 39.2,
+        "avgCycleTime": 13.0,
+        "defenseRating": 2.1,
+        "autoConsistency": 0.88,
+        "climbSuccessRate": 0.85,
+        "pickupSuccessRate": 0.90,
+        "maxMatchScore": 77,
+      },
+      "2481": {
+        // Roboteers
+        "avgAutoPoints": 13.1,
+        "avgTeleopPoints": 40.1,
+        "avgCycleTime": 12.6,
+        "defenseRating": 1.9,
+        "autoConsistency": 0.89,
+        "climbSuccessRate": 0.87,
+        "pickupSuccessRate": 0.92,
+        "maxMatchScore": 79,
+      },
+      "225": {
+        // TechFire
+        "avgAutoPoints": 12.8,
+        "avgTeleopPoints": 39.5,
+        "avgCycleTime": 12.8,
+        "defenseRating": 2.0,
+        "autoConsistency": 0.88,
+        "climbSuccessRate": 0.86,
+        "pickupSuccessRate": 0.91,
+        "maxMatchScore": 78,
+      },
+      "1538": {
+        // The Holy Cows
+        "avgAutoPoints": 13.0,
+        "avgTeleopPoints": 40.3,
+        "avgCycleTime": 12.5,
+        "defenseRating": 1.8,
+        "autoConsistency": 0.89,
+        "climbSuccessRate": 0.87,
+        "pickupSuccessRate": 0.92,
+        "maxMatchScore": 80,
+      },
+      "3847": {
+        // Spectrum
+        "avgAutoPoints": 12.6,
+        "avgTeleopPoints": 39.0,
+        "avgCycleTime": 13.2,
+        "defenseRating": 2.2,
+        "autoConsistency": 0.87,
+        "climbSuccessRate": 0.84,
+        "pickupSuccessRate": 0.90,
+        "maxMatchScore": 76,
+      },
+      "3357": {
+        // COMETS
+        "avgAutoPoints": 12.9,
+        "avgTeleopPoints": 39.6,
+        "avgCycleTime": 12.9,
+        "defenseRating": 2.1,
+        "autoConsistency": 0.88,
+        "climbSuccessRate": 0.85,
+        "pickupSuccessRate": 0.91,
+        "maxMatchScore": 77,
+      },
+      "1023": {
+        // Bedford Express
+        "avgAutoPoints": 12.7,
+        "avgTeleopPoints": 39.3,
+        "avgCycleTime": 13.0,
+        "defenseRating": 2.0,
+        "autoConsistency": 0.87,
+        "climbSuccessRate": 0.84,
+        "pickupSuccessRate": 0.90,
+        "maxMatchScore": 76,
+      },
+      "2590": {
+        // Nemesis
+        "avgAutoPoints": 13.2,
+        "avgTeleopPoints": 40.7,
+        "avgCycleTime": 12.4,
+        "defenseRating": 1.9,
+        "autoConsistency": 0.90,
+        "climbSuccessRate": 0.88,
+        "pickupSuccessRate": 0.93,
+        "maxMatchScore": 81,
+      }
     };
     return MaterialApp(
       title: 'Scouting Home Page',
