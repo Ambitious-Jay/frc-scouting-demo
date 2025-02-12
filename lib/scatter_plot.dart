@@ -419,6 +419,18 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
 
     calculateRanges();
 
+    // Add padding to the ranges
+    if (xMin != null && xMax != null) {
+      double xRange = xMax! - xMin!;
+      xMin = xMin! - (xRange * 0.05); // 5% padding
+      xMax = xMax! + (xRange * 0.05);
+    }
+    if (yMin != null && yMax != null) {
+      double yRange = yMax! - yMin!;
+      yMin = yMin! - (yRange * 0.05);
+      yMax = yMax! + (yRange * 0.05);
+    }
+
     for (String team in teamsMap.keys) {
       final teamMetrics = widget.teamData[team];
       if (teamMetrics == null) continue;
@@ -443,13 +455,58 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
             color: teamsMap[team]!,
             strokeWidth: 1,
             strokeColor: teamsMap[team]!.withOpacity(0.5),
-            radius: 8,
+            radius: 6,
           ),
           show: true,
         ),
       );
     }
     return spots;
+  }
+
+  Widget _buildMetricDropdown({
+    required BuildContext context,
+    required String label,
+    required String? value,
+    required List<String> items,
+  }) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        inputDecorationTheme: const InputDecorationTheme(
+          labelStyle: TextStyle(color: Colors.white70),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white24),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white24),
+          ),
+        ),
+      ),
+      child: DropdownButtonFormField<String>(
+        dropdownColor: Colors.grey[850],
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        value: value,
+        items: items.map((metric) {
+          return DropdownMenuItem(
+            value: metric,
+            child: Text(getDisplayName(metric)),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            if (label.startsWith('X')) {
+              selectedXMetric = newValue;
+            } else {
+              selectedYMetric = newValue;
+            }
+          });
+        },
+      ),
+    );
   }
 
   @override
@@ -470,80 +527,49 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      inputDecorationTheme: const InputDecorationTheme(
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white24),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white24),
-                        ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < 600) {
+                  return Column(
+                    children: [
+                      _buildMetricDropdown(
+                        context: context,
+                        label: 'X-Axis Metric',
+                        value: selectedXMetric,
+                        items: availableXMetrics,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildMetricDropdown(
+                        context: context,
+                        label: 'Y-Axis Metric',
+                        value: selectedYMetric,
+                        items: availableYMetrics,
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _buildMetricDropdown(
+                        context: context,
+                        label: 'X-Axis Metric',
+                        value: selectedXMetric,
+                        items: availableXMetrics,
                       ),
                     ),
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: Colors.grey[850],
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'X-Axis Metric',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: selectedXMetric,
-                      items: availableXMetrics.map((metric) {
-                        return DropdownMenuItem(
-                          value: metric,
-                          child: Text(getDisplayName(metric)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedXMetric = value;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      inputDecorationTheme: const InputDecorationTheme(
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white24),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white24),
-                        ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildMetricDropdown(
+                        context: context,
+                        label: 'Y-Axis Metric',
+                        value: selectedYMetric,
+                        items: availableYMetrics,
                       ),
                     ),
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: Colors.grey[850],
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Y-Axis Metric',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: selectedYMetric,
-                      items: availableYMetrics.map((metric) {
-                        return DropdownMenuItem(
-                          value: metric,
-                          child: Text(getDisplayName(metric)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedYMetric = value;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 16),
             if (selectedXMetric != null && selectedYMetric != null)
@@ -579,38 +605,59 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
                     ),
                     scatterSpots: getScatterSpots(),
                     titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                        axisNameWidget: Padding(
+                          padding: const EdgeInsets.only(bottom: 0.5),
+                          child: Text(
+                            getDisplayName(selectedYMetric!),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14.5,
+                            ),
+                          ),
+                        ),
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 35,
+                          getTitlesWidget: (value, meta) => Text(
+                            value.toStringAsFixed(getAxisDecimalPlaces(false)),
+                            style: const TextStyle(
+                              color: Colors.white60,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
                       bottomTitles: AxisTitles(
-                        axisNameWidget: Text(
-                          getDisplayName(selectedXMetric!),
-                          style: const TextStyle(color: Colors.white70),
+                        axisNameWidget: Padding(
+                          padding: const EdgeInsets.only(),
+                          child: Text(
+                            getDisplayName(selectedXMetric!),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14.5,
+                            ),
+                          ),
                         ),
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 30,
+                          interval: ((xMax ?? 0) - (xMin ?? 0)) / 6,
                           getTitlesWidget: (value, meta) => Text(
                             value.toStringAsFixed(getAxisDecimalPlaces(true)),
                             style: const TextStyle(
-                                color: Colors.white60, fontSize: 10),
+                              color: Colors.white60,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),
-                      leftTitles: AxisTitles(
-                        axisNameWidget: Text(
-                          getDisplayName(selectedYMetric!),
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 40,
-                          getTitlesWidget: (value, meta) => Text(
-                            value.toStringAsFixed(getAxisDecimalPlaces(false)),
-                            style: const TextStyle(
-                                color: Colors.white60, fontSize: 10),
-                          ),
-                        ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
                       ),
-                      topTitles: const AxisTitles(),
-                      rightTitles: const AxisTitles(),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                     ),
                     gridData: FlGridData(
                       show: true,
@@ -630,6 +677,10 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
                       border: Border.all(color: Colors.white24),
                     ),
                     backgroundColor: Colors.grey[900],
+                    minX: xMin,
+                    maxX: xMax,
+                    minY: yMin,
+                    maxY: yMax,
                   ),
                 ),
               ),
