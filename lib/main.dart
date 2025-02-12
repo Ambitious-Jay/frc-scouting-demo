@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/lead_scout_notes_vis_page.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
 
 import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
@@ -32,7 +33,8 @@ class _MainAppState extends State<MyApp> {
       themeMode: themeMode,
       // THE WAY MATTHEW HAD IT
       // home: LeadScoutingPage(teamName: "meow1 meow2 meow3"),
-      home: MatchList(),
+      home: LeadScoutNotesVisPage(teamName: "hi"),
+      // home: MatchList(),
       //  home: TeamStatsList(teamName: "meow"),
       // THE WAY JOSEPH HAD IT
       // home: PresetComment(
