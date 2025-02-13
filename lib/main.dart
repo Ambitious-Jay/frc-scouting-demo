@@ -1,143 +1,108 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/login_page.dart';
+import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
 
-import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
-import 'package:frc1148_2025_scouting_app/match_list.dart';
-import 'package:frc1148_2025_scouting_app/team_stats_list.dart';
-import 'package:frc1148_2025_scouting_app/preset_comment.dart';
-import 'package:frc1148_2025_scouting_app/auto_page.dart';
-
-import 'package:frc1148_2025_scouting_app/endgame.dart';
-
-
-void main() {
-  runApp(const MyApp());
-}
-
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   _MainAppState createState() => _MainAppState();
 }
 
+/// Manages the WebSocket connection for the entire app.
+/// Opens the connection in initState and closes it in dispose.
+/// Passes the WebSocketService to child widgets as needed.
 class _MainAppState extends State<MyApp> {
   ThemeMode themeMode = ThemeMode.system;
+
+  /// Reference to the WebSocketService singleton
+  final WebSocketService _webSocketService = WebSocketService();
+
+  /// Tracks if the user is already logged in
+  bool _isLoggedIn = false;
+
+  /// Tracks if the login state has been checked
+  bool _loginChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus().then((_) {
+      // Always ensure WebSocket is connected
+      _webSocketService.connect();
+      setState(() {
+        _loginChecked = true;
+      });
+    });
+  }
+
+  /// Checks the persisted login state
+  Future<void> _checkLoginStatus() async {
+    _isLoggedIn = await AuthService.isLoggedIn();
+    if (_isLoggedIn) {
+      print('[MainApp] User is logged in.');
+    } else {
+      print('[MainApp] User is not logged in.');
+    }
+  }
+
+  @override
+  void dispose() {
+    // Always disconnect the WebSocket when disposing the app
+    _webSocketService.disconnect();
+    print('[MainApp] Disposed and disconnected WebSocket.');
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Show a loading indicator while checking login status
+    if (!_loginChecked) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    // IMPORTANT: Flip the ternary so "logged in" -> Dashboard, "not logged in" -> Login
     return MaterialApp(
       title: 'Scouting Home Page',
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      // THE WAY MATTHEW HAD IT
-      // home: LeadScoutingPage(teamName: "meow1 meow2 meow3"),
-      home: MatchList(),
-      //  home: TeamStatsList(teamName: "meow"),
-      // THE WAY JOSEPH HAD IT
-      // home: PresetComment(
-      //   key: const Key('objective_page'),
-      //   onThemeChanged: (ThemeMode mode) {
-      //     setState(() {
-      //       themeMode = mode;
-      //     });
-      //   },
-      // ),
-      // home: const AutoPage(
-      //   // onThemeChanged: (ThemeMode mode) {
-      //   //   setState(() {
-      //   //     themeMode = mode;
-      //   //   });
-      //   // },
-      //   teamName: "1148",
-      //   id: "Andrew Jo"
-      // ),
-      // home: PitScouting(teamName: "teamName"),
-      // home: ObjectivePage(
-      //   key: const Key('objective_page'),
-      //   onThemeChanged: (ThemeMode mode) {
-      //     setState(() {
-      //       themeMode = mode;
-      //     });
-      //   },
-      // ),
+      home: _isLoggedIn
+          ? ObjectivePage(
+              channel: _webSocketService.channel,
+              onThemeChanged: (ThemeMode mode) {
+                setState(() {
+                  themeMode = mode;
+                });
+              },
+              webSocketService: _webSocketService,
+            )
+          : ObjectivePage(
+              channel: _webSocketService.channel,
+              onThemeChanged: (ThemeMode mode) {
+                setState(() {
+                  themeMode = mode;
+                });
+              },
+              webSocketService: _webSocketService,
+            ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  final Function(ThemeMode) onThemeChanged;
-
-  const MyHomePage(
-      {super.key, required this.title, required this.onThemeChanged});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
 }
