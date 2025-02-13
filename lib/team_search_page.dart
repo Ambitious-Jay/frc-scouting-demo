@@ -50,12 +50,11 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search Teams'),
+        title: const Text('Search Teams'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Column(
         children: [
-          Divider(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -65,16 +64,25 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
+          const Divider(),
           Expanded(
-            child: ListView.builder(
-              itemCount: filteredTeams.length,
+            child: ListView.separated(
+              separatorBuilder: (context, index) => const Divider(),
+              itemCount: filteredTeams.length + 1,
               itemBuilder: (context, index) {
+                if (index == filteredTeams.length) {
+                  return const SizedBox.shrink();
+                }
                 return ListTile(
-                  title: Text(filteredTeams[index]),
+                  title: Text(
+                    filteredTeams[index],
+                    style: const TextStyle(fontSize: 20),
+                    textAlign: TextAlign.center,
+                  ),
                   onTap: () =>
                       onTeamTap(filteredTeams[index]), // Navigate on tap
                 );
