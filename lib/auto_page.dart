@@ -37,6 +37,8 @@ class _AutoPageState extends State<AutoPage> {
 
   bool doIncrement = true;
 
+  String? startPos = "Option one";
+
   double min(double valOne, double valTwo) {
     return valOne > valTwo ? valTwo : valOne;
   }
@@ -79,6 +81,7 @@ class _AutoPageState extends State<AutoPage> {
         ? const AssetImage('assets/reefscape_blue_field.jpg')
         : const AssetImage('assets/reefscape_red_field.jpg');
     AssetImage reefImg = const AssetImage('assets/reef.png');
+    // String? startPos = "Option one";
     return Scaffold(
         appBar: AppBar(
           backgroundColor: colorScheme.primary,
@@ -179,6 +182,43 @@ class _AutoPageState extends State<AutoPage> {
                                                 })
                                       ]),
                                 ])),
+                        Positioned(
+                            left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
+                            top: fieldHeight / 4 - 25,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  ListTile(
+                                      title: const Text("StartL"),
+                                      leading: Radio<String>(
+                                          value: "Option one",
+                                          groupValue: startPos,
+                                          onChanged: (String? value) {
+                                            setState(() {
+                                              startPos = value;
+                                            });
+                                          })),
+                                  ListTile(
+                                      title: const Text("StartM"),
+                                      leading: Radio<String>(
+                                          value: "Option two",
+                                          groupValue: startPos,
+                                          onChanged: (String? value) {
+                                            setState(() {
+                                              startPos = value;
+                                            });
+                                          })),
+                                  ListTile(
+                                      title: const Text("StartR"),
+                                      leading: Radio<String>(
+                                          value: "Option three",
+                                          groupValue: startPos,
+                                          onChanged: (String? value) {
+                                            setState(() {
+                                              startPos = value;
+                                            });
+                                          })),
+                                ]))
                       ])),
                   Row(
                     children: [
