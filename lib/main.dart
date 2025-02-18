@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/scatter_plot.dart';
 
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
@@ -98,6 +100,9 @@ class _MainAppState extends State<MyApp> {
               },
               webSocketService: _webSocketService,
             ),
+      // home: FlexibleScatterPlot(
+      //   teamData: teamData,
+      // ),
     );
   }
 }
