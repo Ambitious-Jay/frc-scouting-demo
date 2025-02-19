@@ -183,13 +183,17 @@ class _AutoPageState extends State<AutoPage> {
                                       ]),
                                 ])),
                         Positioned(
-                            left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
-                            top: fieldHeight / 4 - 25,
-                            child: Column(
+                            left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
+                            top: fieldHeight / 4,
+                            child: SizedBox(
+                              width: 80,
+                              height: fieldHeight / 3 * 2,
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   ListTile(
-                                      title: const Text("StartL"),
+                                      title: const Text(""),
                                       leading: Radio<String>(
                                           value: "Option one",
                                           groupValue: startPos,
@@ -198,8 +202,9 @@ class _AutoPageState extends State<AutoPage> {
                                               startPos = value;
                                             });
                                           })),
+                                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
                                   ListTile(
-                                      title: const Text("StartM"),
+                                      title: const Text(""),
                                       leading: Radio<String>(
                                           value: "Option two",
                                           groupValue: startPos,
@@ -208,8 +213,9 @@ class _AutoPageState extends State<AutoPage> {
                                               startPos = value;
                                             });
                                           })),
+                                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
                                   ListTile(
-                                      title: const Text("StartR"),
+                                      title: const Text(""),
                                       leading: Radio<String>(
                                           value: "Option three",
                                           groupValue: startPos,
@@ -218,7 +224,7 @@ class _AutoPageState extends State<AutoPage> {
                                               startPos = value;
                                             });
                                           })),
-                                ]))
+                                ])))
                       ])),
                   Row(
                     children: [
