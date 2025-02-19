@@ -4,10 +4,8 @@ import 'package:frc1148_2025_scouting_app/scroll_controller.dart';
 
 String Combatability =
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.';
-String Feats =
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.';
-String HPlayer =
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec placerat sollicitudin ex a porttitor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam at tellus ut nulla tincidunt gravida a non sapien. Curabitur eu magna sit amet leo scelerisque maximus in at mi. Morbi laoreet nulla ante, tristique sodales neque malesuada vel. Sed fermentum ultrices ullamcorper. Vestibulum gravida volutpat tellus vel ornare. Cras non convallis turpis. Vestibulum feugiat luctus lobortis. Integer vehicula porta dolor.';
+String Feats = 'kachow';
+String HPlayer = 'hallo';
 
 final ScrollController compatibilityController = ScrollController();
 final ScrollController featsController = ScrollController();
@@ -139,131 +137,90 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
               const Divider(),
 
               // First Row
-              SizedBox(
-                height: height * 0.3,
-                width: width,
-                child: Column(
-                  children: [
-                    Container(
-                      height: height * 0.05,
-                      width: width,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Compatibility',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Column(
+                children: [
+                  Container(
+                    height: height * 0.05,
+                    width: width,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Compatibility',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Expanded(
-                      child: Scrollbar(
-                        thumbVisibility: true,
-                        controller:
-                            compatibilityController, // 🔴 FIX: Attach the controller
-                        child: SingleChildScrollView(
-                          controller:
-                              compatibilityController, // 🔴 FIX: Attach the controller
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 10.0),
-                            child: Text(
-                              Combatability,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 30.0),
+                    child: Text(
+                      Combatability,
+                      textAlign: TextAlign.center,
+                      softWrap: true,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
 
               const Divider(),
 
               // Second Row
-              SizedBox(
-                height: height * 0.3,
-                width: width,
-                child: Column(
-                  children: [
-                    Container(
-                      height: height * 0.05,
-                      width: width,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Notable Feats',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Column(
+                children: [
+                  Container(
+                    height: height * 0.05,
+                    width: width,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Notable Feats',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Expanded(
-                      child: Scrollbar(
-                        thumbVisibility: true,
-                        controller:
-                            featsController, // 🔴 FIX: Attach the controller
-                        child: SingleChildScrollView(
-                          controller:
-                              featsController, // 🔴 FIX: Attach the controller
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 10.0),
-                            child: Text(
-                              Feats,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 30.0),
+                    child: Text(
+                      Feats,
+                      textAlign: TextAlign.center,
+                      softWrap: true,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
 
               const Divider(),
 
               // Third Row
-              SizedBox(
-                height: height * 0.3,
-                width: width,
-                child: Column(
-                  children: [
-                    Container(
-                      height: height * 0.05,
-                      width: width,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Human Player Net ACC',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Column(
+                children: [
+                  Container(
+                    height: height * 0.05,
+                    width: width,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Human Player Net ACC',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Expanded(
-                      child: Scrollbar(
-                        thumbVisibility: true,
-                        controller:
-                            hPlayerController, // 🔴 FIX: Attach the controller
-                        child: SingleChildScrollView(
-                          controller:
-                              hPlayerController, // 🔴 FIX: Attach the controller
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 10.0),
-                            child: Text(
-                              HPlayer,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 30.0),
+                    child: Text(
+                      HPlayer,
+                      textAlign: TextAlign.center,
+                      softWrap: true,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+
               // Container(
               //   width: width,
               //   height: height * 1 / 13,
