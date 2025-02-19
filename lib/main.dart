@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/scatter_plot.dart';
@@ -81,28 +82,29 @@ class _MainAppState extends State<MyApp> {
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      home: _isLoggedIn
-          ? ObjectivePage(
-              channel: _webSocketService.channel,
-              onThemeChanged: (ThemeMode mode) {
-                setState(() {
-                  themeMode = mode;
-                });
-              },
-              webSocketService: _webSocketService,
-            )
-          : ObjectivePage(
-              channel: _webSocketService.channel,
-              onThemeChanged: (ThemeMode mode) {
-                setState(() {
-                  themeMode = mode;
-                });
-              },
-              webSocketService: _webSocketService,
-            ),
-      // home: FlexibleScatterPlot(
-      //   teamData: teamData,
-      // ),
+      // home: _isLoggedIn
+      //     ? ObjectivePage(
+      //         channel: _webSocketService.channel,
+      //         onThemeChanged: (ThemeMode mode) {
+      //           setState(() {
+      //             themeMode = mode;
+      //           });
+      //         },
+      //         webSocketService: _webSocketService,
+      //       )
+      //     : ObjectivePage(
+      //         channel: _webSocketService.channel,
+      //         onThemeChanged: (ThemeMode mode) {
+      //           setState(() {
+      //             themeMode = mode;
+      //           });
+      //         },
+      //         webSocketService: _webSocketService,
+      //       ),
+      home: AutoPage(
+        teamName: '',
+        id: '',
+      ),
     );
   }
 }

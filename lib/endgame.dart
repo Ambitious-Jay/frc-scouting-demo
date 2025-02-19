@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
+import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 // import 'entrance.dart';
 // import 'sheets_helper.dart';
 // import 'auto_form.dart' as af;
@@ -93,11 +95,9 @@ class _Endgame extends State<Endgame> {
                 ),
               ),
             ),
-
             const Divider(),
-
             SingleChildScrollView(
-              child: GridView.builder(
+                child: GridView.builder(
               shrinkWrap: true,
               padding: EdgeInsets.all(width / 50),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -132,46 +132,68 @@ class _Endgame extends State<Endgame> {
                 );
               },
             )),
-
             const Divider(),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     // await _submitSection();
+            //     // setState(() {
+            //     //   Navigator.push(
+            //     //     context,
+            //     //     MaterialPageRoute
+            //     //     (
+            //     //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
+            //     //     })
+            //     //     )
+            //     //   );
+            //     // });
 
-            ElevatedButton(
-              onPressed: () async {
-                // await _submitSection();
-                // setState(() {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute
-                //     (
-                //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
-                //     })
-                //     )
-                //   );
-                // });
+            //     //     af.autoPath = "";
 
-            //     af.autoPath = "";
+            //     //     tf.speakerPoints.value = 0;
+            //     //     tf.speakerAmpedCounter.value = 0;
+            //     //     tf.speakerNotAmpedCounter.value = 0;
+            //     //     tf.ampPoints.value = 0;
+            //     //     tf.trapPoints.value = 0;
+            //     //     tf.missedS.value = 0;
+            //     //     tf.missedA.value = 0;
+            //     //     tf.missedT.value = 0;
+            //     //     tf.tryParkTele = false;
+            //     //     tf.messUpParkTele = false;
 
-            //     tf.speakerPoints.value = 0;
-            //     tf.speakerAmpedCounter.value = 0;
-            //     tf.speakerNotAmpedCounter.value = 0;
-            //     tf.ampPoints.value = 0;
-            //     tf.trapPoints.value = 0;
-            //     tf.missedS.value = 0;
-            //     tf.missedA.value = 0;
-            //     tf.missedT.value = 0;
-            //     tf.tryParkTele = false;
-            //     tf.messUpParkTele = false;
-
-            //     tippiness = 0;
-            //     tip = false;
-            //     defensive = false;
-            //     robotBreak = false;
-
-              },
-              child: const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
-            )
+            //     //     tippiness = 0;
+            //     //     tip = false;
+            //     //     defensive = false;
+            //     //     robotBreak = false;
+            //   },
+            //   // child: const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
+            // )
           ],
         ),
+      ),
+      bottomNavigationBar: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          foregroundColor: Theme.of(context).colorScheme.secondary,
+          iconColor: Theme.of(context).colorScheme.secondary,
+        ),
+        iconAlignment: IconAlignment.end,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => DashboardPage(
+                      webSocketService: WebSocketService(),
+                      onThemeChanged: (ThemeMode mode) {
+                        setState(() {
+                          // var themeMode = mode;
+                        });
+                      },
+                    )),
+          );
+        },
+        icon: const Icon(Icons.arrow_forward_rounded),
+        label: const Text('Submit'),
       ),
     );
   }
