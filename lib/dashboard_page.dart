@@ -4,6 +4,10 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'login_page.dart';
+import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
+import 'login_page.dart';
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
+import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 
 class DashboardPage extends StatelessWidget {
   final WebSocketService webSocketService;
@@ -33,22 +37,68 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Dashboard'),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Log Out',
             onPressed: () => _logOut(context),
+            tooltip: 'Log Out',
           ),
         ],
       ),
-      body: const Center(
-        child: Text(
-          'Welcome to the Dashboard!',
-          style: TextStyle(fontSize: 24),
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(5),
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8), // Decrease the rounding
+                  ),
+                ),
+                child: const Text(
+                  'Button 1',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(5),
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8), // Decrease the rounding
+                  ),
+                ),
+                child: const Text(
+                  'Button 2',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
