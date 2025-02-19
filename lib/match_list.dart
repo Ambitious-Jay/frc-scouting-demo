@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/alliance_data.dart';
 import 'color_scheme.dart';
 
 class MatchList extends StatefulWidget {
@@ -90,55 +91,61 @@ class _MatchList extends State<MatchList> {
             child: SizedBox(
               height: height / 12,
               width: width / 20,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey, width: 1),
-                    ),
-                    child: Text(matches[index]),
-                    onPressed: () async {
-                      // This fetches what will be displayed (make conditional??)
-                      // List<String> matchData = await _fetchRow(matches[index]);
-                      // This navigates to the next page
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute( builder: (context) =>  MatchListDisplay (matchData: matchData, matchID: matches[index]) )
-                      // );
-                    }),
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey, width: 1),
-                      backgroundColor: Colors.blue,
-                    ),
-                    child: Text("Blue"),
-                    onPressed: () async {
-                      // This fetches what will be displayed (make conditional??)
-                      // List<String> matchData = await _fetchRow(matches[index]);
-                      // This navigates to the next page
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute( builder: (context) =>  MatchListDisplay (matchData: matchData, matchID: matches[index]) )
-                      // );
-                    }),
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey, width: 1),
-                      backgroundColor: Colors.red,
-                    ),
-                    child: Text("Red"),
-                    onPressed: () async {
-                      // This fetches what will be displayed (make conditional??)
-                      // List<String> matchData = await _fetchRow(matches[index]);
-                      // This navigates to the next page
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute( builder: (context) =>  MatchListDisplay (matchData: matchData, matchID: matches[index]) )
-                      // );
-                    })
-              ],
-            ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [ //TODO: update placehold alliance with alliance when backend works
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey, width: 1),
+                      ),
+                      child: Text(matches[index]),
+                      onPressed: () async {
+                        // This fetches what will be displayed (make conditional??)
+                        // List<String> matchData = await _fetchRow(matches[index]);
+                        // This navigates to the next page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const AllianceData(allianceName: "placeholder alliance"),
+                          ),
+                        );
+                      }),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey, width: 1),
+                        backgroundColor: Colors.blue,
+                      ),
+                      child: Text("Blue"),
+                      onPressed: () async {
+                        // This fetches what will be displayed (make conditional??)
+                        // List<String> matchData = await _fetchRow(matches[index]);
+                        // This navigates to the next page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const AllianceData(allianceName: "placeholder alliance"),
+                          ),
+                        );
+                      }),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey, width: 1),
+                        backgroundColor: Colors.red,
+                      ),
+                      child: Text("Red"),
+                      onPressed: () async {
+                        // This fetches what will be displayed (make conditional??)
+                        // List<String> matchData = await _fetchRow(matches[index]);
+                        // This navigates to the next page
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute( builder: (context) =>  MatchListDisplay (matchData: matchData, matchID: matches[index]) )
+                        // );
+                      })
+                ],
+              ),
             ),
           );
         },

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/auto_table_page.dart';
+import 'package:frc1148_2025_scouting_app/preset_comment.dart';
 import 'color_scheme.dart';
 
-class TeamStatsList extends StatefulWidget {
-  const TeamStatsList({super.key, required this.teamName});
-  final String teamName;
+class AllianceData extends StatefulWidget {
+  const AllianceData({super.key, required this.allianceName});
+  final String allianceName;
   @override
-  State<TeamStatsList> createState() => _TeamStatsList();
+  State<AllianceData> createState() => _AllianceData();
 }
 
-class _TeamStatsList extends State<TeamStatsList> {
+class _AllianceData extends State<AllianceData> {
   Future<void> _submitSection() async {
     try {} catch (e) {
       print('Error: $e');
@@ -80,8 +82,22 @@ class _TeamStatsList extends State<TeamStatsList> {
                       //   style: TextStyle(fontSize: height * 0.0175),
                       // ),
                       child: ElevatedButton(
-                        onPressed: () async {},
-                        child: const Text("Auto Table", style: TextStyle(color: Colors.lightBlue,decoration: TextDecoration.underline, decorationColor: Colors.lightBlue)),
+                        onPressed: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AutoTablePage(
+                                  onThemeChanged: (ThemeMode mode) {
+                                setState(() {});
+                              }),
+                            ),
+                          );
+                        },
+                        child: const Text("Auto Table",
+                            style: TextStyle(
+                                color: Colors.lightBlue,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.lightBlue)),
                       ),
                     ),
                     Expanded(
@@ -90,8 +106,22 @@ class _TeamStatsList extends State<TeamStatsList> {
                       //   style: TextStyle(fontSize: height * 0.0175),
                       // ),
                       child: ElevatedButton(
-                        onPressed: () async {},
-                        child: const Text("Preset Comments", style: TextStyle(color: Colors.lightBlue,decoration:TextDecoration.underline, decorationColor: Colors.lightBlue)),
+                        onPressed: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PresetComment(
+                                  onThemeChanged: (ThemeMode mode) {
+                                setState(() {});
+                              }),
+                            ),
+                          );
+                        },
+                        child: const Text("Preset Comments",
+                            style: TextStyle(
+                                color: Colors.lightBlue,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.lightBlue)),
                       ),
                     ),
                   ],
@@ -113,7 +143,7 @@ class _TeamStatsList extends State<TeamStatsList> {
         title: Column(
           children: [
             const Text("Alliance Info"),
-            Text(widget.teamName),
+            Text(widget.allianceName),
           ],
         ),
       ),
