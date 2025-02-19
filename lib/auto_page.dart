@@ -73,7 +73,7 @@ class _AutoPageState extends State<AutoPage> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double screenWidth = MediaQuery.of(context).size.width;
     const double screenPadding = 12;
-    const double imageWidthToHeight = 13 / 14;
+    const double imageWidthToHeight = 1;
     final double fieldWidth = min(screenWidth - 2 * screenPadding, 400);
     final double fieldHeight = fieldWidth / imageWidthToHeight;
     // const AssetImage bg = AssetImage('assets/reefscape_blue_field.jpg');
@@ -227,28 +227,31 @@ class _AutoPageState extends State<AutoPage> {
                                 ])))
                       ])),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      SizedBox(width: screenWidth * 0.03),
                       SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.375,
+                          width: screenWidth * 0.375,
+                          height: screenWidth,
                           child: Image(
                             //reef photo
                             image: reefImg,
                             fit: BoxFit.contain,
                           )),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.05,
+                        width: screenWidth * 0.10,
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Padding(
                             padding: EdgeInsets.all(
-                                MediaQuery.of(context).size.width * 0.01),
+                                screenWidth * 0.03),
                             child: Text("L4",
                                 style: TextStyle(
                                     fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.1)),
+                                        screenWidth *
+                                            0.05)),
                           ),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -258,9 +261,8 @@ class _AutoPageState extends State<AutoPage> {
                                       Theme.of(context).colorScheme.secondary,
                                   // minimumSize: const Size.square(70),
                                   minimumSize: Size(
-                                      MediaQuery.of(context).size.width * 0.5,
-                                      MediaQuery.of(context).size.height *
-                                          0.15),
+                                      screenWidth * 0.30,
+                                      screenWidth * 0.20),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
                               onPressed: () =>
@@ -268,16 +270,16 @@ class _AutoPageState extends State<AutoPage> {
                               child: Text('${l4Counter.value}',
                                   style: TextStyle(
                                       fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.15))),
+                                          screenWidth *
+                                              0.10))),
                           Padding(
                             padding: EdgeInsets.all(
-                                MediaQuery.of(context).size.width * 0.01),
+                                screenWidth * 0.05),
                             child: Text("L2 & L3",
                                 style: TextStyle(
                                     fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.1)),
+                                        screenWidth *
+                                            0.05)),
                           ),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -287,9 +289,8 @@ class _AutoPageState extends State<AutoPage> {
                                       Theme.of(context).colorScheme.secondary,
                                   // minimumSize: const Size.square(70),
                                   minimumSize: Size(
-                                      MediaQuery.of(context).size.width * 0.5,
-                                      MediaQuery.of(context).size.height *
-                                          0.15),
+                                      screenWidth * 0.30,
+                                      screenWidth * 0.20),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
                               onPressed: () =>
@@ -297,16 +298,16 @@ class _AutoPageState extends State<AutoPage> {
                               child: Text('${l2l3Counter.value}',
                                   style: TextStyle(
                                       fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.15))),
+                                          screenWidth *
+                                              0.10))),
                           Padding(
                             padding: EdgeInsets.all(
-                                MediaQuery.of(context).size.width * 0.01),
+                                screenWidth * 0.05),
                             child: Text("L1",
                                 style: TextStyle(
                                     fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.1)),
+                                        screenWidth *
+                                            0.05)),
                           ),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -315,9 +316,8 @@ class _AutoPageState extends State<AutoPage> {
                                   foregroundColor:
                                       Theme.of(context).colorScheme.secondary,
                                   minimumSize: Size(
-                                      MediaQuery.of(context).size.width * 0.5,
-                                      MediaQuery.of(context).size.height *
-                                          0.15),
+                                      screenWidth * 0.30,
+                                      screenWidth * 0.20),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
                               onPressed: () =>
@@ -325,11 +325,11 @@ class _AutoPageState extends State<AutoPage> {
                               child: Text('${l1Counter.value}',
                                   style: TextStyle(
                                       fontSize:
-                                          MediaQuery.of(context).size.width *
-                                              0.15))),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.075,
-                          ),
+                                          screenWidth *
+                                              0.10))),
+                          // SizedBox(
+                          //   height: MediaQuery.of(context).size.height * 0.075,
+                          // ),
                         ],
                       ),
                     ],
@@ -342,11 +342,11 @@ class _AutoPageState extends State<AutoPage> {
                           Padding(
                             padding: EdgeInsets.only(
                                 bottom:
-                                    MediaQuery.of(context).size.width * 0.0125),
+                                    screenWidth * 0.0125),
                             child: Text("Net",
                                 style: TextStyle(
                                     fontSize:
-                                        MediaQuery.of(context).size.width *
+                                        screenWidth *
                                             0.05)),
                           ),
                           ElevatedButton(
@@ -355,11 +355,9 @@ class _AutoPageState extends State<AutoPage> {
                                       Theme.of(context).colorScheme.primary,
                                   foregroundColor:
                                       Theme.of(context).colorScheme.secondary,
-                                  minimumSize: Size(
-                                      MediaQuery.of(context).size.height *
-                                          0.125,
-                                      MediaQuery.of(context).size.height *
-                                          0.125),
+                                  minimumSize: Size.square(
+                                      screenWidth *
+                                          0.15),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
                               onPressed: () =>
@@ -367,7 +365,7 @@ class _AutoPageState extends State<AutoPage> {
                               child: Text('${netCounter.value}',
                                   style: TextStyle(
                                       fontSize:
-                                          MediaQuery.of(context).size.width *
+                                          screenWidth *
                                               0.1))),
                         ],
                       ),
@@ -376,11 +374,11 @@ class _AutoPageState extends State<AutoPage> {
                           Padding(
                             padding: EdgeInsets.only(
                                 bottom:
-                                    MediaQuery.of(context).size.width * 0.0125),
+                                    screenWidth * 0.0125),
                             child: Text("Processor",
                                 style: TextStyle(
                                     fontSize:
-                                        MediaQuery.of(context).size.width *
+                                        screenWidth *
                                             0.05)),
                           ),
                           ElevatedButton(
@@ -389,11 +387,9 @@ class _AutoPageState extends State<AutoPage> {
                                       Theme.of(context).colorScheme.primary,
                                   foregroundColor:
                                       Theme.of(context).colorScheme.secondary,
-                                  minimumSize: Size(
-                                      MediaQuery.of(context).size.height *
-                                          0.125,
-                                      MediaQuery.of(context).size.height *
-                                          0.125),
+                                  minimumSize: Size.square(
+                                      screenWidth *
+                                          0.15,),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
                               onPressed: () =>
@@ -401,7 +397,7 @@ class _AutoPageState extends State<AutoPage> {
                               child: Text('${processorCounter.value}',
                                   style: TextStyle(
                                       fontSize:
-                                          MediaQuery.of(context).size.width *
+                                          screenWidth *
                                               0.1))),
                         ],
                       ),
@@ -410,11 +406,11 @@ class _AutoPageState extends State<AutoPage> {
                           Padding(
                             padding: EdgeInsets.only(
                                 bottom:
-                                    MediaQuery.of(context).size.width * 0.0125),
+                                    screenWidth * 0.0125),
                             child: Text("+/-",
                                 style: TextStyle(
                                     fontSize:
-                                        MediaQuery.of(context).size.width *
+                                        screenWidth *
                                             0.075)),
                           ),
                           ElevatedButton(
@@ -424,7 +420,7 @@ class _AutoPageState extends State<AutoPage> {
                                   foregroundColor:
                                       Theme.of(context).colorScheme.primary,
                                   minimumSize: Size.square(
-                                    MediaQuery.of(context).size.height * 0.1,
+                                    screenWidth * 0.15,
                                   ),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5))),
