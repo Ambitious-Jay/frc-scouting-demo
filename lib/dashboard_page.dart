@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
@@ -59,7 +60,17 @@ class DashboardPage extends StatelessWidget {
               width: double.infinity,
               margin: const EdgeInsets.all(5),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AutoPage(
+                        teamName: "1148",
+                        id: "Andrew"
+                      ),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
@@ -67,7 +78,7 @@ class DashboardPage extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Button 1',
+                  'Next Match',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -81,7 +92,17 @@ class DashboardPage extends StatelessWidget {
               width: double.infinity,
               margin: const EdgeInsets.all(5),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AutoPage(
+                        teamName: "1148",
+                        id: "Andrew"
+                      ),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
@@ -89,7 +110,7 @@ class DashboardPage extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Button 2',
+                  'Info',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
