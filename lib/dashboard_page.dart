@@ -98,11 +98,7 @@ class DashboardPage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => InfoPage(
-                        onThemeChanged: (ThemeMode mode) {
-                          setState(() {
-                            themeMode = mode;
-                          });
-                        },
+                        onThemeChanged: onThemeChanged,
                         webSocketService: webSocketService,
                       ),
                     ),
