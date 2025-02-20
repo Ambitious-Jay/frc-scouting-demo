@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/endgame.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 
@@ -317,7 +318,15 @@ class _ObjectivePageState extends State<ObjectivePage> {
           iconColor: Theme.of(context).colorScheme.secondary,
         ),
         iconAlignment: IconAlignment.end,
-        onPressed: _saveDataToDatabase,
+        onPressed: () {
+          _saveDataToDatabase;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Endgame(teamName: "fake team name",), // placeholder until backend works
+            ),
+          );
+        },
         icon: const Icon(Icons.arrow_forward_rounded),
         label: const Text('Submit'),
       ),
