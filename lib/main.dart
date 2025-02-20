@@ -81,28 +81,13 @@ class _MainAppState extends State<MyApp> {
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      home: _isLoggedIn
-          ? ObjectivePage(
-              channel: _webSocketService.channel,
+      home: DashboardPage(channel: _webSocketService.channel,
               onThemeChanged: (ThemeMode mode) {
                 setState(() {
                   themeMode = mode;
                 });
               },
-              webSocketService: _webSocketService,
-            )
-          : ObjectivePage(
-              channel: _webSocketService.channel,
-              onThemeChanged: (ThemeMode mode) {
-                setState(() {
-                  themeMode = mode;
-                });
-              },
-              webSocketService: _webSocketService,
-            ),
-      // home: FlexibleScatterPlot(
-      //   teamData: teamData,
-      // ),
+              webSocketService: _webSocketService,)
     );
   }
 }

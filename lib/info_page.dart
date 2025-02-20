@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
-import 'package:frc1148_2025_scouting_app/info_page.dart';
+import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
+import 'package:frc1148_2025_scouting_app/match_list.dart';
+import 'package:frc1148_2025_scouting_app/team_search_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
@@ -11,11 +13,11 @@ import 'login_page.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 
-class DashboardPage extends StatelessWidget {
+class InfoPage extends StatelessWidget {
   final WebSocketService webSocketService;
   final Function(ThemeMode) onThemeChanged;
 
-  const DashboardPage({
+  const InfoPage({
     Key? key,
     required this.webSocketService,
     required this.onThemeChanged,
@@ -29,7 +31,7 @@ class DashboardPage extends StatelessWidget {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => LoginPage(
+        builder: (_) => DashboardPage(
           webSocketService: webSocketService,
           onThemeChanged: onThemeChanged,
         ),
@@ -65,10 +67,7 @@ class DashboardPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AutoPage(
-                        teamName: "1148",
-                        id: "Andrew"
-                      ),
+                      builder: (context) => const MatchList(),
                     ),
                   );
                 },
@@ -79,7 +78,7 @@ class DashboardPage extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Next Match',
+                  'Match List',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -97,10 +96,7 @@ class DashboardPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => InfoPage(
-                        onThemeChanged: onThemeChanged,
-                        webSocketService: webSocketService,
-                      ),
+                      builder: (context) => TeamSearchPage(),
                     ),
                   );
                 },
@@ -111,7 +107,7 @@ class DashboardPage extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Info',
+                  'Team list',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
