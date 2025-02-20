@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/team_search_page.dart';
+import 'package:frc1148_2025_scouting_app/match_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/scatter_plot.dart';
@@ -112,6 +113,7 @@ class _MainAppState extends State<MyApp> {
       //   teamData: teamData,
       // ),
       // home: TeamSearchPage(),
+      // home: MatchList(),
     );
   }
 }
