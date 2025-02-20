@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/lead_scout_notes_vis_page.dart';
 
 class TeamSearchPage extends StatefulWidget {
   @override
@@ -38,6 +39,12 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
 
   void onTeamTap(String teamName) {
     // direct to page for team
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LeadScoutNotesVisPage(teamName: teamName.substring(5)),
+      ),
+    );
   }
 
   @override
