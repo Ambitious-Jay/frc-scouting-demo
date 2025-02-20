@@ -37,289 +37,141 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.teamName),
-        ),
-        body: Center(
-          child: ListView(
+  appBar: AppBar(
+    backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    title: Text(widget.teamName),
+  ),
+  body: SingleChildScrollView(  // Wrap the entire body in a scroll view
+    child: Column(
+      children: [
+        // First Row
+        SizedBox(
+          height: height * 0.3,
+          width: width,
+          child: Column(
             children: [
-              // First Row
-              SizedBox(
-                height: height * 0.3,
+              Container(
+                height: height * 0.05,
                 width: width,
-                child: Column(
-                  children: [
-                    Container(
-                      height: height * 0.05,
-                      width: width,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Compatibility',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                CombatabilityOne = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                CombatabilityTwo = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                CombatabilityThree = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                alignment: Alignment.center,
+                child: const Text(
+                  'Compatibility',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-
-              const Divider(),
-
-              // Second Row
-              SizedBox(
-                height: height * 0.3,
-                width: width,
-                child: Column(
-                  children: [
-                    Container(
-                      height: height * 0.05,
-                      width: width,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Notable Feats',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
                       ),
+                      minLines: 1,
+                      maxLines: null,
+                      onChanged: (String value) {
+                        setState(() {
+                          CombatabilityThree = value;
+                        });
+                      },
                     ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                FeatsOne = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                FeatsTwo = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                FeatsThree = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const Divider(),
-
-              // Third Row
-              SizedBox(
-                height: height * 0.3,
-                width: width,
-                child: Column(
-                  children: [
-                    Container(
-                      height: height * 0.05,
-                      width: width,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Human Player Net ACC',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                HPlayerOne = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                HPlayerTwo = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: width / 3,
-                          height: height * 0.15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            minLines: 1, // Sets the initial minimum height
-                            maxLines: null,
-                            onChanged: (String value) {
-                              setState(() {
-                                HPlayerThree = value;
-                              });
-                              // print("Current value: $value");
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Container(
-              //   width: width,
-              //   height: height * 1 / 13,
-              //   //color Colors.amber[300],
-              //   alignment: AlignmentDirectional.center,
-              // ),
-              // ElevatedButton(
-              //   onPressed: () async {
-              //     // await _submitSection();
-              //     // setState(() {
-              //     //   Navigator.push(
-              //     //     context,
-              //     //     MaterialPageRoute
-              //     //     (
-              //     //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
-              //     //     })
-              //     //     )
-              //     //   );
-              //     // });
-              //   },
-              //   child: const Text("Next",
-              //       style: TextStyle(color: colors.myOnPrimary)),
-              // )
+                  ),
             ],
           ),
         ),
-        bottomNavigationBar: ElevatedButton(
-          onPressed: () async {
-            // await _submitSection();
-            // setState(() {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute
-            //     (
-            //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
-            //     })
-            //     )
-            //   );
-            // });
-          },
-          child:
-              const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
-        ));
+        const Divider(),
+
+        // Second Row
+        SizedBox(
+          height: height * 0.3,
+          width: width,
+          child: Column(
+            children: [
+              Container(
+                height: height * 0.05,
+                width: width,
+                alignment: Alignment.center,
+                child: const Text(
+                  'Notable Feats',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      minLines: 1,
+                      maxLines: null,
+                      onChanged: (String value) {
+                        setState(() {
+                          CombatabilityThree = value;
+                        });
+                      },
+                    ),
+                  ),
+            ],
+          ),
+        ),
+        const Divider(),
+
+        // Third Row
+        SizedBox(
+          height: height * 0.3,
+          width: width,
+          child: Column(
+            children: [
+              Container(
+                height: height * 0.05,
+                width: width,
+                alignment: Alignment.center,
+                child: const Text(
+                  'Human Player Net ACC',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      minLines: 1,
+                      maxLines: null,
+                      onChanged: (String value) {
+                        setState(() {
+                          CombatabilityThree = value;
+                        });
+                      },
+                    ),
+                  ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  ),
+  bottomNavigationBar: ElevatedButton(
+    onPressed: () async {
+      // await _submitSection();
+      // setState(() {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
+      //     })
+      //     )
+      //   );
+      // });
+    },
+    child: const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
+  ),
+);
+
   }
 }
