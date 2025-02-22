@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:frc1148_2025_scouting_app/info_page.dart';
+import 'package:frc1148_2025_scouting_app/pit_scouting_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
@@ -40,7 +41,9 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
+    final TextEditingController _teamController = TextEditingController();
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -55,69 +58,102 @@ class DashboardPage extends StatelessWidget {
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(5),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AutoPage(
-                        teamName: "1148",
-                        id: "Andrew"
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Decrease the rounding
-                  ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const AutoPage(teamName: "1148", id: "Andrew"),
                 ),
-                child: const Text(
-                  'Next Match',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              padding: EdgeInsets.symmetric(vertical: height * 0.02),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
+            child: const Text(
+              'Next Match',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
           ),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(5),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => InfoPage(
-                        onThemeChanged: onThemeChanged,
-                        webSocketService: webSocketService,
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Decrease the rounding
+          SizedBox(height: height/16),
+          TextField(
+            controller: _teamController,
+            decoration: InputDecoration(
+              labelText: 'Enter Team Number',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              contentPadding: EdgeInsets.symmetric(
+                  horizontal: width * 0.03, vertical: height * 0.015),
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              String teamName = _teamController.text.trim();
+              if (teamName.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PitScouting(teamName: teamName),
                   ),
-                ),
-                child: const Text(
-                  'Info',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a team number.')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              padding: EdgeInsets.symmetric(vertical: height * 0.02),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
+            ),
+            child: const Text(
+              'Pit Scouting',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(height: height/16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InfoPage(
+                    onThemeChanged: onThemeChanged,
+                    webSocketService: webSocketService,
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              padding: EdgeInsets.symmetric(vertical: height * 0.02),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Info',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         ],
