@@ -180,264 +180,254 @@ class _AutoPageState extends State<AutoPage> {
                                           onChanged: (bool? value) => {
                                                 setState(() {
                                                   inRightZone = value!;
-                                                })})
-                                      ]),
-                                ])),
-                        Positioned(
-                            left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
-                            top: fieldHeight / 4,
-                            child: SizedBox(
+                                                })
+                                              })
+                                    ]),
+                              ])),
+                      Positioned(
+                          left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
+                          top: fieldHeight / 4,
+                          child: SizedBox(
                               width: 80,
                               height: fieldHeight / 3 * 2,
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                      title: const Text(""),
-                                      leading: Radio<String>(
-                                          value: "Option one",
-                                          groupValue: startPos,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              startPos = value;
-                                            });
-                                          })),
-                                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
-                                  ListTile(
-                                      title: const Text(""),
-                                      leading: Radio<String>(
-                                          value: "Option two",
-                                          groupValue: startPos,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              startPos = value;
-                                            });
-                                          })),
-                                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
-                                  ListTile(
-                                      title: const Text(""),
-                                      leading: Radio<String>(
-                                          value: "Option three",
-                                          groupValue: startPos,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              startPos = value;
-                                            });
-                                          })),
-                                ])))
-                      ])),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(width: screenWidth * 0.03),
-                      SizedBox(
-                          width: screenWidth * 0.375,
-                          height: screenWidth,
-                          child: Image(
-                            //reef photo
-                            image: reefImg,
-                            fit: BoxFit.contain,
-                          )),
-                      SizedBox(
-                        width: screenWidth * 0.10,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(
-                                screenWidth * 0.03),
-                            child: Text("L4",
-                                style: TextStyle(
-                                    fontSize:
-                                        screenWidth *
-                                            0.05)),
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  // minimumSize: const Size.square(70),
-                                  minimumSize: Size(
-                                      screenWidth * 0.30,
-                                      screenWidth * 0.20),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5))),
-                              onPressed: () =>
-                                  updateCounter(l4Counter, doIncrement),
-                              child: Text('${l4Counter.value}',
-                                  style: TextStyle(
-                                      fontSize:
-                                          screenWidth *
-                                              0.10))),
-                          Padding(
-                            padding: EdgeInsets.all(
-                                screenWidth * 0.05),
-                            child: Text("L2 & L3",
-                                style: TextStyle(
-                                    fontSize:
-                                        screenWidth *
-                                            0.05)),
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  // minimumSize: const Size.square(70),
-                                  minimumSize: Size(
-                                      screenWidth * 0.30,
-                                      screenWidth * 0.20),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5))),
-                              onPressed: () =>
-                                  updateCounter(l2l3Counter, doIncrement),
-                              child: Text('${l2l3Counter.value}',
-                                  style: TextStyle(
-                                      fontSize:
-                                          screenWidth *
-                                              0.10))),
-                          Padding(
-                            padding: EdgeInsets.all(
-                                screenWidth * 0.05),
-                            child: Text("L1",
-                                style: TextStyle(
-                                    fontSize:
-                                        screenWidth *
-                                            0.05)),
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  minimumSize: Size(
-                                      screenWidth * 0.30,
-                                      screenWidth * 0.20),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5))),
-                              onPressed: () =>
-                                  updateCounter(l1Counter, doIncrement),
-                              child: Text('${l1Counter.value}',
-                                  style: TextStyle(
-                                      fontSize:
-                                          screenWidth *
-                                              0.10))),
-                          // SizedBox(
-                          //   height: MediaQuery.of(context).size.height * 0.075,
-                          // ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                bottom:
-                                    screenWidth * 0.0125),
-                            child: Text("Net",
-                                style: TextStyle(
-                                    fontSize:
-                                        screenWidth *
-                                            0.05)),
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  minimumSize: Size.square(
-                                      screenWidth *
-                                          0.15),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5))),
-                              onPressed: () =>
-                                  updateCounter(netCounter, doIncrement),
-                              child: Text('${netCounter.value}',
-                                  style: TextStyle(
-                                      fontSize:
-                                          screenWidth *
-                                              0.1))),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                bottom:
-                                    screenWidth * 0.0125),
-                            child: Text("Processor",
-                                style: TextStyle(
-                                    fontSize:
-                                        screenWidth *
-                                            0.05)),
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  minimumSize: Size.square(
-                                      screenWidth *
-                                          0.15,),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5))),
-                              onPressed: () =>
-                                  updateCounter(processorCounter, doIncrement),
-                              child: Text('${processorCounter.value}',
-                                  style: TextStyle(
-                                      fontSize:
-                                          screenWidth *
-                                              0.1))),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                bottom:
-                                    screenWidth * 0.0125),
-                            child: Text("+/-",
-                                style: TextStyle(
-                                    fontSize:
-                                        screenWidth *
-                                            0.075)),
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  minimumSize: Size.square(
-                                    screenWidth * 0.15,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5))),
-                              onPressed: () {
-                                setState(() {
-                                  doIncrement = !doIncrement;
-                                });
-                              },
-                              child: signIcon),
-                        ],
-                      ),
-                    ],
-                  )
-                ]
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ListTile(
+                                        title: const Text(""),
+                                        leading: Radio<String>(
+                                            value: "Option one",
+                                            groupValue: startPos,
+                                            onChanged: (String? value) {
+                                              setState(() {
+                                                startPos = value;
+                                              });
+                                            })),
+                                    SizedBox(
+                                        height: max(0, fieldHeight / 4 - 75)),
+                                    ListTile(
+                                        title: const Text(""),
+                                        leading: Radio<String>(
+                                            value: "Option two",
+                                            groupValue: startPos,
+                                            onChanged: (String? value) {
+                                              setState(() {
+                                                startPos = value;
+                                              });
+                                            })),
+                                    SizedBox(
+                                        height: max(0, fieldHeight / 4 - 75)),
+                                    ListTile(
+                                        title: const Text(""),
+                                        leading: Radio<String>(
+                                            value: "Option three",
+                                            groupValue: startPos,
+                                            onChanged: (String? value) {
+                                              setState(() {
+                                                startPos = value;
+                                              });
+                                            })),
+                                  ])))
+                    ])),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(width: screenWidth * 0.03),
+                    SizedBox(
+                        width: screenWidth * 0.375,
+                        height: screenWidth,
+                        child: Image(
+                          //reef photo
+                          image: reefImg,
+                          fit: BoxFit.contain,
+                        )),
+                    SizedBox(
+                      width: screenWidth * 0.10,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.all(screenWidth * 0.03),
+                          child: Text("L4",
+                              style: TextStyle(fontSize: screenWidth * 0.05)),
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                // minimumSize: const Size.square(70),
+                                minimumSize: Size(
+                                    screenWidth * 0.30, screenWidth * 0.20),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                            onPressed: () =>
+                                updateCounter(l4Counter, doIncrement),
+                            child: Text('${l4Counter.value}',
+                                style:
+                                    TextStyle(fontSize: screenWidth * 0.10))),
+                        Padding(
+                          padding: EdgeInsets.all(screenWidth * 0.05),
+                          child: Text("L2 & L3",
+                              style: TextStyle(fontSize: screenWidth * 0.05)),
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                // minimumSize: const Size.square(70),
+                                minimumSize: Size(
+                                    screenWidth * 0.30, screenWidth * 0.20),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                            onPressed: () =>
+                                updateCounter(l2l3Counter, doIncrement),
+                            child: Text('${l2l3Counter.value}',
+                                style:
+                                    TextStyle(fontSize: screenWidth * 0.10))),
+                        Padding(
+                          padding: EdgeInsets.all(screenWidth * 0.05),
+                          child: Text("L1",
+                              style: TextStyle(fontSize: screenWidth * 0.05)),
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                minimumSize: Size(
+                                    screenWidth * 0.30, screenWidth * 0.20),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                            onPressed: () =>
+                                updateCounter(l1Counter, doIncrement),
+                            child: Text('${l1Counter.value}',
+                                style:
+                                    TextStyle(fontSize: screenWidth * 0.10))),
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 0.075,
+                        // ),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Padding(
+                          padding:
+                              EdgeInsets.only(bottom: screenWidth * 0.0125),
+                          child: Text("Net",
+                              style: TextStyle(fontSize: screenWidth * 0.05)),
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                minimumSize: Size.square(screenWidth * 0.15),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                            onPressed: () =>
+                                updateCounter(netCounter, doIncrement),
+                            child: Text('${netCounter.value}',
+                                style: TextStyle(fontSize: screenWidth * 0.1))),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Padding(
+                          padding:
+                              EdgeInsets.only(bottom: screenWidth * 0.0125),
+                          child: Text("Processor",
+                              style: TextStyle(fontSize: screenWidth * 0.05)),
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                minimumSize: Size.square(
+                                  screenWidth * 0.15,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                            onPressed: () =>
+                                updateCounter(processorCounter, doIncrement),
+                            child: Text('${processorCounter.value}',
+                                style: TextStyle(fontSize: screenWidth * 0.1))),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Padding(
+                          padding:
+                              EdgeInsets.only(bottom: screenWidth * 0.0125),
+                          child: Text("+/-",
+                              style: TextStyle(fontSize: screenWidth * 0.075)),
+                        ),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                minimumSize: Size.square(
+                                  screenWidth * 0.15,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5))),
+                            onPressed: () {
+                              setState(() {
+                                doIncrement = !doIncrement;
+                              });
+                            },
+                            child: signIcon),
+                      ],
+                    ),
+                  ],
                 )
-                )
-                ));
+              ]))),
+      bottomNavigationBar: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+            // shape: RectangleBorder(
+            //   borderRadius: BorderRadius.zero, // Makes it completely rectangular
+            // ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            foregroundColor: Theme.of(context).colorScheme.secondary,
+            iconColor: Theme.of(context).colorScheme.secondary),
+        iconAlignment: IconAlignment.end,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ObjectivePage(
+                onThemeChanged: (ThemeMode mode) {
+                  setState(() {
+                    themeMode = mode;
+                  });
+                },
+                channel: WebSocketService().channel,
+                webSocketService: WebSocketService(),
+              ),
+            ),
+          );
+        },
+        icon: const Icon(Icons.arrow_forward_rounded),
+        label: const Text('Submit'),
+      ),
+    );
   }
 }
