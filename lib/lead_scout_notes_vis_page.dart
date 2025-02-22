@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/auto_table_page.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/preset_comment.dart';
 import 'package:frc1148_2025_scouting_app/scroll_controller.dart';
 
 Map<String, int> stored = {
@@ -132,7 +134,17 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                       //   style: TextStyle(fontSize: height * 0.0175),
                       // ),
                       child: ElevatedButton(
-                        onPressed: () async {},
+                        onPressed: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AutoTablePage(
+                                  onThemeChanged: (ThemeMode mode) {
+                                setState(() {});
+                              }),
+                            ),
+                          );
+                        },
                         child: const Text("Auto Table",
                             style: TextStyle(
                                 color: Colors.lightBlue,
@@ -146,7 +158,17 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                       //   style: TextStyle(fontSize: height * 0.0175),
                       // ),
                       child: ElevatedButton(
-                        onPressed: () async {},
+                        onPressed: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PresetComment(
+                                  onThemeChanged: (ThemeMode mode) {
+                                setState(() {});
+                              }),
+                            ),
+                          );
+                        },
                         child: const Text("Preset Comments",
                             style: TextStyle(
                                 color: Colors.lightBlue,

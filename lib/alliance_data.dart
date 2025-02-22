@@ -3,6 +3,18 @@ import 'package:frc1148_2025_scouting_app/auto_table_page.dart';
 import 'package:frc1148_2025_scouting_app/preset_comment.dart';
 import 'color_scheme.dart';
 
+Map<String, int> stored = {
+  'Coral Per Match': 0,
+  'L4 OPR Count': 1,
+  'L3/L2 OPR Count': 2,
+  'L1 OPR Count': 3,
+  'Algae Per Match': 4,
+  'Net OPR Count': 5,
+  'Processor OPR Count': 6,
+};
+String deepCage = 'TRUE';
+String ShallowCage = 'False';
+
 class AllianceData extends StatefulWidget {
   const AllianceData({super.key, required this.allianceName});
   final String allianceName;
@@ -28,7 +40,7 @@ class _AllianceData extends State<AllianceData> {
         ),
         const SizedBox(height: 4),
         Text(
-          "NUM",
+          stored[label].toString(),
           style: TextStyle(
             fontSize: height * 0.02,
             color: Colors.red,
@@ -39,7 +51,7 @@ class _AllianceData extends State<AllianceData> {
   }
 
   Widget buildStatsContainer(double width, double height) {
-    return Container(
+     return Container(
       width: width,
       height: height * 1 / 3,
       alignment: AlignmentDirectional.center,
@@ -51,9 +63,9 @@ class _AllianceData extends State<AllianceData> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(child: buildStatItem("Coral Per Match", height)),
-                Expanded(child: buildStatItem("High OPR Count", height)),
-                Expanded(child: buildStatItem("Middle OPR Count", height)),
-                Expanded(child: buildStatItem("Low OPR Count", height)),
+                Expanded(child: buildStatItem("L4 OPR Count", height)),
+                Expanded(child: buildStatItem("L3/L2 OPR Count", height)),
+                Expanded(child: buildStatItem("L1 OPR Count", height)),
               ],
             ),
           ),
@@ -71,8 +83,42 @@ class _AllianceData extends State<AllianceData> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(child: buildStatItem("Deep Cage %", height)),
-                Expanded(child: buildStatItem("Shallow Cage %", height)),
+                Expanded(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Can Deep Cage",
+                      style: TextStyle(fontSize: height * 0.0175),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      deepCage,
+                      style: TextStyle(
+                        fontSize: height * 0.02,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                )),
+                Expanded(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Can Shallow Cage",
+                      style: TextStyle(fontSize: height * 0.0175),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      ShallowCage,
+                      style: TextStyle(
+                        fontSize: height * 0.02,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                )),
                 Expanded(
                     child: Column(
                   children: [
