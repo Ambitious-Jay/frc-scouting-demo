@@ -114,7 +114,7 @@ class _MainAppState extends State<MyApp> {
       // home: FlexibleScatterPlot(
       //   teamData: teamData,
       // ),
-      home: PitScouting(teamName: 'meow'),
+      home: LeadScoutNotesVisPage(teamName: 'meow'),
     );
   }
 }

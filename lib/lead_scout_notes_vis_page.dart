@@ -18,6 +18,30 @@ String Combatability = 'is it?';
 String Feats = 'kachow';
 String HPlayer = 'hallo';
 
+ Map<String,String> entries = {
+    'Robot weight (lbs)': '',
+    'Type of drive':'',
+    'Type of motor': '',
+    'Number of motors': '',
+    'Bumper quality': '',
+    // ---
+    'Can pick up coral from Coral Station': '',
+    'Can pick up coral from ground': '',
+    'Can pick up algae from ground (not just pushing)': '',
+    'Can remove algae from reef (controlled, not just knocking off)': '',
+    // ---
+    'Can score coral onto L1':' ',
+    'Can score coral onto L2': '',
+    'Can score coral onto L3': '',
+    'Can score coral onto L4': '',
+    'Can score in processor': '',
+    'Can score into net': '',
+    'Type of Climb': '',
+    // ---
+    'Coral scored during Autonomous': '',
+    'Can robot move off of starting line during Autonomous': '',
+ };
+
 final ScrollController compatibilityController = ScrollController();
 final ScrollController featsController = ScrollController();
 final ScrollController hPlayerController = ScrollController();
@@ -43,7 +67,9 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
         ),
         const SizedBox(height: 4),
         Text(
-          stored[label].toString(),
+          stored.containsKey(label)
+            ? stored[label].toString()
+            : entries[label].toString(),
           style: TextStyle(
             fontSize: height * 0.02,
             color: Colors.red,
@@ -265,6 +291,10 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                   ),
                 ],
               ),
+              
+              const Divider(),
+
+
 
               // Container(
               //   width: width,
