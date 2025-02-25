@@ -177,6 +177,7 @@ class _LoginPageState extends State<LoginPage>
                 builder: (_) => DashboardPage(
                   webSocketService: widget.webSocketService,
                   onThemeChanged: widget.onThemeChanged,
+                  teamName: '',
                 ),
               ),
             );

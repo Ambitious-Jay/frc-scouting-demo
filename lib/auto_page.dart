@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class IntegerWrapper {
   int value = 0;
@@ -8,16 +10,20 @@ class IntegerWrapper {
 }
 
 class AutoPage extends StatefulWidget {
-  const AutoPage(
-      {Key? key,
-      required this.teamName,
-      // required this.onThemeChanged,
-      required this.id})
-      : super(key: key);
+  const AutoPage({
+    Key? key,
+    required this.teamName,
+    required this.id,
+    required this.channel,
+    required this.onThemeChanged,
+    required this.webSocketService,
+  }) : super(key: key);
 
-  // final Function(ThemeMode) onThemeChanged;
   final String teamName;
   final String id;
+  final WebSocketChannel channel;
+  final Function(ThemeMode) onThemeChanged;
+  final WebSocketService webSocketService;
 
   @override
   _AutoPageState createState() => _AutoPageState();
@@ -57,15 +63,50 @@ class _AutoPageState extends State<AutoPage> {
   }
 
   Icon get signIcon {
-    IconData iconData;
-    if (doIncrement) {
-      iconData = Icons.add;
-    } else {
-      iconData = Icons.remove;
-    }
+    IconData iconData = doIncrement ? Icons.add : Icons.remove;
     return Icon(iconData,
         color: Theme.of(context).colorScheme.primary,
         size: MediaQuery.of(context).size.width * 0.1);
+  }
+
+  /// Submits the auto scouting data to the SQL server.
+  /// Builds an INSERT statement targeting the AutoScoutingData table.
+  Future<void> _submitAutoScoutingData() async {
+    final sql = '''
+      INSERT INTO AutoScoutingData (
+        team_number, watcher_id, l4_count, l2_l3_count, l1_count, net_count, processor_count,
+        in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
+      )
+      VALUES (
+        '${widget.teamName}',
+        '${widget.id}',
+        ${l4Counter.value},
+        ${l2l3Counter.value},
+        ${l1Counter.value},
+        ${netCounter.value},
+        ${processorCounter.value},
+        ${inCenterZone ? 1 : 0},
+        ${inLeftZone ? 1 : 0},
+        ${inRightZone ? 1 : 0},
+        ${isBlue ? 1 : 0},
+        ${fieldFlipped ? 1 : 0}
+      )
+    ''';
+
+    final cmd = {
+      "type": "query",
+      "text": sql,
+    };
+
+    final encodedJson = jsonEncode(cmd);
+    final prefix = '${encodedJson.length}\r\n';
+
+    try {
+      widget.channel.sink.add(prefix + encodedJson);
+      debugPrint('Successfully sent auto scouting INSERT command: $sql');
+    } catch (e, st) {
+      debugPrint('Error sending auto scouting data to DB: $e\n$st');
+    }
   }
 
   @override
@@ -76,7 +117,6 @@ class _AutoPageState extends State<AutoPage> {
     const double imageWidthToHeight = 13 / 14;
     final double fieldWidth = min(screenWidth - 2 * screenPadding, 400);
     final double fieldHeight = fieldWidth / imageWidthToHeight;
-    // const AssetImage bg = AssetImage('assets/reefscape_blue_field.jpg');
     AssetImage bg = isBlue
         ? const AssetImage('assets/reefscape_blue_field.jpg')
         : const AssetImage('assets/reefscape_red_field.jpg');
@@ -86,9 +126,7 @@ class _AutoPageState extends State<AutoPage> {
         backgroundColor: colorScheme.primary,
         title: Column(
           children: [
-            const Text(
-              "Auto Phase",
-            ),
+            const Text("Auto Phase"),
             Text("${widget.id} is watching team ${widget.teamName}"),
           ],
         ),
@@ -104,307 +142,342 @@ class _AutoPageState extends State<AutoPage> {
         ],
       ),
       body: Container(
-          padding: const EdgeInsets.all(screenPadding),
-          child: SingleChildScrollView(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+        padding: const EdgeInsets.all(screenPadding),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: double.infinity,
+                alignment: Alignment.center,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: Stack(alignment: Alignment.center, children: [
-                      SizedBox(
-                        width: fieldWidth,
-                        height: fieldHeight,
-                        child: Transform.rotate(
-                            angle: fieldFlipped ? 3.14159265 : 0,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: bg, fit: BoxFit.fitWidth)),
-                            )),
+                    SizedBox(
+                      width: fieldWidth,
+                      height: fieldHeight,
+                      child: Transform.rotate(
+                        angle: fieldFlipped ? 3.14159265 : 0,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: bg,
+                              fit: BoxFit.fitWidth,
+                            ),
+                          ),
+                        ),
                       ),
-                      Positioned(
-                          top: fieldHeight / 2 - 25,
-                          right: (fieldFlipped
-                                  ? fieldWidth * 4 / 5
-                                  : fieldWidth / 4) -
-                              25,
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text("Center"),
-                                Checkbox(
-                                    value: inCenterZone,
-                                    onChanged: (bool? value) => {
-                                          setState(() {
-                                            inCenterZone = value!;
-                                          })
-                                        })
-                              ])),
-                      Positioned(
-                          left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
-                          top: fieldHeight / 4 - 25,
-                          // top: 0,
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      const Text("Left"),
-                                      Checkbox(
-                                          value: inLeftZone,
-                                          onChanged: (bool? value) => {
-                                                setState(() {
-                                                  inLeftZone = value!;
-                                                })
-                                              })
-                                    ]),
-                                SizedBox(height: fieldHeight / 2 - 50),
-                                Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      const Text("Right"),
-                                      Checkbox(
-                                          value: inRightZone,
-                                          onChanged: (bool? value) => {
-                                                setState(() {
-                                                  inRightZone = value!;
-                                                })
-                                              })
-                                    ]),
-                              ])),
-                    ])),
-                Row(
-                  children: [
-                    SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.375,
-                        child: Image(
-                          //reef photo
-                          image: reefImg,
-                          fit: BoxFit.contain,
-                        )),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.05,
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(
-                              MediaQuery.of(context).size.width * 0.01),
-                          child: Text("L4",
-                              style: TextStyle(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.1)),
-                        ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                // minimumSize: const Size.square(70),
-                                minimumSize: Size(
-                                    MediaQuery.of(context).size.width * 0.5,
-                                    MediaQuery.of(context).size.height * 0.15),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5))),
-                            onPressed: () =>
-                                updateCounter(l4Counter, doIncrement),
-                            child: Text('${l4Counter.value}',
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.15))),
-                        Padding(
-                          padding: EdgeInsets.all(
-                              MediaQuery.of(context).size.width * 0.01),
-                          child: Text("L2 & L3",
-                              style: TextStyle(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.1)),
-                        ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                // minimumSize: const Size.square(70),
-                                minimumSize: Size(
-                                    MediaQuery.of(context).size.width * 0.5,
-                                    MediaQuery.of(context).size.height * 0.15),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5))),
-                            onPressed: () =>
-                                updateCounter(l2l3Counter, doIncrement),
-                            child: Text('${l2l3Counter.value}',
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.15))),
-                        Padding(
-                          padding: EdgeInsets.all(
-                              MediaQuery.of(context).size.width * 0.01),
-                          child: Text("L1",
-                              style: TextStyle(
-                                  fontSize:
-                                      MediaQuery.of(context).size.width * 0.1)),
-                        ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                minimumSize: Size(
-                                    MediaQuery.of(context).size.width * 0.5,
-                                    MediaQuery.of(context).size.height * 0.15),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5))),
-                            onPressed: () =>
-                                updateCounter(l1Counter, doIncrement),
-                            child: Text('${l1Counter.value}',
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.15))),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.075,
-                        ),
-                      ],
+                    Positioned(
+                      top: fieldHeight / 2 - 25,
+                      right:
+                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) -
+                              25,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text("Center"),
+                          Checkbox(
+                            value: inCenterZone,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                inCenterZone = value!;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
+                      top: fieldHeight / 4 - 25,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Text("Left"),
+                              Checkbox(
+                                value: inLeftZone,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    inLeftZone = value!;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: fieldHeight / 2 - 50),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Text("Right"),
+                              Checkbox(
+                                value: inRightZone,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    inRightZone = value!;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).size.width * 0.0125),
-                          child: Text("Net",
-                              style: TextStyle(
-                                  fontSize: MediaQuery.of(context).size.width *
-                                      0.05)),
-                        ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                minimumSize: Size(
-                                    MediaQuery.of(context).size.height * 0.125,
-                                    MediaQuery.of(context).size.height * 0.125),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5))),
-                            onPressed: () =>
-                                updateCounter(netCounter, doIncrement),
-                            child: Text('${netCounter.value}',
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.1))),
-                      ],
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.375,
+                    child: Image(
+                      image: reefImg,
+                      fit: BoxFit.contain,
                     ),
-                    Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).size.width * 0.0125),
-                          child: Text("Processor",
-                              style: TextStyle(
-                                  fontSize: MediaQuery.of(context).size.width *
-                                      0.05)),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.05,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width * 0.01),
+                        child: Text(
+                          "L4",
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.1),
                         ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                minimumSize: Size(
-                                    MediaQuery.of(context).size.height * 0.125,
-                                    MediaQuery.of(context).size.height * 0.125),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5))),
-                            onPressed: () =>
-                                updateCounter(processorCounter, doIncrement),
-                            child: Text('${processorCounter.value}',
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.1))),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).size.width * 0.0125),
-                          child: Text("+/-",
-                              style: TextStyle(
-                                  fontSize: MediaQuery.of(context).size.width *
-                                      0.075)),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          minimumSize: Size(
+                            MediaQuery.of(context).size.width * 0.5,
+                            MediaQuery.of(context).size.height * 0.15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
                         ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                minimumSize: Size.square(
-                                  MediaQuery.of(context).size.height * 0.1,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5))),
-                            onPressed: () {
-                              setState(() {
-                                doIncrement = !doIncrement;
-                              });
-                            },
-                            child: signIcon),
-                      ],
-                    ),
-                  ],
-                )
-              ]))),
+                        onPressed: () => updateCounter(l4Counter, doIncrement),
+                        child: Text(
+                          '${l4Counter.value}',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.15),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width * 0.01),
+                        child: Text(
+                          "L2 & L3",
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.1),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          minimumSize: Size(
+                            MediaQuery.of(context).size.width * 0.5,
+                            MediaQuery.of(context).size.height * 0.15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                        ),
+                        onPressed: () =>
+                            updateCounter(l2l3Counter, doIncrement),
+                        child: Text(
+                          '${l2l3Counter.value}',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.15),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width * 0.01),
+                        child: Text(
+                          "L1",
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.1),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          minimumSize: Size(
+                            MediaQuery.of(context).size.width * 0.5,
+                            MediaQuery.of(context).size.height * 0.15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                        ),
+                        onPressed: () => updateCounter(l1Counter, doIncrement),
+                        child: Text(
+                          '${l1Counter.value}',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.15),
+                        ),
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.075),
+                    ],
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.width * 0.0125),
+                        child: Text(
+                          "Net",
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.05),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          minimumSize: Size(
+                            MediaQuery.of(context).size.height * 0.125,
+                            MediaQuery.of(context).size.height * 0.125,
+                          ),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                        ),
+                        onPressed: () => updateCounter(netCounter, doIncrement),
+                        child: Text(
+                          '${netCounter.value}',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.1),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.width * 0.0125),
+                        child: Text(
+                          "Processor",
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.05),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          minimumSize: Size(
+                            MediaQuery.of(context).size.height * 0.125,
+                            MediaQuery.of(context).size.height * 0.125,
+                          ),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                        ),
+                        onPressed: () =>
+                            updateCounter(processorCounter, doIncrement),
+                        child: Text(
+                          '${processorCounter.value}',
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.1),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.width * 0.0125),
+                        child: Text(
+                          "+/-",
+                          style: TextStyle(
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.075),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          minimumSize: Size.square(
+                              MediaQuery.of(context).size.height * 0.1),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            doIncrement = !doIncrement;
+                          });
+                        },
+                        child: signIcon,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
       bottomNavigationBar: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-            // shape: RectangleBorder(
-            //   borderRadius: BorderRadius.zero, // Makes it completely rectangular
-            // ),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            foregroundColor: Theme.of(context).colorScheme.secondary,
-            iconColor: Theme.of(context).colorScheme.secondary),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          foregroundColor: Theme.of(context).colorScheme.secondary,
+          iconColor: Theme.of(context).colorScheme.secondary,
+        ),
         iconAlignment: IconAlignment.end,
-        onPressed: () {
+        onPressed: () async {
+          await _submitAutoScoutingData();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ObjectivePage(
-                onThemeChanged: (ThemeMode mode) {
-                  setState(() {
-                    themeMode = mode;
-                  });
-                },
-                channel: WebSocketService().channel,
-                webSocketService: WebSocketService(),
+                teamName: widget.teamName,
+                onThemeChanged: widget.onThemeChanged,
+                channel: widget.webSocketService.channel,
+                webSocketService: widget.webSocketService,
               ),
             ),
           );

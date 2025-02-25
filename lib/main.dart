@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/team_search_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
-import 'package:frc1148_2025_scouting_app/auto_page.dart';
+import 'package:frc1148_2025_scouting_app/auto_page.dart' as auto;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/scatter_plot.dart';
@@ -12,6 +12,7 @@ import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/login_page.dart';
 import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
+import 'package:frc1148_2025_scouting_app/endgame.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -80,46 +81,50 @@ class _MainAppState extends State<MyApp> {
 
     // IMPORTANT: Flip the ternary so "logged in" -> Dashboard, "not logged in" -> Login
     return MaterialApp(
-      title: 'Scouting Home Page',
-      theme: ThemeData.from(colorScheme: lightColorScheme),
-      darkTheme: ThemeData.from(colorScheme: darkColorScheme),
-      themeMode: themeMode,
-      home: DashboardPage(channel: _webSocketService.channel,
-              onThemeChanged: (ThemeMode mode) {
-                setState(() {
-                  themeMode = mode;
-                });
-              },
-              webSocketService: _webSocketService,)
-      // home: _isLoggedIn
-      //     ? ObjectivePage(
-      //         channel: _webSocketService.channel,
-      //         onThemeChanged: (ThemeMode mode) {
-      //           setState(() {
-      //             themeMode = mode;
-      //           });
-      //         },
-      //         webSocketService: _webSocketService,
-      //       )
-      //     : ObjectivePage(
-      //         channel: _webSocketService.channel,
-      //         onThemeChanged: (ThemeMode mode) {
-      //           setState(() {
-      //             themeMode = mode;
-      //           });
-      //         },
-      //         webSocketService: _webSocketService,
-      //       ),
-      // home: FlexibleScatterPlot(
-      //   teamData: teamData,
-      // ),
-      // home: TeamSearchPage(),
-      // home: MatchList(),
-      // home: AutoPage(
-      //   teamName: '',
-      //   id: '',
-      // ),
-    );
+        title: 'Scouting Home Page',
+        theme: ThemeData.from(colorScheme: lightColorScheme),
+        darkTheme: ThemeData.from(colorScheme: darkColorScheme),
+        themeMode: themeMode,
+        home: auto.AutoPage(
+          channel: _webSocketService.channel!,
+          onThemeChanged: (ThemeMode mode) {
+            setState(() {
+              themeMode = mode;
+            });
+          },
+          webSocketService: _webSocketService,
+          teamName: '',
+          id: '',
+        )
+        // home: _isLoggedIn
+        //     ? ObjectivePage(
+        //         channel: _webSocketService.channel,
+        //         onThemeChanged: (ThemeMode mode) {
+        //           setState(() {
+        //             themeMode = mode;
+        //           });
+        //         },
+        //         webSocketService: _webSocketService,
+        //       )
+        //     : ObjectivePage(
+        //         channel: _webSocketService.channel,
+        //         onThemeChanged: (ThemeMode mode) {
+        //           setState(() {
+        //             themeMode = mode;
+        //           });
+        //         },
+        //         webSocketService: _webSocketService,
+        //       ),
+        // home: FlexibleScatterPlot(
+        //   teamData: teamData,
+        // ),
+        // home: TeamSearchPage(),
+        // home: MatchList(),
+        // home: AutoPage(
+        //   teamName: '',
+        //   id: '',
+        // ),
+        );
   }
 }
 

@@ -20,6 +20,7 @@ class DashboardPage extends StatelessWidget {
     required this.webSocketService,
     required this.onThemeChanged,
     WebSocketChannel? channel,
+    required String teamName,
   }) : super(key: key);
 
   Future<void> _logOut(BuildContext context) async {
@@ -65,9 +66,12 @@ class DashboardPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AutoPage(
+                      builder: (context) => AutoPage(
                         teamName: "1148",
-                        id: "Andrew"
+                        id: "Andrew",
+                        channel: webSocketService.channel!,
+                        onThemeChanged: onThemeChanged,
+                        webSocketService: webSocketService,
                       ),
                     ),
                   );
@@ -75,7 +79,8 @@ class DashboardPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Decrease the rounding
+                    borderRadius:
+                        BorderRadius.circular(8), // Decrease the rounding
                   ),
                 ),
                 child: const Text(
@@ -107,7 +112,8 @@ class DashboardPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Decrease the rounding
+                    borderRadius:
+                        BorderRadius.circular(8), // Decrease the rounding
                   ),
                 ),
                 child: const Text(
