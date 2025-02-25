@@ -45,15 +45,16 @@ class InfoPage extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Info Page'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logOut(context),
-            tooltip: 'Log Out',
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.logout),
+        //     onPressed: () => _logOut(context),
+        //     tooltip: 'Log Out',
+        //   ),
+        // ],
       ),
       body: Center(
         child: Column(
