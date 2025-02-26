@@ -39,7 +39,6 @@ class PitScouting extends StatefulWidget {
       {super.key,
       required this.teamName,
       required this.channel,
-      required Null Function(ThemeMode mode) onThemeChanged,
       required WebSocketService webSocketService});
   final String teamName;
   final WebSocketChannel channel;
