@@ -514,179 +514,194 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.grey[900],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Select Metrics to Compare:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 8),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth < 600) {
-                  return Column(
-                    children: [
-                      _buildMetricDropdown(
-                        context: context,
-                        label: 'X-Axis Metric',
-                        value: selectedXMetric,
-                        items: availableXMetrics,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildMetricDropdown(
-                        context: context,
-                        label: 'Y-Axis Metric',
-                        value: selectedYMetric,
-                        items: availableYMetrics,
-                      ),
-                    ],
-                  );
-                }
-                return Row(
-                  children: [
-                    Expanded(
-                      child: _buildMetricDropdown(
-                        context: context,
-                        label: 'X-Axis Metric',
-                        value: selectedXMetric,
-                        items: availableXMetrics,
-                      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppBar(
+            title: const Text('Scatter Plot'),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Select Metrics to Compare:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildMetricDropdown(
-                        context: context,
-                        label: 'Y-Axis Metric',
-                        value: selectedYMetric,
-                        items: availableYMetrics,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            if (selectedXMetric != null && selectedYMetric != null)
-              Expanded(
-                child: ScatterChart(
-                  ScatterChartData(
-                    scatterTouchData: ScatterTouchData(
-                      enabled: true,
-                      touchTooltipData: ScatterTouchTooltipData(
-                        getTooltipItems: (ScatterSpot touchedSpot) {
-                          final teamSpot = teamSpots.firstWhere(
-                            (ts) =>
-                                ts.x == touchedSpot.x && ts.y == touchedSpot.y,
-                            orElse: () =>
-                                TeamSpotData('Unknown', 0, 0, Colors.grey),
-                          );
-                          return ScatterTooltipItem(
-                            'Team ${teamSpot.team}\n'
-                            '${getDisplayName(selectedXMetric!)}: ${teamSpot.x.toStringAsFixed(getAxisDecimalPlaces(true))}\n'
-                            '${getDisplayName(selectedYMetric!)}: ${teamSpot.y.toStringAsFixed(getAxisDecimalPlaces(false))}',
-                            textStyle: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          );
-                        },
-                      ),
-                      mouseCursorResolver: (event, response) {
-                        return response == null || response.touchedSpot == null
-                            ? MouseCursor.defer
-                            : SystemMouseCursors.click;
-                      },
-                    ),
-                    scatterSpots: getScatterSpots(),
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        axisNameWidget: Padding(
-                          padding: const EdgeInsets.only(bottom: 0.5),
-                          child: Text(
-                            getDisplayName(selectedYMetric!),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14.5,
-                            ),
-                          ),
-                        ),
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 35,
-                          getTitlesWidget: (value, meta) => Text(
-                            value.toStringAsFixed(getAxisDecimalPlaces(false)),
-                            style: const TextStyle(
-                              color: Colors.white60,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                      bottomTitles: AxisTitles(
-                        axisNameWidget: Padding(
-                          padding: const EdgeInsets.only(),
-                          child: Text(
-                            getDisplayName(selectedXMetric!),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14.5,
-                            ),
-                          ),
-                        ),
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 30,
-                          interval: ((xMax ?? 0) - (xMin ?? 0)) / 6,
-                          getTitlesWidget: (value, meta) => Text(
-                            value.toStringAsFixed(getAxisDecimalPlaces(true)),
-                            style: const TextStyle(
-                              color: Colors.white60,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawHorizontalLine: true,
-                      drawVerticalLine: true,
-                      getDrawingHorizontalLine: (value) => const FlLine(
-                        color: Colors.white10,
-                        strokeWidth: 1,
-                      ),
-                      getDrawingVerticalLine: (value) => const FlLine(
-                        color: Colors.white10,
-                        strokeWidth: 1,
-                      ),
-                    ),
-                    borderData: FlBorderData(
-                      show: true,
-                      border: Border.all(color: Colors.white24),
-                    ),
-                    backgroundColor: Colors.grey[900],
-                    minX: xMin,
-                    maxX: xMax,
-                    minY: yMin,
-                    maxY: yMax,
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (constraints.maxWidth < 600) {
+                        return Column(
+                          children: [
+                            _buildMetricDropdown(
+                              context: context,
+                              label: 'X-Axis Metric',
+                              value: selectedXMetric,
+                              items: availableXMetrics,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildMetricDropdown(
+                              context: context,
+                              label: 'Y-Axis Metric',
+                              value: selectedYMetric,
+                              items: availableYMetrics,
+                            ),
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _buildMetricDropdown(
+                              context: context,
+                              label: 'X-Axis Metric',
+                              value: selectedXMetric,
+                              items: availableXMetrics,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildMetricDropdown(
+                              context: context,
+                              label: 'Y-Axis Metric',
+                              value: selectedYMetric,
+                              items: availableYMetrics,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  if (selectedXMetric != null && selectedYMetric != null)
+                    Expanded(
+                      child: ScatterChart(
+                        ScatterChartData(
+                          scatterTouchData: ScatterTouchData(
+                            enabled: true,
+                            touchTooltipData: ScatterTouchTooltipData(
+                              getTooltipItems: (ScatterSpot touchedSpot) {
+                                final teamSpot = teamSpots.firstWhere(
+                                  (ts) =>
+                                      ts.x == touchedSpot.x &&
+                                      ts.y == touchedSpot.y,
+                                  orElse: () => TeamSpotData(
+                                      'Unknown', 0, 0, Colors.grey),
+                                );
+                                return ScatterTooltipItem(
+                                  'Team ${teamSpot.team}\n'
+                                  '${getDisplayName(selectedXMetric!)}: ${teamSpot.x.toStringAsFixed(getAxisDecimalPlaces(true))}\n'
+                                  '${getDisplayName(selectedYMetric!)}: ${teamSpot.y.toStringAsFixed(getAxisDecimalPlaces(false))}',
+                                  textStyle: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                );
+                              },
+                            ),
+                            mouseCursorResolver: (event, response) {
+                              return response == null ||
+                                      response.touchedSpot == null
+                                  ? MouseCursor.defer
+                                  : SystemMouseCursors.click;
+                            },
+                          ),
+                          scatterSpots: getScatterSpots(),
+                          titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                              axisNameWidget: Padding(
+                                padding: const EdgeInsets.only(bottom: 0.5),
+                                child: Text(
+                                  getDisplayName(selectedYMetric!),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14.5,
+                                  ),
+                                ),
+                              ),
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 35,
+                                getTitlesWidget: (value, meta) => Text(
+                                  value.toStringAsFixed(
+                                      getAxisDecimalPlaces(false)),
+                                  style: const TextStyle(
+                                    color: Colors.white60,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              axisNameWidget: Padding(
+                                padding: const EdgeInsets.only(),
+                                child: Text(
+                                  getDisplayName(selectedXMetric!),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14.5,
+                                  ),
+                                ),
+                              ),
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 30,
+                                interval: ((xMax ?? 0) - (xMin ?? 0)) / 6,
+                                getTitlesWidget: (value, meta) => Text(
+                                  value.toStringAsFixed(
+                                      getAxisDecimalPlaces(true)),
+                                  style: const TextStyle(
+                                    color: Colors.white60,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            topTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ),
+                          gridData: FlGridData(
+                            show: true,
+                            drawHorizontalLine: true,
+                            drawVerticalLine: true,
+                            getDrawingHorizontalLine: (value) => const FlLine(
+                              color: Colors.white10,
+                              strokeWidth: 1,
+                            ),
+                            getDrawingVerticalLine: (value) => const FlLine(
+                              color: Colors.white10,
+                              strokeWidth: 1,
+                            ),
+                          ),
+                          borderData: FlBorderData(
+                            show: true,
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          backgroundColor: Colors.grey[900],
+                          minX: xMin,
+                          maxX: xMax,
+                          minY: yMin,
+                          maxY: yMax,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
