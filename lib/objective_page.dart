@@ -16,6 +16,7 @@ class ObjectivePage extends StatefulWidget {
     required this.onThemeChanged,
     required this.channel,
     required WebSocketService webSocketService,
+    required String teamName,
   }) : super(key: key);
 
   @override
@@ -323,7 +324,14 @@ class _ObjectivePageState extends State<ObjectivePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const Endgame(teamName: "fake team name",), // placeholder until backend works
+              builder: (context) => Endgame(
+                teamName: "fake team name",
+                channel: widget.channel!,
+                onThemeChanged: (ThemeMode mode) {
+                  widget.onThemeChanged(mode);
+                },
+                webSocketService: WebSocketService(),
+              ), // placeholder until backend works
             ),
           );
         },

@@ -70,6 +70,7 @@ class InfoPage extends StatelessWidget {
         builder: (_) => DashboardPage(
           webSocketService: webSocketService,
           onThemeChanged: onThemeChanged,
+          teamName: '',
         ),
       ),
     );
@@ -115,7 +116,8 @@ class InfoPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius:
+                        BorderRadius.circular(8), // Decrease the rounding
                   ),
                 ),
                 child: const Text(
@@ -143,7 +145,8 @@ class InfoPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius:
+                        BorderRadius.circular(8), // Decrease the rounding
                   ),
                 ),
                 child: const Text(

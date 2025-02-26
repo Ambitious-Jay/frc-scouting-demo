@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/pit_scouting_page.dart';
 import 'package:frc1148_2025_scouting_app/team_search_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
-import 'package:frc1148_2025_scouting_app/auto_page.dart';
+import 'package:frc1148_2025_scouting_app/auto_page.dart' as auto;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/Flexiblescatter_plot.dart';
@@ -13,6 +13,7 @@ import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/login_page.dart';
 import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
+import 'package:frc1148_2025_scouting_app/endgame.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -90,7 +91,7 @@ class _MainAppState extends State<MyApp> {
                   themeMode = mode;
                 });
               },
-              webSocketService: _webSocketService,)
+              webSocketService: _webSocketService, teamName: "1148",)
       // home: _isLoggedIn
       //     ? ObjectivePage(
       //         channel: _webSocketService.channel,

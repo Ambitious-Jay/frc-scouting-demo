@@ -1,34 +1,60 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
-import 'package:frc1148_2025_scouting_app/scroll_controller.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 
-String CombatabilityOne = '';
-String CombatabilityTwo = '';
-String CombatabilityThree = '';
-
-String FeatsOne = '';
-String FeatsTwo = '';
-String FeatsThree = '';
-
-String HPlayerOne = '';
-String HPlayerTwo = '';
-String HPlayerThree = '';
+String compatibility = "";
+String notableFeats = "";
+String humanPlayerNetAcc = "";
 
 class LeadScoutingPage extends StatefulWidget {
-  const LeadScoutingPage({super.key, required this.teamName});
+  const LeadScoutingPage({
+    super.key,
+    required this.teamName,
+    required this.channel,
+    required this.onThemeChanged,
+    required this.webSocketService,
+  });
   final String teamName;
+  final WebSocketChannel channel;
+  final Function(ThemeMode) onThemeChanged;
+  final WebSocketService webSocketService;
 
   @override
   State<LeadScoutingPage> createState() => _LeadScoutingPage();
 }
 
 class _LeadScoutingPage extends State<LeadScoutingPage> {
-  Future<void> setUp() async {
-    List<String> teams = widget.teamName.split(' ');
-    String robotOne = teams[1].substring(0, teams[1].length - 1);
-    String robotTwo = teams[2].substring(0, teams[2].length - 1);
-    String robotThree = teams[3];
-    List<String> teamNames = [robotOne, robotTwo, robotThree];
+  /// Submits the lead scouting data to the SQL server.
+  /// Builds an INSERT statement targeting the LeadScoutingData table.
+  Future<void> _submitLeadScoutingData() async {
+    final sql = '''
+      INSERT INTO LeadScoutingData (
+        team_number, compatibility, notable_feats, human_player_net_acc
+      )
+      VALUES (
+        '${widget.teamName}',
+        '$compatibility',
+        '$notableFeats',
+        '$humanPlayerNetAcc'
+      )
+    ''';
+
+    final cmd = {
+      "type": "query",
+      "text": sql,
+    };
+
+    final encodedJson = jsonEncode(cmd);
+    final prefix = '${encodedJson.length}\r\n';
+
+    try {
+      widget.channel.sink.add(prefix + encodedJson);
+      debugPrint('Successfully sent lead scouting INSERT command: $sql');
+    } catch (e, st) {
+      debugPrint('Error sending lead scouting data to DB: $e\n$st');
+    }
   }
 
   @override
@@ -37,141 +63,129 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-  appBar: AppBar(
-    backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-    title: Text(widget.teamName),
-  ),
-  body: SingleChildScrollView(  // Wrap the entire body in a scroll view
-    child: Column(
-      children: [
-        // First Row
-        SizedBox(
-          height: height * 0.3,
-          width: width,
-          child: Column(
-            children: [
-              Container(
-                height: height * 0.05,
-                width: width,
-                alignment: Alignment.center,
-                child: const Text(
-                  'Compatibility',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.teamName),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Compatibility Field
+            SizedBox(
+              height: height * 0.3,
+              width: width,
+              child: Column(
+                children: [
+                  Container(
+                    height: height * 0.05,
+                    width: width,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Compatibility',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ),
                   Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
                       minLines: 1,
                       maxLines: null,
                       onChanged: (String value) {
                         setState(() {
-                          CombatabilityThree = value;
+                          compatibility = value;
                         });
                       },
                     ),
                   ),
-            ],
-          ),
-        ),
-        const Divider(),
-
-        // Second Row
-        SizedBox(
-          height: height * 0.3,
-          width: width,
-          child: Column(
-            children: [
-              Container(
-                height: height * 0.05,
-                width: width,
-                alignment: Alignment.center,
-                child: const Text(
-                  'Notable Feats',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                ],
               ),
+            ),
+            const Divider(),
+            // Notable Feats Field
+            SizedBox(
+              height: height * 0.3,
+              width: width,
+              child: Column(
+                children: [
+                  Container(
+                    height: height * 0.05,
+                    width: width,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Notable Feats',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
                       minLines: 1,
                       maxLines: null,
                       onChanged: (String value) {
                         setState(() {
-                          CombatabilityThree = value;
+                          notableFeats = value;
                         });
                       },
                     ),
                   ),
-            ],
-          ),
-        ),
-        const Divider(),
-
-        // Third Row
-        SizedBox(
-          height: height * 0.3,
-          width: width,
-          child: Column(
-            children: [
-              Container(
-                height: height * 0.05,
-                width: width,
-                alignment: Alignment.center,
-                child: const Text(
-                  'Human Player Net ACC',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                ],
               ),
+            ),
+            const Divider(),
+            // Human Player Net ACC Field
+            SizedBox(
+              height: height * 0.3,
+              width: width,
+              child: Column(
+                children: [
+                  Container(
+                    height: height * 0.05,
+                    width: width,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Human Player Net ACC',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
                       minLines: 1,
                       maxLines: null,
                       onChanged: (String value) {
                         setState(() {
-                          CombatabilityThree = value;
+                          humanPlayerNetAcc = value;
                         });
                       },
                     ),
                   ),
-            ],
-          ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  ),
-  bottomNavigationBar: ElevatedButton(
-    onPressed: () async {
-      // await _submitSection();
-      // setState(() {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
-      //     })
-      //     )
-      //   );
-      // });
-    },
-    child: const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
-  ),
-);
-
+      ),
+      bottomNavigationBar: ElevatedButton(
+        onPressed: () async {
+          await _submitLeadScoutingData();
+        },
+        child: const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
+      ),
+    );
   }
 }

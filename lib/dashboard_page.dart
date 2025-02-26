@@ -21,6 +21,7 @@ class DashboardPage extends StatelessWidget {
     required this.webSocketService,
     required this.onThemeChanged,
     WebSocketChannel? channel,
+    required String teamName,
   }) : super(key: key);
 
   Future<void> _logOut(BuildContext context) async {
@@ -71,7 +72,11 @@ class DashboardPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        const AutoPage(teamName: "1148", id: "Andrew"),
+                        AutoPage(teamName: "1148", id: "Andrew",
+                        channel: webSocketService.channel!,
+                        onThemeChanged: onThemeChanged,
+                        webSocketService: webSocketService,
+                        ),
                   ),
                 );
               },
@@ -117,7 +122,9 @@ class DashboardPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PitScouting(teamName: teamName),
+                        builder: (context) => PitScouting(teamName: teamName,
+                        channel: webSocketService.channel!,
+                        webSocketService: webSocketService,),
                       ),
                     );
                   } else {
@@ -134,7 +141,8 @@ class DashboardPage extends StatelessWidget {
                   ),
                   padding: EdgeInsets.symmetric(vertical: height * 0.02),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius:
+                        BorderRadius.circular(8), // Decrease the rounding
                   ),
                 ),
                 child: const Text(
@@ -169,7 +177,8 @@ class DashboardPage extends StatelessWidget {
                   ),
                   padding: EdgeInsets.symmetric(vertical: height * 0.02),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius:
+                        BorderRadius.circular(8), // Decrease the rounding
                   ),
                 ),
                 child: const Text(
