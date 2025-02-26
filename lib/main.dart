@@ -78,7 +78,6 @@ class _MainAppState extends State<MyApp> {
         ),
       );
     }
-
     // IMPORTANT: Flip the ternary so "logged in" -> Dashboard, "not logged in" -> Login
     return MaterialApp(
       title: 'Scouting Home Page',
