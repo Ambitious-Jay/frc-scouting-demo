@@ -4,21 +4,63 @@ import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/preset_comment.dart';
 import 'package:frc1148_2025_scouting_app/scroll_controller.dart';
 
-Map<String, int> stored = {
-  'Coral Per Match': 0,
-  'L4 OPR Count': 1,
-  'L3/L2 OPR Count': 2,
-  'L1 OPR Count': 3,
-  'Algae Per Match': 4,
-  'Net OPR Count': 5,
-  'Processor OPR Count': 6,
+// Define a structure to organize data by categories
+Map<String, Map<String, Map<String, dynamic>>> robotData = {
+  'Performance Stats': {
+    'Scoring': {
+      'Coral Per Match': 0,
+      'L4 OPR Count': 1,
+      'L3/L2 OPR Count': 2,
+      'L1 OPR Count': 3,
+      'Algae Per Match': 4,
+      'Net OPR Count': 5,
+      'Processor OPR Count': 6,
+    },
+    'Capabilities': {
+      'Can Deep Cage': 'TRUE',
+      'Can Shallow Cage': 'False',
+    },
+  },
+  'Robot Specifications': {
+    'Drivetrain': {
+      'Robot weight (lbs)': 120,
+      'Type of drive': 'tank',
+      'Type of motor': 'kraken',
+      'Number of motors': 4,
+      'Bumper quality': 5,
+    },
+    'Intake': {
+      'Can pick up coral from Coral Station': 'TRUE',
+      'Can pick up coral from ground': 'FALSE',
+      'Can pick up algae from ground (controlled)': 'FALSE',
+      'Can remove algae from reef (controlled)': 'TRUE',
+    },
+    'Scoring': {
+      'Can score coral onto L1': 'TRUE',
+      'Can score coral onto L2': 'TRUE',
+      'Can score coral onto L3': 'TRUE',
+      'Can score coral onto L4': 'TRUE',
+      'Can score in processor': 'TRUE',
+      'Can score into net': 'TRUE',
+      'Type of Climb': 'Deep Cage',
+    },
+    'Autonomous': {
+      'Coral scored during Auton': '6 L4',
+      'Leave AutoLine in Auton': 'TRUE',
+    },
+  },
+  'Notes': {
+    'Team Compatibility': {
+      'Description': 'is it?',
+    },
+    'Notable Feats': {
+      'Description': 'kachow',
+    },
+    'Human Player': {
+      'Net ACC': 'hallo',
+    },
+  },
 };
-String deepCage = 'TRUE';
-String ShallowCage = 'False';
-
-String Combatability = 'is it?';
-String Feats = 'kachow';
-String HPlayer = 'hallo';
 
 final ScrollController compatibilityController = ScrollController();
 final ScrollController featsController = ScrollController();
@@ -36,16 +78,86 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
   Future<void> setUp() async {}
 
   Widget buildStatItem(String label, double height) {
+    // First check if it's in the Performance Stats section
+    if (robotData['Performance Stats']!['Scoring']!.containsKey(label)) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: height * 0.0175),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            robotData['Performance Stats']!['Scoring']![label].toString(),
+            style: TextStyle(
+              fontSize: height * 0.02,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
+    } 
+    // Check if it's in the Capabilities section
+    else if (robotData['Performance Stats']!['Capabilities']!.containsKey(label)) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: height * 0.0175),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            robotData['Performance Stats']!['Capabilities']![label].toString(),
+            style: TextStyle(
+              fontSize: height * 0.02,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
+    }
+    // Check all categories in Robot Specifications
+    else {
+      for (var category in robotData['Robot Specifications']!.keys) {
+        if (robotData['Robot Specifications']![category]!.containsKey(label)) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: height * 0.0175),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                robotData['Robot Specifications']![category]![label].toString(),
+                style: TextStyle(
+                  fontSize: height * 0.02,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          );
+        }
+      }
+    }
+    
+    // Fallback for any other items not found in the structure
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           label,
           style: TextStyle(fontSize: height * 0.0175),
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4),
         Text(
-          stored[label].toString(),
+          "Not found",
           style: TextStyle(
             fontSize: height * 0.02,
             color: Colors.red,
@@ -55,7 +167,6 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
     );
   }
 
-  @override
   Widget buildStatsContainer(double width, double height) {
     return Container(
       width: width,
@@ -89,98 +200,92 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Expanded(child: buildStatItem("Can Deep Cage", height)),
+                Expanded(child: buildStatItem("Can Shallow Cage", height)),
                 Expanded(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Can Deep Cage",
-                      style: TextStyle(fontSize: height * 0.0175),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      deepCage,
-                      style: TextStyle(
-                        fontSize: height * 0.02,
-                        color: Colors.red,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {},
+                          child: const Text("Auto Table",
+                              style: TextStyle(
+                                  color: Colors.lightBlue,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.lightBlue)),
+                        ),
                       ),
-                    ),
-                  ],
-                )),
-                Expanded(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Can Shallow Cage",
-                      style: TextStyle(fontSize: height * 0.0175),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      ShallowCage,
-                      style: TextStyle(
-                        fontSize: height * 0.02,
-                        color: Colors.red,
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {},
+                          child: const Text("Preset Comments",
+                              style: TextStyle(
+                                  color: Colors.lightBlue,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.lightBlue)),
+                        ),
                       ),
-                    ),
-                  ],
-                )),
-                Expanded(
-                    child: Column(
-                  children: [
-                    Expanded(
-                      // child: Text(
-                      //   "Auto Table",
-                      //   style: TextStyle(fontSize: height * 0.0175),
-                      // ),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AutoTablePage(
-                                  onThemeChanged: (ThemeMode mode) {
-                                setState(() {});
-                              }),
-                            ),
-                          );
-                        },
-                        child: const Text("Auto Table",
-                            style: TextStyle(
-                                color: Colors.lightBlue,
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.lightBlue)),
-                      ),
-                    ),
-                    Expanded(
-                      // child: Text(
-                      //   "Preset Comments",
-                      //   style: TextStyle(fontSize: height * 0.0175),
-                      // ),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PresetComment(
-                                  onThemeChanged: (ThemeMode mode) {
-                                setState(() {});
-                              }),
-                            ),
-                          );
-                        },
-                        child: const Text("Preset Comments",
-                            style: TextStyle(
-                                color: Colors.lightBlue,
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.lightBlue)),
-                      ),
-                    ),
-                  ],
-                ))
+                    ],
+                  )
+                )
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildRobotSpecificationsContainer(double width, double height) {
+    return Container(
+      width: width,
+      padding: EdgeInsets.symmetric(vertical: 15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            child: Text(
+              "Robot Specifications",
+              style: TextStyle(
+                fontSize: height * 0.025,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // For each category in Robot Specifications
+          ...robotData['Robot Specifications']!.entries.map((category) => 
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0, top: 15.0, bottom: 5.0),
+                  child: Text(
+                    category.key,
+                    style: TextStyle(
+                      fontSize: height * 0.02,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceEvenly,
+                    spacing: 10.0,
+                    runSpacing: 15.0,
+                    children: category.value.keys.map((label) => 
+                      SizedBox(
+                        width: width * 0.45,
+                        child: buildStatItem(label, height),
+                      )
+                    ).toList(),
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            )
+          ).toList(),
         ],
       ),
     );
@@ -202,8 +307,12 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
               buildStatsContainer(width, height),
 
               const Divider(),
+              
+              buildRobotSpecificationsContainer(width, height),
+              
+              const Divider(),
 
-              // First Row
+              // Team Compatibility
               Column(
                 children: [
                   Container(
@@ -222,7 +331,7 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 30.0),
                     child: Text(
-                      Combatability,
+                      robotData['Notes']!['Team Compatibility']!['Description'].toString(),
                       textAlign: TextAlign.center,
                       softWrap: true,
                     ),
@@ -232,7 +341,7 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
 
               const Divider(),
 
-              // Second Row
+              // Notable Feats
               Column(
                 children: [
                   Container(
@@ -251,7 +360,7 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 30.0),
                     child: Text(
-                      Feats,
+                      robotData['Notes']!['Notable Feats']!['Description'].toString(),
                       textAlign: TextAlign.center,
                       softWrap: true,
                     ),
@@ -261,7 +370,7 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
 
               const Divider(),
 
-              // Third Row
+              // Human Player Net ACC
               Column(
                 children: [
                   Container(
@@ -280,53 +389,21 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 30.0),
                     child: Text(
-                      HPlayer,
+                      robotData['Notes']!['Human Player']!['Net ACC'].toString(),
                       textAlign: TextAlign.center,
                       softWrap: true,
                     ),
                   ),
                 ],
               ),
-
-              // Container(
-              //   width: width,
-              //   height: height * 1 / 13,
-              //   //color Colors.amber[300],
-              //   alignment: AlignmentDirectional.center,
-              // ),
-              // ElevatedButton(
-              //   onPressed: () async {
-              //     // await _submitSection();
-              //     // setState(() {
-              //     //   Navigator.push(
-              //     //     context,
-              //     //     MaterialPageRoute
-              //     //     (
-              //     //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
-              //     //     })
-              //     //     )
-              //     //   );
-              //     // });
-              //   },
-              //   child: const Text("Next",
-              //       style: TextStyle(color: colors.myOnPrimary)),
-              // )
+              
+              const Divider(),
             ],
           ),
         ),
         bottomNavigationBar: ElevatedButton(
           onPressed: () async {
-            // await _submitSection();
-            // setState(() {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute
-            //     (
-            //       builder: (context) => Entrance(onThemeChanged: (newTheme) {
-            //     })
-            //     )
-            //   );
-            // });
+            // Navigation code would go here
           },
           child:
               const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
