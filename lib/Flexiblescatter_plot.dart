@@ -270,6 +270,7 @@ class TeamSpotData {
 
 class FlexibleScatterPlot extends StatefulWidget {
   final Map<String, Map<String, double>> teamData;
+  //team data is a map of teamnames as the first key and then the metric as the second key and the value as the value
 
   const FlexibleScatterPlot({
     super.key,
