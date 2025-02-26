@@ -9,12 +9,47 @@ class MatchList extends StatefulWidget {
 }
 
 class _MatchList extends State<MatchList> {
+  final TextEditingController searchController = TextEditingController();
+  Map<String, List<String>> matches = {};
+  List<String> filteredMatches = [];
+  bool searchByMatch = true;
+
   @override
   void initState() {
     super.initState();
+    filteredMatches = matches.keys.toList(); // Start with all teams displayed
+    searchController.addListener(filterTeams);
   }
 
-  List<String> matches = List.empty(growable: true);
+  void filterTeams() {
+    setState(() {
+      String query = searchController.text.toLowerCase();
+      if (searchByMatch) {
+        // Search by match number
+        filteredMatches = matches.keys
+            .where((match) =>
+                match.toLowerCase() == "qm" + query ||
+                match.toLowerCase().startsWith("qm" + query))
+            .toList();
+      } else {
+        // Search by team number
+        filteredMatches = matches.entries
+            .where((entry) => entry.value.any((team) => team.contains(query)))
+            .map((entry) => entry.key)
+            .toList();
+      }
+    });
+  }
+
+  void toggleSearch() {
+    searchByMatch = !searchByMatch;
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _fillMatches(col) async {
     // This gets the matches they we list
@@ -30,34 +65,33 @@ class _MatchList extends State<MatchList> {
     // } catch (e) {
     //   print('Error: $e');
     // }
-    matches.add("qm1");
-    matches.add("qm2");
-    matches.add("qm3");
-    matches.add("qm4");
-    matches.add("qm5");
-    matches.add("qm6");
-    matches.add("qm7");
-    matches.add("qm8");
-    matches.add("qm9");
-    matches.add("qm10");
-    matches.add("qm11");
-    matches.add("qm12");
-    matches.add("qm13");
-    matches.add("qm14");
-    matches.add("qm15");
-    matches.add("qm16");
-    matches.add("qm17");
-    matches.add("qm18");
-    matches.add("qm19");
-    matches.add("qm11");
-    matches.add("qm12");
-    matches.add("qm13");
-    matches.add("qm14");
-    matches.add("qm15");
-    matches.add("qm16");
-    matches.add("qm17");
-    matches.add("qm18");
-    matches.add("qm19");
+    // "qm1": ["254", "1678", "973", "4414", "118", "148"],
+    //   "qm2": ["1678", "148", "118", "254", "973", "4414"],
+    //   "qm3": ["4414", "973", "1678", "148", "118", "254"],
+    //   "qm4": ["973", "254", "4414", "1678", "118", "148"],
+    //   "qm5": ["118", "4414", "148", "254", "973", "1678"],
+    //   "qm6": ["148", "118", "254", "1678", "4414", "973"],
+    // setState(() {});
+    matches.clear(); // Clear existing data before adding new
+    matches.addAll({
+      "qm1": ["1114", "254", "1678", "2056", "118", "148"],
+      "qm2": ["148", "118", "3310", "2056", "2910", "1323"],
+      "qm3": ["1678", "4414", "2910", "254", "1114", "2056"],
+      "qm4": ["1323", "118", "148", "2910", "4414", "1678"],
+      "qm5": ["4414", "1114", "254", "3310", "148", "1678"],
+      "qm6": ["2056", "254", "1323", "3310", "118", "2910"],
+      "qm7": ["2910", "1678", "1114", "148", "2056", "4414"],
+      "qm8": ["3310", "1323", "2056", "4414", "254", "2910"],
+      "qm9": ["148", "1678", "118", "1114", "1323", "3310"],
+      "qm10": ["2056", "2910", "254", "148", "4414", "1323"],
+      "qm11": ["1678", "3310", "1114", "118", "2056", "254"],
+      "qm12": ["4414", "1323", "2910", "1114", "118", "148"],
+      "qm13": ["2910", "2056", "254", "1678", "4414", "1323"],
+      "qm14": ["148", "3310", "1114", "1678", "2056", "254"],
+      "qm15": ["1323", "2910", "118", "4414", "148", "3112"],
+    });
+
+    filteredMatches = matches.keys.toList(); // Refresh displayed matches
     setState(() {});
   }
 
@@ -80,79 +114,144 @@ class _MatchList extends State<MatchList> {
       appBar: AppBar(
         title: const Text("Home"),
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(8),
-        itemCount: matches.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white),
-            ),
-            child: SizedBox(
-              height: height / 12,
-              width: width / 20,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [ //TODO: update placehold alliance with alliance when backend works
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey, width: 1),
-                      ),
-                      child: Text(matches[index]),
-                      onPressed: () async {
-                        // This fetches what will be displayed (make conditional??)
-                        // List<String> matchData = await _fetchRow(matches[index]);
-                        // This navigates to the next page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const AllianceData(allianceName: "placeholder alliance"),
-                          ),
-                        );
-                      }),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey, width: 1),
-                        backgroundColor: Colors.blue,
-                      ),
-                      child: Text("Blue"),
-                      onPressed: () async {
-                        // This fetches what will be displayed (make conditional??)
-                        // List<String> matchData = await _fetchRow(matches[index]);
-                        // This navigates to the next page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const AllianceData(allianceName: "placeholder alliance"),
-                          ),
-                        );
-                      }),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey, width: 1),
-                        backgroundColor: Colors.red,
-                      ),
-                      child: Text("Red"),
-                      onPressed: () async {
-                        // This fetches what will be displayed (make conditional??)
-                        // List<String> matchData = await _fetchRow(matches[index]);
-                        // This navigates to the next page
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute( builder: (context) =>  MatchListDisplay (matchData: matchData, matchID: matches[index]) )
-                        // );
-                      })
-                ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Enter Match',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) => Container(
-          alignment: AlignmentDirectional.center,
-          height: height / 150,
-        ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Searching by",
+                style: TextStyle(fontSize: 20),
+              ),
+              SizedBox(width: height * 0.025),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    searchByMatch = !searchByMatch;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  // backgroundColor: park
+                  //     ? Theme.of(context).colorScheme.primary
+                  //     : Theme.of(context).colorScheme.secondary,
+                  // foregroundColor: park
+                  //     ? Theme.of(context).colorScheme.onPrimary
+                  //     : Theme.of(context).colorScheme.onSecondary,
+                  backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                  // minimumSize: const Size(100, 100),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+                child: searchByMatch
+                    ? const Text(
+                        "Match",
+                        style: TextStyle(fontSize: 20, color: Colors.black),
+                      )
+                    : const Text("Team",
+                        style: TextStyle(fontSize: 20, color: Colors.black)),
+              ),
+            ],
+          ),
+          const Divider(),
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(8),
+              itemCount: filteredMatches.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                  ),
+                  child: SizedBox(
+                    height: height / 12,
+                    width: width / 20,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        //TODO: update placehold alliance with alliance when backend works
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              side: BorderSide(color: Colors.grey, width: 1),
+                            ),
+                            child: Text(filteredMatches[index]),
+                            onPressed: () async {
+                              // This fetches what will be displayed (make conditional??)
+                              // List<String> matchData = await _fetchRow(matches[index]);
+                              // This navigates to the next page
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AllianceData(
+                                      allianceName: "placeholder alliance"),
+                                ),
+                              );
+                            }),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              side: BorderSide(color: Colors.grey, width: 1),
+                              backgroundColor: Colors.blue,
+                            ),
+                            child: Text("Blue"),
+                            onPressed: () async {
+                              // This fetches what will be displayed (make conditional??)
+                              // List<String> matchData = await _fetchRow(matches[index]);
+                              // This navigates to the next page
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AllianceData(
+                                      allianceName: "placeholder alliance"),
+                                ),
+                              );
+                            }),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              side: BorderSide(color: Colors.grey, width: 1),
+                              backgroundColor: Colors.red,
+                            ),
+                            child: Text("Red"),
+                            onPressed: () async {
+                              // This fetches what will be displayed (make conditional??)
+                              // List<String> matchData = await _fetchRow(matches[index]);
+                              // This navigates to the next page
+                              // Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute( builder: (context) =>  MatchListDisplay (matchData: matchData, matchID: matches[index]) )
+                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AllianceData(
+                                      allianceName: "placeholder alliance"),
+                                ),
+                              );
+                            })
+                      ],
+                    ),
+                  ),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) => Container(
+                alignment: AlignmentDirectional.center,
+                height: height / 150,
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.refresh),
