@@ -57,107 +57,132 @@ class DashboardPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const AutoPage(teamName: "1148", id: "Andrew"),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.primary,
-              padding: EdgeInsets.symmetric(vertical: height * 0.02),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Next Match',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-          SizedBox(height: height/16),
-          TextField(
-            controller: _teamController,
-            decoration: InputDecoration(
-              labelText: 'Enter Team Number',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              contentPadding: EdgeInsets.symmetric(
-                  horizontal: width * 0.03, vertical: height * 0.015),
-            ),
-            keyboardType: TextInputType.number,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              String teamName = _teamController.text.trim();
-              if (teamName.isNotEmpty) {
+      body: 
+      Padding(
+        padding: const EdgeInsets.only(top: 24, left: 36, right: 36),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: height / 6,
+              child: ElevatedButton(
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PitScouting(teamName: teamName),
+                    builder: (context) =>
+                        const AutoPage(teamName: "1148", id: "Andrew"),
                   ),
                 );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter a team number.')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.primary,
-              padding: EdgeInsets.symmetric(vertical: height * 0.02),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                side: BorderSide(
+                  color: colorScheme.secondary,
+                  width: 8.0,
+                ),
+                padding: EdgeInsets.symmetric(vertical: height * 0.02),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Next Match',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
               ),
             ),
-            child: const Text(
-              'Pit Scouting',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
             ),
-          ),
-          SizedBox(height: height/16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InfoPage(
-                    onThemeChanged: onThemeChanged,
-                    webSocketService: webSocketService,
+            SizedBox(height: height/16),
+            TextField(
+              controller: _teamController,
+              decoration: InputDecoration(
+                labelText: 'Enter Team Number',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: width * 0.03, vertical: height * 0.015),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: height/24),
+            SizedBox(
+              height: height / 6,
+              child: ElevatedButton(
+                onPressed: () {
+                  String teamName = _teamController.text.trim();
+                  if (teamName.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PitScouting(teamName: teamName),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a team number.')),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  side: BorderSide(
+                    color: colorScheme.secondary,
+                    width: 8.0,
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: height * 0.02),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.primary,
-              padding: EdgeInsets.symmetric(vertical: height * 0.02),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                child: const Text(
+                  'Pit Scouting',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
               ),
             ),
-            child: const Text(
-              'Info',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
+            SizedBox(height: height/16),
+            SizedBox(
+              height: height / 6,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => InfoPage(
+                        onThemeChanged: onThemeChanged,
+                        webSocketService: webSocketService,
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  side: BorderSide(
+                    color: colorScheme.secondary,
+                    width: 8.0,
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: height * 0.02),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Info',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+              )
+            )
+          ],
+        ),
+    ));
   }
 }
