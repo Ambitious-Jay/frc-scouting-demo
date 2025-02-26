@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
+import 'package:frc1148_2025_scouting_app/graphing_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
 import 'package:frc1148_2025_scouting_app/Flexiblescatter_plot.dart';
 import 'package:frc1148_2025_scouting_app/team_search_page.dart';
@@ -167,7 +168,7 @@ class InfoPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TeamSearchPage(),
+                      builder: (context) => Graphing(),
                     ),
                   );
                 },
