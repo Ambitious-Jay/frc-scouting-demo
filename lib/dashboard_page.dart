@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:frc1148_2025_scouting_app/info_page.dart';
+import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
 import 'package:frc1148_2025_scouting_app/pit_scouting_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -78,20 +79,34 @@ class DashboardPage extends StatelessWidget {
               height: height / 6,
               child: ElevatedButton(
                 onPressed: () async {
-                  // Retrieve the user id from SharedPreferences before navigating
                   final userId = await _getUserId();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AutoPage(
-                        teamName: "1148",
-                        id: userId, // Use the retrieved id here
-                        channel: webSocketService.channel!,
-                        onThemeChanged: onThemeChanged,
-                        webSocketService: webSocketService,
+                  if (await isLeadScout()) {
+                    // await the Future<bool>
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LeadScoutingPage(
+                          teamName: "1148",
+                          channel: webSocketService.channel!,
+                          onThemeChanged: onThemeChanged,
+                          webSocketService: webSocketService,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AutoPage(
+                          teamName: "1148",
+                          id: userId,
+                          channel: webSocketService.channel!,
+                          onThemeChanged: onThemeChanged,
+                          webSocketService: webSocketService,
+                        ),
+                      ),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
