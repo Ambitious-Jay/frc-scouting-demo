@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/auto_table_page.dart';
+import 'package:frc1148_2025_scouting_app/graphing_page.dart';
 import 'package:frc1148_2025_scouting_app/preset_comment.dart';
 import 'color_scheme.dart';
 
@@ -16,7 +17,7 @@ Map<String, Map<String, dynamic>> teamsData = {
     'EPA': 3.45,
     'Rank': 1,
     'WLR': '5-2-0',
-    'Processor': 2,
+    'Processor': 'TRUE',
     'Net': 'TRUE',
     'Hang': 'deep Cage',
     'L1': 3,
@@ -36,7 +37,7 @@ Map<String, Map<String, dynamic>> teamsData = {
     'EPA': 4.12,
     'Rank': 2,
     'WLR': '7-1-0',
-    'Processor': 3,
+    'Processor': 'False',
     'Net': 'TRUE',
     'Hang': 'shallow Cage',
     'L1': 1,
@@ -56,7 +57,7 @@ Map<String, Map<String, dynamic>> teamsData = {
     'EPA': 2.87,
     'Rank': 3,
     'WLR': '3-4-1',
-    'Processor': 1,
+    'Processor': 'TRUE',
     'Net': 'FALSE',
     'Hang': 'none',
     'L1': 2,
@@ -100,7 +101,7 @@ class _AllianceData extends State<AllianceData> {
       'EPA': 0.0,
       'Rank': 0,
       'WLR': '0-0-0',
-      'Processor': 0,
+      'Processor': 'FALSE',
       'Net': 'FALSE',
       'Hang': 'none',
       'L1': 0,
@@ -279,6 +280,78 @@ class _AllianceData extends State<AllianceData> {
                 ]),
               ],
             ),
+          ),
+          
+          SizedBox(height: height * 0.02),
+          
+          // Buttons for Auto Table and Preset Comments
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Navigate to Auto Table page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AutoTablePage(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Auto Table",
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.lightBlue
+                    )
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Navigate to Preset Comments page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PresetComment(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Preset Comments",
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.lightBlue
+                    )
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Navigate to Preset Comments page
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Graphing(),
+                    ),
+                  );
+                  },
+                  child: const Text(
+                    "Graphing",
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.lightBlue
+                    )
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

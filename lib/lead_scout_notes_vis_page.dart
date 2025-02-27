@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/auto_table_page.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/graphing_page.dart';
 import 'package:frc1148_2025_scouting_app/preset_comment.dart';
 import 'package:frc1148_2025_scouting_app/scroll_controller.dart';
 
@@ -9,12 +10,19 @@ Map<String, Map<String, Map<String, dynamic>>> robotData = {
   'Performance Stats': {
     'Scoring': {
       'Coral Per Match': 0,
-      'L4 OPR Count': 1,
-      'L3/L2 OPR Count': 2,
-      'L1 OPR Count': 3,
-      'Algae Per Match': 4,
-      'Net OPR Count': 5,
-      'Processor OPR Count': 6,
+      'L4 OPR Count': 0,
+      'L3/L2 OPR Count': 0,
+      'L1 OPR Count': 0,
+      'Algae Per Match': 0,
+      'Net OPR Count': 0,
+      'Processor OPR Count': 0,
+      'EPA': 0.0,
+      'Rank': 0,
+      'WLR': '0-0-0',
+      'Processor': 'FALSE',
+      'Net': 'FALSE',
+      'CPM': 0,
+      'APM': 0,
     },
     'Capabilities': {
       'Can Deep Cage': 'TRUE',
@@ -62,6 +70,7 @@ Map<String, Map<String, Map<String, dynamic>>> robotData = {
   },
 };
 
+
 final ScrollController compatibilityController = ScrollController();
 final ScrollController featsController = ScrollController();
 final ScrollController hPlayerController = ScrollController();
@@ -76,7 +85,14 @@ class LeadScoutNotesVisPage extends StatefulWidget {
 
 class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
   Future<void> setUp() async {}
-
+  String teamName = "";
+  
+  @override
+  void initState() {
+    super.initState();
+    teamName = widget.teamName;
+  }
+  
   Widget buildStatItem(String label, double height) {
     // First check if it's in the Performance Stats section
     if (robotData['Performance Stats']!['Scoring']!.containsKey(label)) {
@@ -170,66 +186,179 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
   Widget buildStatsContainer(double width, double height) {
     return Container(
       width: width,
-      height: height * 1 / 3,
-      alignment: AlignmentDirectional.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      padding: EdgeInsets.all(width * 0.02),
+      child: Column(
         children: [
-          Expanded(
-            child: Column(
+          // Team Name and Number at the top
+          Container(
+            width: width,
+            padding: EdgeInsets.symmetric(vertical: height * 0.01),
+            child: Text(
+              teamName,
+              style: TextStyle(
+                fontSize: height * 0.025,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          
+          SizedBox(height: height * 0.01),
+          
+          // First row: EPA, Rank, WLR
+          Container(
+            width: width,
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Expanded(child: buildStatItem("EPA", height)),
+                Expanded(child: buildStatItem("Rank", height)),
+                Expanded(child: buildStatItem("WLR", height)),
+              ],
+            ),
+          ),
+          
+          SizedBox(height: height * 0.02),
+          
+          // Second row: Processor, Net, Hang
+          Container(
+            width: width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(child: buildStatItem("Processor", height)),
+                Expanded(child: buildStatItem("Net", height)),
+              ],
+            ),
+          ),
+          
+          SizedBox(height: height * 0.02),
+          
+          // Third row: CPM, APM, CPM
+          Container(
+            width: width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(child: buildStatItem("CPM", height)),
+                Expanded(child: buildStatItem("APM", height)),
                 Expanded(child: buildStatItem("Coral Per Match", height)),
-                Expanded(child: buildStatItem("L4 OPR Count", height)),
-                Expanded(child: buildStatItem("L3/L2 OPR Count", height)),
-                Expanded(child: buildStatItem("L1 OPR Count", height)),
               ],
             ),
           ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(child: buildStatItem("Algae Per Match", height)),
-                Expanded(child: buildStatItem("Net OPR Count", height)),
-                Expanded(child: buildStatItem("Processor OPR Count", height)),
+          
+          SizedBox(height: height * 0.03),
+          
+          // OPR Table
+          Container(
+            width: width * 0.9,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DataTable(
+              columnSpacing: width * 0.05,
+              headingRowHeight: height * 0.04,
+              dataRowHeight: height * 0.04,
+              columns: const [
+                DataColumn(label: Text('Metric', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Value', style: TextStyle(fontWeight: FontWeight.bold))),
+              ],
+              rows: [
+                DataRow(cells: [
+                  const DataCell(Text('L4 OPR Count')),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['L4 OPR Count'].toString())),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text('L3/L2 OPR Count')),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['L3/L2 OPR Count'].toString())),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text('L1 OPR Count')),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['L1 OPR Count'].toString())),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text('Net OPR Count')),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['Net OPR Count'].toString())),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text('Processor OPR Count')),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['Processor OPR Count'].toString())),
+                ]),
               ],
             ),
           ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(child: buildStatItem("Can Deep Cage", height)),
-                Expanded(child: buildStatItem("Can Shallow Cage", height)),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {},
-                          child: const Text("Auto Table",
-                              style: TextStyle(
-                                  color: Colors.lightBlue,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: Colors.lightBlue)),
-                        ),
+          
+          SizedBox(height: height * 0.02),
+          
+          // Buttons for Auto Table and Preset Comments
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Navigate to Auto Table page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AutoTablePage(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
                       ),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {},
-                          child: const Text("Preset Comments",
-                              style: TextStyle(
-                                  color: Colors.lightBlue,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: Colors.lightBlue)),
-                        ),
+                    );
+                  },
+                  child: const Text(
+                    "Auto Table",
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.lightBlue
+                    )
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Navigate to Preset Comments page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PresetComment(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
                       ),
-                    ],
-                  )
-                )
-              ],
-            ),
+                    );
+                  },
+                  child: const Text(
+                    "Preset Comments",
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.lightBlue
+                    )
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Navigate to Preset Comments page
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Graphing(),
+                    ),
+                  );
+                  },
+                  child: const Text(
+                    "Graphing",
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.lightBlue
+                    )
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

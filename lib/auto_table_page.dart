@@ -6,7 +6,7 @@ class AutoTablePage extends StatefulWidget {
 
   const AutoTablePage({
     Key? key,
-    required this.onThemeChanged,
+    required this.onThemeChanged, required String teamNumber,
   }) : super(key: key);
 
   @override
