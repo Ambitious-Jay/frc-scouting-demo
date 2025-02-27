@@ -192,14 +192,15 @@ class _MatchList extends State<MatchList> {
                               // This fetches what will be displayed (make conditional??)
                               // List<String> matchData = await _fetchRow(matches[index]);
                               // This navigates to the next page
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AllianceData(
-                                      allianceName: "placeholder alliance"),
-                                ),
-                              );
-                            }),
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => const AllianceData(
+                              //         allianceName: "placeholder alliance"),
+                              //   ),
+                              // );
+                            }
+                          ),
                         ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               side: BorderSide(color: Colors.grey, width: 1),
@@ -214,7 +215,7 @@ class _MatchList extends State<MatchList> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const AllianceData(
-                                      allianceName: "placeholder alliance"),
+                                      allianceNames: "1148,254,1678"),
                                 ),
                               );
                             }),
@@ -236,7 +237,7 @@ class _MatchList extends State<MatchList> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const AllianceData(
-                                      allianceName: "placeholder alliance"),
+                                      allianceNames: "1148,254,1678"),
                                 ),
                               );
                             })
