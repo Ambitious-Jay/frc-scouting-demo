@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/pit_scouting_page.dart';
+import 'package:frc1148_2025_scouting_app/qual_vis_page.dart';
 import 'package:frc1148_2025_scouting_app/team_search_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
@@ -85,13 +86,13 @@ class _MainAppState extends State<MyApp> {
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      home: DashboardPage(channel: _webSocketService.channel,
-              onThemeChanged: (ThemeMode mode) {
-                setState(() {
-                  themeMode = mode;
-                });
-              },
-              webSocketService: _webSocketService,)
+      // home: DashboardPage(channel: _webSocketService.channel,
+      //         onThemeChanged: (ThemeMode mode) {
+      //           setState(() {
+      //             themeMode = mode;
+      //           });
+      //         },
+      //         webSocketService: _webSocketService,)
       // home: _isLoggedIn
       //     ? ObjectivePage(
       //         channel: _webSocketService.channel,
@@ -114,7 +115,7 @@ class _MainAppState extends State<MyApp> {
       // home: FlexibleScatterPlot(
       //   teamData: teamData,
       // ),
-      // home: PitScouting(teamName: 'meow'),
+      home: const QualVisPage(qualNum: "4"),
     );
   }
 }
