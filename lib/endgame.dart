@@ -7,6 +7,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 // String Hang = "";
 bool triedHang = false;
+bool defensive = false;
 
 /**
  * HEY MILO ADD PRESENT COMMENTS HERE
@@ -208,6 +209,48 @@ class _Endgame extends State<Endgame> {
                 //     }).toList(),
                 //   ),
                 // ),
+                ),
+            const Divider(),
+            SizedBox(
+                height: height / 3.5,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const Text(
+                      "Defense?",
+                      style: TextStyle(fontSize: 30),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          defensive = !defensive;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        // backgroundColor: park
+                        //     ? Theme.of(context).colorScheme.primary
+                        //     : Theme.of(context).colorScheme.secondary,
+                        // foregroundColor: park
+                        //     ? Theme.of(context).colorScheme.onPrimary
+                        //     : Theme.of(context).colorScheme.onSecondary,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        minimumSize: const Size(100, 100),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      child: defensive
+                          ? const Icon(
+                              // Icons.library_add_check,
+                              Icons.done,
+                              size: 44,
+                              color: Colors.white,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                )
                 ),
             const Divider(),
             // Grid of preset buttons
