@@ -43,16 +43,22 @@ bool triedHang = false;
  * HEY MILO ADD PRESENT COMMENTS HERE
 **/
 Map<String, bool> presets = <String, bool>{
-  'Part Broke': false,
+  'Mechanism Broke': false,
   'Stopped Moving': false,
   'Fast': false,
   'Good Driving': false,
+  'Bad Driving': false,
   'Tippy': false,
-  'Accurate Coral': false,
-  'Defensive': false,
-  'Net Algae': false,
-  'L2': false,
-  'L3': false
+  'Not Tippy': false,
+  'Consistent Coral': false,
+  'Inaccurate Coral': false,
+  'Good Defense': false,
+  'Bad Defense': false,
+  'Jams Often': false,
+  'Fast Climb': false,
+  'Slow Climb': false,
+  'Consistent Auton': false,
+  'Inconsistent Auton': false,
 };
 
 List<String> keys = presets.keys.toList();
