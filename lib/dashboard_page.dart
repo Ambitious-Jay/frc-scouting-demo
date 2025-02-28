@@ -3,6 +3,7 @@ import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:frc1148_2025_scouting_app/info_page.dart';
 import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
 import 'package:frc1148_2025_scouting_app/pit_scouting_page.dart';
+import 'package:frc1148_2025_scouting_app/scout_match_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -97,8 +98,7 @@ class DashboardPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AutoPage(
-                          teamName: "1148",
+                        builder: (context) => ScoutMatchList(
                           id: userId,
                           channel: webSocketService.channel!,
                           onThemeChanged: onThemeChanged,
