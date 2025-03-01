@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'color_scheme.dart';
 import 'dart:convert';
+import 'dashboard_page.dart'; 
 
 // Global variables for pit scouting values
 String robotWeight = "";
@@ -33,6 +34,15 @@ List<String> climbOptions = ['Shallow', 'Deep', 'No Hang'];
 // Autonomous
 int coralPoints = 0;
 bool leavesStartLine = false;
+
+/// Custom scroll behavior that disables the default overscroll glow.
+class MyCustomScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
+}
 
 class PitScouting extends StatefulWidget {
   const PitScouting(
@@ -87,9 +97,7 @@ class _PitScouting extends State<PitScouting> {
   }
 
   /// Submits the pit scouting data to the SQL server.
-  /// This function builds an INSERT statement targeting a table called "PitScoutingData"
-  /// with clearly named columns and sends it over the WebSocket channel using the
-  /// "length-prefixed JSON" protocol.
+  /// Builds an INSERT statement targeting "PitScoutingData" and sends it over the WebSocket.
   Future<void> _submitPitScoutingData() async {
     final sql = '''
       INSERT INTO PitScoutingData (
@@ -99,25 +107,10 @@ class _PitScouting extends State<PitScouting> {
         autonomous_coral_points, leaves_start_line
       )
       VALUES (
-        '${widget.teamName}',
-        '$robotWeight',
-        '$driveType',
-        '$motorType',
-        '$motorNum',
-        '$bumperQuality',
-        ${intakeStation ? 1 : 0},
-        ${coralGround ? 1 : 0},
-        ${algaeGround ? 1 : 0},
-        ${algaeReefControlled ? 1 : 0},
-        ${levelOne ? 1 : 0},
-        ${levelTwo ? 1 : 0},
-        ${levelThree ? 1 : 0},
-        ${levelFour ? 1 : 0},
-        ${processor ? 1 : 0},
-        ${net ? 1 : 0},
-        '$climbType',
-        $coralPoints,
-        ${leavesStartLine ? 1 : 0}
+        '${widget.teamName}', '$robotWeight', '$driveType', '$motorType', '$motorNum', '$bumperQuality',
+        ${intakeStation ? 1 : 0}, ${coralGround ? 1 : 0}, ${algaeGround ? 1 : 0}, ${algaeReefControlled ? 1 : 0},
+        ${levelOne ? 1 : 0}, ${levelTwo ? 1 : 0}, ${levelThree ? 1 : 0}, ${levelFour ? 1 : 0},
+        ${processor ? 1 : 0}, ${net ? 1 : 0}, '$climbType', $coralPoints, ${leavesStartLine ? 1 : 0}
       )
     ''';
 
@@ -131,7 +124,17 @@ class _PitScouting extends State<PitScouting> {
     try {
       widget.channel.sink.add(prefix + encodedJson);
       debugPrint('Successfully sent pit scouting INSERT command: $sql');
-      // Optionally, show a confirmation message or navigate to another page.
+      // After sending, redirect to DashboardPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashboardPage(
+            webSocketService: WebSocketService(), // pass your existing instance if available
+            onThemeChanged: (ThemeMode mode) {},
+            teamName: widget.teamName,
+          ),
+        ),
+      );
     } catch (e, st) {
       debugPrint('Error sending pit scouting data to DB: $e\n$st');
     }
@@ -149,14 +152,12 @@ class _PitScouting extends State<PitScouting> {
         ),
         elevation: 21,
       ),
-      body: Center(
+      body: ScrollConfiguration(
+        behavior: MyCustomScrollBehavior(),
         child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           children: <Widget>[
-            Container(
-              width: 0,
-              height: 60,
-              color: Colors.white10,
-            ),
+            SizedBox(height: 16),
             Center(
               child: RichText(
                 text: TextSpan(
@@ -181,468 +182,337 @@ class _PitScouting extends State<PitScouting> {
                 ),
               ),
             ),
+            SizedBox(height: 16),
             const Center(
               child: Text(
-                "\nGeneral Robot Information",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                "General Robot Information",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+            SizedBox(height: 16),
             // Robot Weight
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[0],
-                      textScaleFactor: 1.5,
-                    ),
-                    SizedBox(
-                      width: width / 7,
-                      child: TextField(
-                        controller: _controller1,
-                        onChanged: (String value) {
-                          setState(() {
-                            robotWeight = value;
-                          });
-                          print("Current value: $value");
-                        },
-                      ),
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[0], textScaleFactor: 1.3),
+                SizedBox(
+                  width: width / 4,
+                  child: TextField(
+                    controller: _controller1,
+                    onChanged: (String value) {
+                      setState(() {
+                        robotWeight = value;
+                      });
+                      print("Robot weight: $value");
+                    },
+                  ),
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Drive Type
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(entries[1], textScaleFactor: 1.5),
-                    DropdownButton<String>(
-                      value: driveType.isNotEmpty ? driveType : null,
-                      hint: const Text('Select Drive Type'),
-                      items: driveOptions.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          driveType = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[1], textScaleFactor: 1.3),
+                DropdownButton<String>(
+                  value: driveType.isNotEmpty ? driveType : null,
+                  hint: const Text('Select Drive Type'),
+                  items: driveOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      driveType = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Motor Type
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[2],
-                      textScaleFactor: 1.5,
-                    ),
-                    SizedBox(
-                      width: width / 3,
-                      child: TextField(
-                        controller: _controller2,
-                        onChanged: (String value) {
-                          setState(() {
-                            motorType = value;
-                          });
-                          print("Current value: $value");
-                        },
-                      ),
-                    )
-                  ],
+            Column(
+              children: [
+                Text(entries[2], textScaleFactor: 1.3),
+                SizedBox(
+                  width: width / 3,
+                  child: TextField(
+                    controller: _controller2,
+                    onChanged: (String value) {
+                      setState(() {
+                        motorType = value;
+                      });
+                      print("Motor type: $value");
+                    },
+                  ),
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Motor Count
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[3],
-                      textScaleFactor: 1.5,
-                    ),
-                    SizedBox(
-                      width: width / 3,
-                      child: TextField(
-                        controller: _controller3,
-                        onChanged: (String value) {
-                          setState(() {
-                            motorNum = value;
-                          });
-                          print("Current value: $value");
-                        },
-                      ),
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[3], textScaleFactor: 1.3),
+                SizedBox(
+                  width: width / 3,
+                  child: TextField(
+                    controller: _controller3,
+                    onChanged: (String value) {
+                      setState(() {
+                        motorNum = value;
+                      });
+                      print("Motor count: $value");
+                    },
+                  ),
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Bumper Quality
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[4],
-                      textScaleFactor: 1.5,
-                    ),
-                    SizedBox(
-                        width: width / 3,
-                        child: TextField(
-                          controller: _controller4,
-                          onChanged: (String value) {
-                            setState(() {
-                              bumperQuality = value;
-                            });
-                            print("Current value: $value");
-                          },
-                        )),
-                  ],
+            Column(
+              children: [
+                Text(entries[4], textScaleFactor: 1.3),
+                SizedBox(
+                  width: width / 3,
+                  child: TextField(
+                    controller: _controller4,
+                    onChanged: (String value) {
+                      setState(() {
+                        bumperQuality = value;
+                      });
+                      print("Bumper quality: $value");
+                    },
+                  ),
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Intake Information
             const Center(
               child: Text(
                 "Intake Information",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[5],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: intakeStation,
-                      onChanged: (newValue) {
-                        setState(() {
-                          intakeStation = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            SizedBox(height: 16),
+            Column(
+              children: [
+                Text(entries[5], textScaleFactor: 1.3),
+                Checkbox(
+                  value: intakeStation,
+                  onChanged: (newValue) {
+                    setState(() {
+                      intakeStation = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Coral from Ground
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[6],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: coralGround,
-                      onChanged: (newValue) {
-                        setState(() {
-                          coralGround = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[6], textScaleFactor: 1.3),
+                Checkbox(
+                  value: coralGround,
+                  onChanged: (newValue) {
+                    setState(() {
+                      coralGround = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Algae from Ground
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[7],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: algaeGround,
-                      onChanged: (newValue) {
-                        setState(() {
-                          algaeGround = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[7], textScaleFactor: 1.3),
+                Checkbox(
+                  value: algaeGround,
+                  onChanged: (newValue) {
+                    setState(() {
+                      algaeGround = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Algae Reef Controlled
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[8],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: algaeReefControlled,
-                      onChanged: (newValue) {
-                        setState(() {
-                          algaeReefControlled = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[8], textScaleFactor: 1.3),
+                Checkbox(
+                  value: algaeReefControlled,
+                  onChanged: (newValue) {
+                    setState(() {
+                      algaeReefControlled = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Scoring Information Header
             const Center(
               child: Text(
                 "Scoring Information",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+            SizedBox(height: 16),
             // Level One
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[9],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: levelOne,
-                      onChanged: (newValue) {
-                        setState(() {
-                          levelOne = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[9], textScaleFactor: 1.3),
+                Checkbox(
+                  value: levelOne,
+                  onChanged: (newValue) {
+                    setState(() {
+                      levelOne = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Level Two
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[10],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: levelTwo,
-                      onChanged: (newValue) {
-                        setState(() {
-                          levelTwo = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[10], textScaleFactor: 1.3),
+                Checkbox(
+                  value: levelTwo,
+                  onChanged: (newValue) {
+                    setState(() {
+                      levelTwo = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Level Three
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[11],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: levelThree,
-                      onChanged: (newValue) {
-                        setState(() {
-                          levelThree = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[11], textScaleFactor: 1.3),
+                Checkbox(
+                  value: levelThree,
+                  onChanged: (newValue) {
+                    setState(() {
+                      levelThree = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Level Four
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[12],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: levelFour,
-                      onChanged: (newValue) {
-                        setState(() {
-                          levelFour = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[12], textScaleFactor: 1.3),
+                Checkbox(
+                  value: levelFour,
+                  onChanged: (newValue) {
+                    setState(() {
+                      levelFour = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Processor
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[13],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: processor,
-                      onChanged: (newValue) {
-                        setState(() {
-                          processor = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[13], textScaleFactor: 1.3),
+                Checkbox(
+                  value: processor,
+                  onChanged: (newValue) {
+                    setState(() {
+                      processor = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Net
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[14],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: net,
-                      onChanged: (newValue) {
-                        setState(() {
-                          net = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[14], textScaleFactor: 1.3),
+                Checkbox(
+                  value: net,
+                  onChanged: (newValue) {
+                    setState(() {
+                      net = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Climb Type
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(entries[15], textScaleFactor: 1.5),
-                    DropdownButton<String>(
-                      value: climbType.isNotEmpty ? climbType : null,
-                      hint: const Text('Select Climb Type'),
-                      items: climbOptions.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          climbType = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[15], textScaleFactor: 1.3),
+                DropdownButton<String>(
+                  value: climbType.isNotEmpty ? climbType : null,
+                  hint: const Text('Select Climb Type'),
+                  items: climbOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      climbType = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Autonomous - Coral Points
             const Center(
               child: Text(
                 "Autonomous",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[16],
-                      textScaleFactor: 1.5,
-                    ),
-                    TextField(
-                      onChanged: (String value) {
-                        setState(() {
-                          coralPoints = int.tryParse(value) ?? 0;
-                        });
-                        print("Current value: $value");
-                      },
-                    ),
-                  ],
+            SizedBox(height: 16),
+            Column(
+              children: [
+                Text(entries[16], textScaleFactor: 1.3),
+                TextField(
+                  keyboardType: TextInputType.number,
+                  onChanged: (String value) {
+                    setState(() {
+                      coralPoints = int.tryParse(value) ?? 0;
+                    });
+                    print("Coral Points: $value");
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Autonomous - Leaves Start Line
-            SizedBox(
-              height: height / 3.5,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      entries[17],
-                      textScaleFactor: 1.5,
-                    ),
-                    Checkbox(
-                      value: leavesStartLine,
-                      onChanged: (newValue) {
-                        setState(() {
-                          leavesStartLine = newValue!;
-                        });
-                      },
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(entries[17], textScaleFactor: 1.3),
+                Checkbox(
+                  value: leavesStartLine,
+                  onChanged: (newValue) {
+                    setState(() {
+                      leavesStartLine = newValue!;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
+            SizedBox(height: 16),
             // Submission Button
             ElevatedButton(
               onPressed: () async {
@@ -650,6 +520,7 @@ class _PitScouting extends State<PitScouting> {
               },
               child: const Icon(Icons.send, color: colors.myOnPrimary),
             ),
+            SizedBox(height: 16),
           ],
         ),
       ),

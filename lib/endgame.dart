@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+// Global variables for endgame/pit scouting presets
 bool triedHang = false;
 bool defensive = false;
 
@@ -25,6 +27,7 @@ Map<String, bool> presets = <String, bool>{
   'Slow Climb': false,
   'Consistent Auton': false,
   'Inconsistent Auton': false,
+  'Net Algae': false, // Added key for net_algae
 };
 
 List<String> keys = presets.keys.toList();
@@ -52,22 +55,26 @@ class Endgame extends StatefulWidget {
 }
 
 class _Endgame extends State<Endgame> {
+  String _username = "";
+
   Future<void> _submitEndgameData() async {
+    // Build the SQL query to insert endgame data.
+    // Note: We convert booleans to integers (1 for true, 0 for false).
     final sql = '''
       INSERT INTO EndgameData (
-        team_number, triedHang, part_broke, stopped_moving, fast, good_driving, tippy, accurate_coral, defensive, net_algae
+        team_number, attempt_to_park, part_broke, stopped_moving, fast, good_driving, tippy, accurate_coral, defensive, net_algae
       )
       VALUES (
         '${widget.teamName}',
-        '$triedHang',
-        ${presets['Part Broke'] == true ? 1 : 0},
+        ${triedHang ? 1 : 0},
+        ${presets['Mechanism Broke'] == true ? 1 : 0},
         ${presets['Stopped Moving'] == true ? 1 : 0},
         ${presets['Fast'] == true ? 1 : 0},
         ${presets['Good Driving'] == true ? 1 : 0},
         ${presets['Tippy'] == true ? 1 : 0},
-        ${presets['Accurate Coral'] == true ? 1 : 0},
-        ${presets['Defensive'] == true ? 1 : 0},
-        ${presets['Net Algae'] == true ? 1 : 0}
+        ${presets['Consistent Coral'] == true ? 1 : 0},
+        ${presets['Good Defense'] == true ? 1 : 0},
+        ${presets.containsKey('Net Algae') && presets['Net Algae'] == true ? 1 : 0}
       )
     ''';
 
@@ -88,9 +95,20 @@ class _Endgame extends State<Endgame> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Retrieve the logged-in username from AuthService.
+    AuthService.getUsername().then((value) {
+      setState(() {
+        _username = value ?? "";
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+    double width  = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -102,7 +120,7 @@ class _Endgame extends State<Endgame> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(
-              '${widget.id} is watching Team ${widget.teamName} "${widget.teamNickname}"',
+              '$_username: Team ${widget.teamName} in match ${widget.id}',
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -111,6 +129,7 @@ class _Endgame extends State<Endgame> {
       body: Center(
         child: ListView(
           children: [
+            // Attempt to Park Row
             SizedBox(
               height: height / 3.5,
               child: Row(
@@ -145,6 +164,7 @@ class _Endgame extends State<Endgame> {
               ),
             ),
             const Divider(),
+            // Defense Row
             SizedBox(
                 height: height / 3.5,
                 child: Row(
@@ -161,14 +181,7 @@ class _Endgame extends State<Endgame> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        // backgroundColor: park
-                        //     ? Theme.of(context).colorScheme.primary
-                        //     : Theme.of(context).colorScheme.secondary,
-                        // foregroundColor: park
-                        //     ? Theme.of(context).colorScheme.onPrimary
-                        //     : Theme.of(context).colorScheme.onSecondary,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Theme.of(context).colorScheme.onPrimary,
                         minimumSize: const Size(100, 100),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
@@ -176,7 +189,6 @@ class _Endgame extends State<Endgame> {
                       ),
                       child: defensive
                           ? const Icon(
-                              // Icons.library_add_check,
                               Icons.done,
                               size: 44,
                               color: Colors.white,
@@ -184,8 +196,7 @@ class _Endgame extends State<Endgame> {
                           : const SizedBox.shrink(),
                     ),
                   ],
-                )
-                ),
+                )),
             const Divider(),
             // Grid of preset buttons
             SingleChildScrollView(

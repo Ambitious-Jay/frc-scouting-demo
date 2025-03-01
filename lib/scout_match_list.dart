@@ -1,172 +1,225 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
-import 'package:frc1148_2025_scouting_app/alliance_data.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
+import 'package:frc1148_2025_scouting_app/objective_page.dart';
+import 'package:frc1148_2025_scouting_app/lead_scouting_page.dart';
+import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'color_scheme.dart';
+
+/// Model representing a match assignment.
+class AssignmentItem {
+  final int rowSeq;
+  final String matchID;
+  final String teamNumber;
+  final String role;
+
+  AssignmentItem({
+    required this.rowSeq,
+    required this.matchID,
+    required this.teamNumber,
+    required this.role,
+  });
+
+  factory AssignmentItem.fromMap(Map<String, dynamic> map) {
+    return AssignmentItem(
+      rowSeq: map['row_seq'] is int
+          ? map['row_seq']
+          : int.parse(map['row_seq'].toString()),
+      matchID: map['MatchID'] as String,
+      teamNumber: map['TeamNumber'] as String,
+      role: map['role'] as String,
+    );
+  }
+}
 
 class ScoutMatchList extends StatefulWidget {
   final WebSocketService webSocketService;
   final Function(ThemeMode) onThemeChanged;
-
   const ScoutMatchList({
     Key? key,
-    required this.id,
     required this.webSocketService,
     required this.onThemeChanged,
     WebSocketChannel? channel,
   }) : super(key: key);
-  final String id;
 
   @override
-  State<ScoutMatchList> createState() => _ScoutMatchList();
+  State<ScoutMatchList> createState() => _ScoutMatchListState();
 }
 
-class _ScoutMatchList extends State<ScoutMatchList> {
-  final TextEditingController searchController = TextEditingController();
-  Map<String, String> matches = {}; // Changed from Map<String, List<String>>
-  List<String> filteredMatches = [];
-  bool searchByMatch = true;
+class _ScoutMatchListState extends State<ScoutMatchList> {
+  List<AssignmentItem> _assignments = [];
+  String _username = "";
+  bool _loading = false;
+  String? _errorMessage;
+  StreamSubscription? _wsSubscription;
 
   @override
   void initState() {
     super.initState();
-    filteredMatches = matches.keys.toList(); // Start with all matches displayed
-    searchController.addListener(filterMatches);
-  }
-
-  void filterMatches() {
-    // Renamed from filterTeams for clarity
-    setState(() {
-      String query = searchController.text.toLowerCase();
-      if (searchByMatch) {
-        // Search by match number
-        filteredMatches = matches.keys
-            .where((match) =>
-                match.toLowerCase() == "qm" + query ||
-                match.toLowerCase().startsWith("qm" + query))
-            .toList();
-      } else {
-        // Search by team number
-        filteredMatches = matches.entries
-            .where((entry) => entry.value.toLowerCase().contains(query))
-            .map((entry) => entry.key)
-            .toList();
-      }
+    AuthService.getUsername().then((value) {
+      setState(() {
+        _username = value ?? "";
+      });
+      _fetchAssignments();
     });
-  }
 
-  void toggleSearch() {
-    searchByMatch = !searchByMatch;
+    _wsSubscription = widget.webSocketService.stream?.listen((rawMessage) {
+      _handleServerMessage(rawMessage);
+    });
   }
 
   @override
   void dispose() {
-    searchController.dispose();
+    _wsSubscription?.cancel();
     super.dispose();
   }
 
-  Future<void> _fillMatches(col) async {
-    // This gets the matches for one scout to list
-    matches.clear(); // Clear existing data before adding new
-    matches.addAll({
-      "qm1": "1114",
-      "qm2": "148",
-      "qm3": "1678",
-      "qm4": "1323",
-      "qm5": "4414",
-      "qm6": "2056",
-      "qm7": "2910",
-      "qm8": "3310",
-      "qm9": "148",
-      "qm10": "2056",
-      "qm11": "1678",
-      "qm12": "4414",
-      "qm13": "2910",
-      "qm14": "148",
-      "qm15": "1323",
+  Future<void> _fetchAssignments() async {
+    if (_username.isEmpty) {
+      setState(() {
+        _errorMessage = "Username not found.";
+        _loading = false;
+      });
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
     });
+    final String sql =
+        "SELECT row_seq, 'qm' + CAST(match_number AS VARCHAR(10)) AS MatchID, "
+        "team_key AS TeamNumber, role "
+        "FROM Assignment "
+        "WHERE scout_name = '$_username' "
+        "ORDER BY row_seq;";
+    final Map<String, dynamic> queryCmd = {
+      "type": "query",
+      "text": sql,
+    };
+    widget.webSocketService.sendLengthPrefixed(queryCmd);
+    print('Sent assignment query: $sql');
+  }
 
-    filteredMatches = matches.keys.toList(); // Refresh displayed matches
-    setState(() {});
+  void _handleServerMessage(String raw) {
+    try {
+      final int idx = raw.indexOf('\r\n');
+      if (idx < 0) return;
+      final String lenStr = raw.substring(0, idx);
+      final int len = int.parse(lenStr);
+      final String jsonPart = raw.substring(idx + 2);
+      if (jsonPart.length != len) {
+        print('Length mismatch: expected $len, got ${jsonPart.length}');
+        return;
+      }
+      final Map<String, dynamic> msg = jsonDecode(jsonPart);
+      if (msg["type"] == "query") {
+        final List<dynamic> rows = msg["rows"];
+        if (rows == null || rows.isEmpty) {
+          setState(() {
+            _errorMessage = "No match assignments found.";
+            _assignments = [];
+            _loading = false;
+          });
+        } else {
+          List<AssignmentItem> assignments =
+              rows.map((row) => AssignmentItem.fromMap(row)).toList();
+          setState(() {
+            _assignments = assignments;
+            _loading = false;
+          });
+          print("Fetched ${assignments.length} assignments.");
+        }
+      }
+    } catch (e) {
+      print("Error processing server message: $e");
+      setState(() {
+        _errorMessage = "Error processing server message: $e";
+        _loading = false;
+      });
+    }
+  }
+
+  void _onMatchPressed(AssignmentItem assignment) {
+    if (assignment.role.toLowerCase() == 'lead') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LeadScoutingPage(
+            teamName: assignment.teamNumber,
+            id: assignment.matchID,
+            channel: widget.webSocketService.channel!,
+            onThemeChanged: widget.onThemeChanged,
+            webSocketService: widget.webSocketService,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AutoPage(
+            teamName: assignment.teamNumber,
+            teamNickname: "", // Optionally, add more info here.
+            id: assignment.matchID,
+            channel: widget.webSocketService.channel!,
+            onThemeChanged: widget.onThemeChanged,
+            webSocketService: widget.webSocketService,
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+    final double h = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Matches to Scout"),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(8),
-              itemCount: filteredMatches.length,
-              itemBuilder: (BuildContext context, int index) {
-                String matchKey = filteredMatches[index];
-                String teamToScout = matches[matchKey] ?? "";
-
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white),
-                  ),
-                  child: SizedBox(
-                    height: height / 12,
-                    width: width / 20,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              side: BorderSide(color: Colors.grey, width: 1),
-                            ),
-                            child: Text("${matchKey}: Team ${teamToScout}"),
-                            onPressed: () async {
-                              // This navigates to the next page
-                              // Add your navigation code here
-                            }),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              side: BorderSide(color: Colors.grey, width: 1),
-                            ),
-                            child: Text("Scout"),
-                            onPressed: () async {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AutoPage(
-                                    teamName: teamToScout,
-                                    teamNickname:
-                                        "temporary filler fix mattin to do",
-                                    id: matchKey,
-                                    channel: widget.webSocketService.channel!,
-                                    onThemeChanged: (ThemeMode) {},
-                                    webSocketService: widget.webSocketService,
-                                  ),
-                                ),
-                              );
-                            }),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) => Container(
-                alignment: AlignmentDirectional.center,
-                height: height / 150,
-              ),
-            ),
-          ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _fetchAssignments,
+          )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.refresh),
-          onPressed: () async {
-            await _fillMatches(1);
-          }),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(child: Text(_errorMessage!))
+              : _assignments.isEmpty
+                  ? const Center(child: Text("No assignments found."))
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(8),
+                      itemCount: _assignments.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final AssignmentItem assignment = _assignments[index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              "${assignment.matchID}: Team ${assignment.teamNumber}",
+                              style: TextStyle(
+                                color: const Color(0xFFFFA5A5),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text("Role: ${assignment.role}"),
+                            trailing: ElevatedButton(
+                              child: const Text("Scout"),
+                              onPressed: () => _onMatchPressed(assignment),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -33,6 +34,7 @@ class AutoPage extends StatefulWidget {
 
 class _AutoPageState extends State<AutoPage> {
   ThemeMode themeMode = ThemeMode.system;
+  String _username = ""; // Define the _username variable
   bool isBlue = true;
   bool inCenterZone = false;
   bool inLeftZone = false;
@@ -75,23 +77,16 @@ class _AutoPageState extends State<AutoPage> {
 
   Future<void> _submitAutoScoutingData() async {
     final sql = '''
-      INSERT INTO AutoScoutingData (
+      INSERT INTO AutoScouting (
         team_number, watcher_id, l4_count, l2_l3_count, l1_count, net_count, processor_count,
         in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
       )
       VALUES (
-        '${widget.teamName}',
-        '${widget.id}',
-        ${l4Counter.value},
-        ${l2l3Counter.value},
-        ${l1Counter.value},
-        ${netCounter.value},
-        ${processorCounter.value},
-        ${inCenterZone ? 1 : 0},
-        ${inLeftZone ? 1 : 0},
-        ${inRightZone ? 1 : 0},
-        ${isBlue ? 1 : 0},
-        ${fieldFlipped ? 1 : 0}
+        '${widget.teamName}', '${widget.id}',
+        ${l4Counter.value}, ${l2l3Counter.value}, ${l1Counter.value},
+        ${netCounter.value}, ${processorCounter.value},
+        ${inCenterZone ? 1 : 0}, ${inLeftZone ? 1 : 0}, ${inRightZone ? 1 : 0},
+        ${isBlue ? 1 : 0}, ${fieldFlipped ? 1 : 0}
       )
     ''';
 
@@ -109,6 +104,17 @@ class _AutoPageState extends State<AutoPage> {
     } catch (e, st) {
       debugPrint('Error sending auto scouting data to DB: $e\n$st');
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Retrieve the logged-in username from SharedPreferences via AuthService.
+    AuthService.getUsername().then((value) {
+      setState(() {
+        _username = value ?? "";
+      });
+    });
   }
 
   @override
@@ -130,7 +136,10 @@ class _AutoPageState extends State<AutoPage> {
         title: Column(
           children: [
             const Text("Auto Phase"),
-            Text('${widget.id} is watching Team ${widget.teamName} "${widget.teamNickname}"'),
+            Text(
+              '$_username: Team ${widget.teamName} in match ${widget.id}',
+              style: const TextStyle(fontSize: 14),
+            ),
           ],
         ),
         actions: [
@@ -174,14 +183,19 @@ class _AutoPageState extends State<AutoPage> {
                     ),
                     Positioned(
                       top: fieldHeight / 2 - 25,
-                      right: (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) - 25,
+                      right:
+                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) -
+                              25,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Text("Center"),
+                          const Text("Center",
+                              style: TextStyle(color: Colors.black)),
                           Checkbox(
                               value: inCenterZone,
+                              checkColor: Colors.black,
+                              activeColor: Colors.black,
                               onChanged: (bool? value) => {
                                     setState(() {
                                       inCenterZone = value!;
@@ -200,9 +214,12 @@ class _AutoPageState extends State<AutoPage> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text("Left"),
+                                  const Text("Left",
+                                      style: TextStyle(color: Colors.black)),
                                   Checkbox(
                                       value: inLeftZone,
+                                      checkColor: Colors.black,
+                                      activeColor: Colors.black,
                                       onChanged: (bool? value) => {
                                             setState(() {
                                               inLeftZone = value!;
@@ -214,9 +231,12 @@ class _AutoPageState extends State<AutoPage> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text("Right"),
+                                  const Text("Right",
+                                      style: TextStyle(color: Colors.black)),
                                   Checkbox(
                                       value: inRightZone,
+                                      checkColor: Colors.black,
+                                      activeColor: Colors.black,
                                       onChanged: (bool? value) => {
                                             setState(() {
                                               inRightZone = value!;
@@ -245,7 +265,8 @@ class _AutoPageState extends State<AutoPage> {
                                               startPos = value;
                                             });
                                           })),
-                                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
+                                  SizedBox(
+                                      height: max(0, fieldHeight / 4 - 75)),
                                   ListTile(
                                       title: const Text(""),
                                       leading: Radio<String>(
@@ -256,7 +277,8 @@ class _AutoPageState extends State<AutoPage> {
                                               startPos = value;
                                             });
                                           })),
-                                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
+                                  SizedBox(
+                                      height: max(0, fieldHeight / 4 - 75)),
                                   ListTile(
                                       title: const Text(""),
                                       leading: Radio<String>(
@@ -304,8 +326,7 @@ class _AutoPageState extends State<AutoPage> {
                           onPressed: () =>
                               updateCounter(l4Counter, doIncrement),
                           child: Text('${l4Counter.value}',
-                              style:
-                                  TextStyle(fontSize: screenWidth * 0.10))),
+                              style: TextStyle(fontSize: screenWidth * 0.10))),
                       Padding(
                         padding: EdgeInsets.all(screenWidth * 0.05),
                         child: Text("L2 & L3",
@@ -324,8 +345,7 @@ class _AutoPageState extends State<AutoPage> {
                           onPressed: () =>
                               updateCounter(l2l3Counter, doIncrement),
                           child: Text('${l2l3Counter.value}',
-                              style:
-                                  TextStyle(fontSize: screenWidth * 0.10))),
+                              style: TextStyle(fontSize: screenWidth * 0.10))),
                       Padding(
                         padding: EdgeInsets.all(screenWidth * 0.05),
                         child: Text("L1",
@@ -344,8 +364,7 @@ class _AutoPageState extends State<AutoPage> {
                           onPressed: () =>
                               updateCounter(l1Counter, doIncrement),
                           child: Text('${l1Counter.value}',
-                              style:
-                                  TextStyle(fontSize: screenWidth * 0.10))),
+                              style: TextStyle(fontSize: screenWidth * 0.10))),
                     ],
                   ),
                 ],
@@ -356,8 +375,7 @@ class _AutoPageState extends State<AutoPage> {
                   Column(
                     children: [
                       Padding(
-                        padding:
-                            EdgeInsets.only(bottom: screenWidth * 0.0125),
+                        padding: EdgeInsets.only(bottom: screenWidth * 0.0125),
                         child: Text("Net",
                             style: TextStyle(fontSize: screenWidth * 0.05)),
                       ),
@@ -379,8 +397,7 @@ class _AutoPageState extends State<AutoPage> {
                   Column(
                     children: [
                       Padding(
-                        padding:
-                            EdgeInsets.only(bottom: screenWidth * 0.0125),
+                        padding: EdgeInsets.only(bottom: screenWidth * 0.0125),
                         child: Text("Processor",
                             style: TextStyle(fontSize: screenWidth * 0.05)),
                       ),
@@ -402,8 +419,7 @@ class _AutoPageState extends State<AutoPage> {
                   Column(
                     children: [
                       Padding(
-                        padding:
-                            EdgeInsets.only(bottom: screenWidth * 0.0125),
+                        padding: EdgeInsets.only(bottom: screenWidth * 0.0125),
                         child: Text("+/-",
                             style: TextStyle(fontSize: screenWidth * 0.075)),
                       ),
@@ -432,8 +448,7 @@ class _AutoPageState extends State<AutoPage> {
       ),
       bottomNavigationBar: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           foregroundColor: Theme.of(context).colorScheme.secondary,
           iconColor: Theme.of(context).colorScheme.secondary,

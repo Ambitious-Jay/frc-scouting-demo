@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/endgame.dart';
@@ -9,9 +10,10 @@ class ObjectivePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
   final WebSocketChannel? channel;
   final WebSocketService webSocketService;
-  final String teamName;
+  final String teamName; // Team number
+  final String id; // Match ID (e.g., "qm1")
+  // We no longer use teamNickname in the title.
   final String teamNickname;
-  final String id;
 
   const ObjectivePage({
     Key? key,
@@ -29,6 +31,9 @@ class ObjectivePage extends StatefulWidget {
 
 class _ObjectivePageState extends State<ObjectivePage> {
   ThemeMode themeMode = ThemeMode.system;
+
+  // We'll fetch the username from AuthService.
+  String _username = "";
 
   // counters
   int l4Counter = 0;
@@ -107,7 +112,7 @@ class _ObjectivePageState extends State<ObjectivePage> {
   Future<void> _saveDataToDatabase() async {
     try {
       final sql = '''
-        INSERT INTO [Match Data]
+        INSERT INTO [MatchData]
           (l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter)
         VALUES
           ($l4Counter, $l2l3Counter, $l1Counter, $netCounter, $processorCounter)
@@ -133,6 +138,17 @@ class _ObjectivePageState extends State<ObjectivePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Retrieve the logged-in username from SharedPreferences via AuthService.
+    AuthService.getUsername().then((value) {
+      setState(() {
+        _username = value ?? "";
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -146,8 +162,9 @@ class _ObjectivePageState extends State<ObjectivePage> {
               "Objective Phase",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
+            // Updated title: Show the username, team, and match.
             Text(
-              '${widget.id} is watching Team ${widget.teamName} "${widget.teamNickname}"',
+              '$_username: Team ${widget.teamName} in match ${widget.id}',
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -158,6 +175,7 @@ class _ObjectivePageState extends State<ObjectivePage> {
           child: Center(
             child: Column(
               children: [
+                // (Rest of your UI remains unchanged)
                 Row(
                   children: [
                     SizedBox(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
@@ -11,12 +12,14 @@ String humanPlayerNetAcc = "";
 class LeadScoutingPage extends StatefulWidget {
   const LeadScoutingPage({
     super.key,
-    required this.teamName,
+    required this.teamName, // for lead scouting, this should be the alliance (e.g., "red" or "blue")
+    required this.id,       // match identifier, e.g., "qm1"
     required this.channel,
     required this.onThemeChanged,
     required this.webSocketService,
   });
   final String teamName;
+  final String id;
   final WebSocketChannel channel;
   final Function(ThemeMode) onThemeChanged;
   final WebSocketService webSocketService;
@@ -26,6 +29,20 @@ class LeadScoutingPage extends StatefulWidget {
 }
 
 class _LeadScoutingPage extends State<LeadScoutingPage> {
+  // Store the logged-in username.
+  String _username = "";
+
+  @override
+  void initState() {
+    super.initState();
+    // Retrieve username from AuthService.
+    AuthService.getUsername().then((value) {
+      setState(() {
+        _username = value ?? "";
+      });
+    });
+  }
+
   /// Submits the lead scouting data to the SQL server.
   /// Builds an INSERT statement targeting the LeadScoutingData table.
   Future<void> _submitLeadScoutingData() async {
@@ -60,12 +77,24 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+    double width  = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.teamName),
+        centerTitle: true,
+        title: Column(
+          children: [
+            const Text(
+              "Lead Scouting Phase",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '$_username: ${widget.teamName} in Match ${widget.id}',
+              style: const TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
