@@ -1,6 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/lead_scout_notes_vis_page.dart';
 
+// Define a simple model for a Team
+class Team {
+  final String number;
+  final String name;
+
+  Team({required this.number, required this.name});
+}
+
+// Function stub to fetch teams from the SQL backend
+Future<List<Team>> fetchTeamsFromSQL() async {
+  // TODO: Implement SQL query and data fetching logic here.
+  // For example, use a package like 'sqflite' or call a backend API that returns team data.
+
+  // This is just a placeholder returning some dummy data.
+  return [
+    Team(number: "254", name: "The Cheesy Poofs"),
+    Team(number: "1678", name: "Citrus Circuits"),
+    Team(number: "118", name: "Team Rocket"),
+    Team(number: "1114", name: "Simbotics"),
+    Team(number: "148", name: "RoboWarriors"),
+    Team(number: "2056", name: "OP Robotics"),
+    Team(number: "971", name: "Spartan Robotics"),
+    Team(number: "330", name: "Team Phoenix"),
+    Team(number: "1323", name: "The Innovators"),
+    Team(number: "5460", name: "Cyberdynamics"),
+  ];
+}
+
 class TeamSearchPage extends StatefulWidget {
   @override
   _TeamSearchPageState createState() => _TeamSearchPageState();
@@ -8,41 +36,43 @@ class TeamSearchPage extends StatefulWidget {
 
 class _TeamSearchPageState extends State<TeamSearchPage> {
   final TextEditingController searchController = TextEditingController();
-  final List<String> teams = [
-    "Team 254",
-    "Team 1678",
-    "Team 118",
-    "Team 1114",
-    "Team 148",
-    "Team 2056",
-    "Team 971",
-    "Team 330",
-    "Team 1323",
-    "Team 5460"
-  ];
-  List<String> filteredTeams = [];
+
+  List<Team> teams = [];
+  List<Team> filteredTeams = [];
 
   @override
   void initState() {
     super.initState();
-    filteredTeams = teams; // Start with all teams displayed
+    loadTeams();
     searchController.addListener(filterTeams);
+  }
+
+  Future<void> loadTeams() async {
+    teams = await fetchTeamsFromSQL();
+    setState(() {
+      filteredTeams = teams;
+    });
   }
 
   void filterTeams() {
     setState(() {
       String query = searchController.text.toLowerCase();
-      filteredTeams =
-          teams.where((team) => team.toLowerCase().contains(query)).toList();
+      filteredTeams = teams.where((team) {
+        return team.number.toLowerCase().contains(query) ||
+            team.name.toLowerCase().contains(query);
+      }).toList();
     });
   }
 
-  void onTeamTap(String teamName) {
-    // direct to page for team
+  void onTeamTap(Team team) {
+    // Navigate to the team details page using the team's number.
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LeadScoutNotesVisPage(teamName: teamName.substring(5)),
+        builder: (context) => LeadScoutNotesVisPage(
+          teamName: team.number,
+          teamNickname: team.name,
+        ),
       ),
     );
   }
@@ -67,7 +97,7 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: 'Enter Team Name',
+                hintText: 'Enter Team Number or Name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -79,19 +109,20 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
           Expanded(
             child: ListView.separated(
               separatorBuilder: (context, index) => const Divider(),
-              itemCount: filteredTeams.length + 1,
+              itemCount: filteredTeams.length,
               itemBuilder: (context, index) {
-                if (index == filteredTeams.length) {
-                  return const SizedBox.shrink();
-                }
+                final team = filteredTeams[index];
                 return ListTile(
                   title: Text(
-                    filteredTeams[index],
+                    "Team ${team.number}",
                     style: const TextStyle(fontSize: 20),
                     textAlign: TextAlign.center,
                   ),
-                  onTap: () =>
-                      onTeamTap(filteredTeams[index]), // Navigate on tap
+                  subtitle: Text(
+                    team.name,
+                    textAlign: TextAlign.center,
+                  ),
+                  onTap: () => onTeamTap(team),
                 );
               },
             ),

@@ -1,287 +1,296 @@
-// import 'package:flutter/material.dart';
-// import 'package:frc1148_2025_scouting_app/color_scheme.dart';
-// import 'package:fl_chart/fl_chart.dart';
-// import 'dart:math' as math;
-
-// class TeamGraphing extends StatefulWidget {
-//   const TeamGraphing({super.key, required this.allTeams, required this.teamName});
-
-//   final String teamName;
-//   final List<String> allTeams;
-//   @override
-//   State<TeamGraphing> createState() => _TeamGraphingState();
-// }
-
-// class _TeamGraphingState extends State<TeamGraphing> {
-//   //List<String> allTeams = List.empty();
-//   List<String> selectedTeams = List.empty(growable: true);
-
-//   String selectedTeamsDisplay = "";
-//   List<Widget> allTeamColorsDisplay = List.empty(growable: true);
-
-//   Map<String, Color> allTeamColors = {};
-
-//   String selectedMetric = "";
-//   List<LineChartBarData> coordinates = List.empty(growable: true);
-
-//   List<String> allMetricsName = List.empty(growable: true);
-
-//   void _updateTeams() {
-//     try {
-//       for (int i = 0; i < widget.allTeams.length; i++){
-//         allTeamColors[widget.allTeams[i]] = Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
-//       }
-
-//       setState(() {});
-//       print(widget.allTeams.length);
-//     } catch (e) {
-//       print('Error: $e');
-//     }
-//   }
-
-//   Map<String, List<Map<String, List<int>>>> all = {};
-
-//   bool isNumeric(String s) {
-//     return double.tryParse(s) != null;
-//   }
-
-//   Future<void> _updateGraphs() async {
-//     try {
-
-//       var sheet = null;// await SheetsHelper.sheetSetup("App results");
-
-//       final rows = await sheet!.values.allRows();
-
-//       allMetricsName = rows[0];
-
-//       for (int k = 0; k < widget.allTeams.length; k++){
-//         List<Map<String, List<int>>> rutro = List.empty(growable: true);
-//         print ("got");
-//         for (int i = 1; i < rows.length; i++){
-//           if (rows[i][0] != ""){
-//             int spaceLoc = rows[i][0].indexOf(" ");
-//             String teamNumber = rows[i][0].substring(spaceLoc+1);
-//             String matchNumber = rows[i][0].substring(1, spaceLoc);
-//             if (teamNumber == widget.allTeams[k]){
-//               final allMetricsInAMatch = rows[i];
-
-//               Map<String, List<int>> aMatch = {};
-
-//               for (int j = 2; j < allMetricsInAMatch.length; j++){
-//                 if (isNumeric( allMetricsInAMatch[j])){
-//                   String columnName = allMetricsName[j];
-//                   List<int> coordinate = [int.parse(matchNumber), int.parse(allMetricsInAMatch[j])];
-//                   if (aMatch.containsKey(columnName)) {
-//                     aMatch.update(columnName, (value) => coordinate);
-//                   } else {
-//                     aMatch.putIfAbsent(columnName, () => coordinate);
-//                   }
-//                 }
-
-//               }
-//               rutro.add(aMatch);
-//             }
-//           }
-//         }
-
-//         if (all.containsKey(widget.allTeams[k])) {
-//           print ("here");
-//           all.update(widget.allTeams[k], (value) => rutro);
-//         } else {
-//           print ("here");
-//           all.putIfAbsent(widget.allTeams[k], () => rutro);
-//         }
-//       }
-//       setState(() {});
-//     } catch (e) {
-//       print('Error: $e');
-//     }
-//   }
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     all = {};
-
-//     _updateTeams();
-//     _updateGraphs();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     double height = MediaQuery.of(context).size.height;
-//     double width = MediaQuery.of(context).size.width;
-//     TextEditingController teamDrop = TextEditingController();
-//     TextEditingController metricDrop = TextEditingController();
-//     if (widget.allTeams.isEmpty || all.isEmpty) {
-//       return const SafeArea(
-//         child: Scaffold(
-//             body: Center(
-//               child: Text(
-//                 "loading ...",
-//               ),
-//             )),
-//       );
-//     }
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text("Graphing"),
-//       ),
-//       body: SizedBox(
-//         height: height,
-//         child: SingleChildScrollView(
-//           child: Column(
-//             children: [
-//               Text(selectedTeamsDisplay),
-//               Row(mainAxisAlignment: MainAxisAlignment.center ,children: allTeamColorsDisplay,),
-//               Text(selectedMetric),
-//               DropdownMenu<String>(
-//                   width: width,
-//                   hintText: "Select Teams To Compare",
-//                   requestFocusOnTap: true,
-//                   controller: teamDrop,
-//                   enableFilter: true,
-//                   label: const Text('Select Teams To Compare'),
-//                   onSelected: (String? value) {
-//                     // setState(() {
-//                     //   teamDrop.text = "";
-//                     // });
-//                     if (!selectedTeams.contains(value)) {
-
-//                       setState(() {
-//                         selectedTeamsDisplay += "$value, ";
-//                         selectedTeams.add (value!);
-//                         allTeamColorsDisplay.add(Icon(Icons.circle, color: allTeamColors[value],));
-//                         allTeamColorsDisplay.add(const SizedBox(width: 10,),);
-//                       });
-
-//                       if (selectedMetric != ""){
-//                         LineChartBarData line;
-//                         print (all[value]);
-//                         List<FlSpot> spots = List.empty(growable: true);
-//                         for (int j = 0; j < all[value]!.length; j++){
-//                           FlSpot spot = FlSpot(all[value]![j][selectedMetric]![0] as double, all[value]![j][selectedMetric]![1] as double);
-//                           spots.add(spot);
-
-//                         }
-//                         line = LineChartBarData(spots: spots, color: allTeamColors[value]);
-//                         //print (line);
-//                         setState(() {
-//                           coordinates.add(line);
-//                         });
-//                       }
-//                     }
-
-//                   },
-//                   dropdownMenuEntries:
-//                       widget.allTeams.map<DropdownMenuEntry<String>>((String menu) {
-//                     return DropdownMenuEntry<String>(
-//                         value: menu,
-//                         label: menu,);
-//                   }).toList(),
-//               ),
-//               DropdownMenu<String>(
-//                   width: width,
-//                   hintText: "Select Metrics to Compare",
-//                   requestFocusOnTap: true,
-//                   controller: metricDrop,
-//                   enableFilter: true,
-//                   label: const Text('Select Metrics to Compare'),
-//                   onSelected: (String? value) {
-//                     //coordinates = List.empty(growable: true);
-//                     // setState(() {
-//                     //   metricDrop.text = "";
-//                     // });
-//                     selectedMetric = value!;
-//                     coordinates = List.empty(growable: true);
-//                     try{
-//                       for (int i = 0; i < selectedTeams.length; i++){
-//                         ScatterChartData line;
-
-//                         List<ScatterSpot> spots = List.empty(growable: true);
-//                         for (int j = 0; j < all[selectedTeams[i]]!.length; j++){
-//                           if (all[selectedTeams[i]]![j][value] != null){
-//                             ScatterSpot spot = ScatterSpot(all[selectedTeams[i]]![j][value]![0] as double, all[selectedTeams[i]]![j][value]![1] as double);
-//                             spots.add(spot);
-//                           }
-
-//                         }
-//                         line = ScatterChartData(scatterSpots: spots);
-//                         //print (line);
-//                         setState(() {
-//                           //coordinates.add(line);
-//                         });
-//                       }
-//                     }
-//                     catch(e){
-//                       print (e);
-//                     }
-
-//                   },
-//                   dropdownMenuEntries:
-//                       allMetricsName.sublist(2).map<DropdownMenuEntry<String>>((String menu) {
-//                     return DropdownMenuEntry<String>(
-//                         value: menu,
-//                         label: menu,);
-//                   }).toList(),
-//               ),
-//               coordinates.isNotEmpty ?
-//               SizedBox(
-//                 height: height*0.5,
-//                 width: width,
-//                 child: LineChart(
-//                   LineChartData(
-//                     lineBarsData: coordinates,
-//                   ),
-//                 ),
-//               )
-//               : const SizedBox(),
-//             ],
-//           ),
-//         ),
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: (){
-//           setState(() {
-//             selectedTeams = List.empty(growable: true);
-//             selectedTeamsDisplay = "";
-//             allTeamColorsDisplay = List.empty(growable: true);
-//             selectedMetric = "";
-//             coordinates = List.empty(growable: true);
-//           });
-//         },
-//         child: const Icon(Icons.delete),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'dart:math' as math;
 
+// -----------------------
+// TeamGraphing Widget
+// -----------------------
+class TeamGraphing extends StatefulWidget {
+  const TeamGraphing({
+    super.key,
+    required this.allTeams,
+    required this.teamNumber,
+    required this.teamNickname,
+  });
+
+  // Instead of a single teamName, we now have two separate variables.
+  final String teamNumber;
+  final String teamNickname;
+  final List<String> allTeams;
+
+  @override
+  State<TeamGraphing> createState() => _TeamGraphingState();
+}
+
+class _TeamGraphingState extends State<TeamGraphing> {
+  List<String> selectedTeams = List.empty(growable: true);
+  String selectedTeamsDisplay = "";
+  List<Widget> allTeamColorsDisplay = List.empty(growable: true);
+  Map<String, Color> allTeamColors = {};
+  String selectedMetric = "";
+  List<LineChartBarData> coordinates = List.empty(growable: true);
+  List<String> allMetricsName = List.empty(growable: true);
+
+  // A map to hold all team graph data (for demonstration purposes)
+  Map<String, List<Map<String, List<int>>>> all = {};
+
+  bool isNumeric(String s) {
+    return double.tryParse(s) != null;
+  }
+
+  void _updateTeams() {
+    try {
+      for (int i = 0; i < widget.allTeams.length; i++) {
+        allTeamColors[widget.allTeams[i]] =
+            Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
+                .withOpacity(1.0);
+      }
+      setState(() {});
+      print("Total teams: ${widget.allTeams.length}");
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> _updateGraphs() async {
+    try {
+      // For this example, assume sheet setup returns a valid sheet.
+      // Replace null with your actual sheet initialization code.
+      var sheet = null; // await SheetsHelper.sheetSetup("App results");
+
+      // Replace this with actual data fetching from your sheet.
+      final rows = await sheet!.values.allRows();
+      allMetricsName = rows[0];
+
+      for (int k = 0; k < widget.allTeams.length; k++) {
+        List<Map<String, List<int>>> teamMatches = List.empty(growable: true);
+        for (int i = 1; i < rows.length; i++) {
+          if (rows[i][0] != "") {
+            int spaceLoc = rows[i][0].indexOf(" ");
+            String teamNumberFromRow = rows[i][0].substring(spaceLoc + 1);
+            String matchNumber = rows[i][0].substring(1, spaceLoc);
+            if (teamNumberFromRow == widget.allTeams[k]) {
+              final allMetricsInAMatch = rows[i];
+              Map<String, List<int>> aMatch = {};
+
+              for (int j = 2; j < allMetricsInAMatch.length; j++) {
+                if (isNumeric(allMetricsInAMatch[j])) {
+                  String columnName = allMetricsName[j];
+                  List<int> coordinate = [
+                    int.parse(matchNumber),
+                    int.parse(allMetricsInAMatch[j])
+                  ];
+                  aMatch.putIfAbsent(columnName, () => coordinate);
+                }
+              }
+              teamMatches.add(aMatch);
+            }
+          }
+        }
+        if (all.containsKey(widget.allTeams[k])) {
+          all.update(widget.allTeams[k], (value) => teamMatches);
+        } else {
+          all.putIfAbsent(widget.allTeams[k], () => teamMatches);
+        }
+      }
+      setState(() {});
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    all = {};
+    _updateTeams();
+    _updateGraphs();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    TextEditingController teamDrop = TextEditingController();
+    TextEditingController metricDrop = TextEditingController();
+
+    if (widget.allTeams.isEmpty || all.isEmpty) {
+      return const SafeArea(
+        child: Scaffold(
+          body: Center(
+            child: Text("loading ..."),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        // Display both team number and nickname in the title.
+        title: Text(
+            "Graphing - Team ${widget.teamNumber} • ${widget.teamNickname}"),
+      ),
+      body: SizedBox(
+        height: height,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Display team number and nickname together.
+              Text(
+                "Team Number: ${widget.teamNumber}\nNickname: ${widget.teamNickname}",
+                style: const TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Text(selectedTeamsDisplay),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: allTeamColorsDisplay,
+              ),
+              Text(selectedMetric),
+              DropdownMenu<String>(
+                width: width,
+                hintText: "Select Teams To Compare",
+                requestFocusOnTap: true,
+                controller: teamDrop,
+                enableFilter: true,
+                label: const Text('Select Teams To Compare'),
+                onSelected: (String? value) {
+                  if (!selectedTeams.contains(value)) {
+                    setState(() {
+                      selectedTeamsDisplay += "$value, ";
+                      selectedTeams.add(value!);
+                      allTeamColorsDisplay
+                          .add(Icon(Icons.circle, color: allTeamColors[value]));
+                      allTeamColorsDisplay.add(const SizedBox(width: 10));
+                    });
+
+                    if (selectedMetric != "") {
+                      List<FlSpot> spots = [];
+                      for (int j = 0; j < all[value]!.length; j++) {
+                        FlSpot spot = FlSpot(
+                          all[value]![j][selectedMetric]![0].toDouble(),
+                          all[value]![j][selectedMetric]![1].toDouble(),
+                        );
+                        spots.add(spot);
+                      }
+                      LineChartBarData line = LineChartBarData(
+                        spots: spots,
+                        color: allTeamColors[value],
+                      );
+                      setState(() {
+                        coordinates.add(line);
+                      });
+                    }
+                  }
+                },
+                dropdownMenuEntries: widget.allTeams
+                    .map<DropdownMenuEntry<String>>((String menu) {
+                  return DropdownMenuEntry<String>(
+                    value: menu,
+                    label: menu,
+                  );
+                }).toList(),
+              ),
+              DropdownMenu<String>(
+                width: width,
+                hintText: "Select Metrics to Compare",
+                requestFocusOnTap: true,
+                controller: metricDrop,
+                enableFilter: true,
+                label: const Text('Select Metrics to Compare'),
+                onSelected: (String? value) {
+                  selectedMetric = value!;
+                  coordinates = List.empty(growable: true);
+                  try {
+                    for (int i = 0; i < selectedTeams.length; i++) {
+                      List<ScatterSpot> spots = [];
+                      for (int j = 0; j < all[selectedTeams[i]]!.length; j++) {
+                        if (all[selectedTeams[i]]![j][value] != null) {
+                          ScatterSpot spot = ScatterSpot(
+                            all[selectedTeams[i]]![j][value]![0].toDouble(),
+                            all[selectedTeams[i]]![j][value]![1].toDouble(),
+                          );
+                          spots.add(spot);
+                        }
+                      }
+                      // (Optional) Process your scatter chart data here.
+                    }
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+                dropdownMenuEntries: allMetricsName
+                    .sublist(2)
+                    .map<DropdownMenuEntry<String>>((String menu) {
+                  return DropdownMenuEntry<String>(
+                    value: menu,
+                    label: menu,
+                  );
+                }).toList(),
+              ),
+              coordinates.isNotEmpty
+                  ? SizedBox(
+                      height: height * 0.5,
+                      width: width,
+                      child: LineChart(
+                        LineChartData(
+                          lineBarsData: coordinates,
+                        ),
+                      ),
+                    )
+                  : const SizedBox(),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            selectedTeams = List.empty(growable: true);
+            selectedTeamsDisplay = "";
+            allTeamColorsDisplay = List.empty(growable: true);
+            selectedMetric = "";
+            coordinates = List.empty(growable: true);
+          });
+        },
+        child: const Icon(Icons.delete),
+      ),
+    );
+  }
+}
+
+// -----------------------
+// ScatterPlot Widget
+// -----------------------
+
+// Updated data model to include both team number and team nickname.
 class TeamSpotData {
-  final String team;
+  final String teamNumber;
+  final String teamNickname;
   final double x;
   final double y;
   final Color color;
 
-  TeamSpotData(this.team, this.x, this.y, this.color);
+  TeamSpotData(this.teamNumber, this.teamNickname, this.x, this.y, this.color);
 }
 
-class FlexibleScatterPlot extends StatefulWidget {
+// In this version we do not use a separate map for nicknames;
+// if needed, you could simply pass the nickname together with your team data.
+class ScatterPlot extends StatefulWidget {
+  // teamData is a map of team numbers as strings to a map of metric names and values.
   final Map<String, Map<String, double>> teamData;
-  //team data is a map of teamnames as the first key and then the metric as the second key and the value as the value
 
-  const FlexibleScatterPlot({
+  const ScatterPlot({
     super.key,
     required this.teamData,
   });
 
   @override
-  State<FlexibleScatterPlot> createState() => _FlexibleScatterPlotState();
+  State<ScatterPlot> createState() => _ScatterPlotState();
 }
 
-class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
+class _ScatterPlotState extends State<ScatterPlot> {
   late Map<String, Color> teamsMap = {};
   double? xMin, xMax, yMin, yMax;
 
@@ -307,7 +316,6 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
           (Match m) => ' ${m.group(0)}',
         )
         .split(' ');
-
     return words
         .where((word) => word.isNotEmpty)
         .map((word) => word[0].toUpperCase() + word.substring(1))
@@ -353,7 +361,6 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
 
   void calculateRanges() {
     if (selectedXMetric == null || selectedYMetric == null) return;
-
     xMin = double.infinity;
     xMax = double.negativeInfinity;
     yMin = double.infinity;
@@ -362,7 +369,6 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
     for (var teamMetrics in widget.teamData.values) {
       final xValue = teamMetrics[selectedXMetric];
       final yValue = teamMetrics[selectedYMetric];
-
       if (xValue != null) {
         xMin = xMin!.compareTo(xValue) <= 0 ? xMin : xValue;
         xMax = xMax!.compareTo(xValue) >= 0 ? xMax : xValue;
@@ -438,15 +444,13 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
 
       final xValue = teamMetrics[selectedXMetric];
       final yValue = teamMetrics[selectedYMetric];
-
       if (xValue == null || yValue == null) continue;
 
-      teamSpots.add(TeamSpotData(
-        team,
-        xValue,
-        yValue,
-        teamsMap[team]!,
-      ));
+      // Since we are not using a separate map for nicknames,
+      // here we simply set a default or placeholder nickname.
+      String nickname = "No Nickname";
+      teamSpots
+          .add(TeamSpotData(team, nickname, xValue, yValue, teamsMap[team]!));
 
       spots.add(
         ScatterSpot(
@@ -594,10 +598,10 @@ class _FlexibleScatterPlotState extends State<FlexibleScatterPlot> {
                                       ts.x == touchedSpot.x &&
                                       ts.y == touchedSpot.y,
                                   orElse: () => TeamSpotData(
-                                      'Unknown', 0, 0, Colors.grey),
+                                      'Unknown', 'Unknown', 0, 0, Colors.grey),
                                 );
                                 return ScatterTooltipItem(
-                                  'Team ${teamSpot.team}\n'
+                                  'Team ${teamSpot.teamNumber} • ${teamSpot.teamNickname}\n'
                                   '${getDisplayName(selectedXMetric!)}: ${teamSpot.x.toStringAsFixed(getAxisDecimalPlaces(true))}\n'
                                   '${getDisplayName(selectedYMetric!)}: ${teamSpot.y.toStringAsFixed(getAxisDecimalPlaces(false))}',
                                   textStyle: const TextStyle(

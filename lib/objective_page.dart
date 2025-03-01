@@ -7,16 +7,20 @@ import 'dart:convert';
 
 class ObjectivePage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
-
-  /// Accept the WebSocketChannel from main.dart
   final WebSocketChannel? channel;
+  final WebSocketService webSocketService;
+  final String teamName;
+  final String teamNickname;
+  final String id;
 
   const ObjectivePage({
     Key? key,
     required this.onThemeChanged,
     required this.channel,
-    required WebSocketService webSocketService,
-    required String teamName,
+    required this.webSocketService,
+    required this.teamName,
+    required this.teamNickname,
+    required this.id,
   }) : super(key: key);
 
   @override
@@ -34,7 +38,6 @@ class _ObjectivePageState extends State<ObjectivePage> {
   int processorCounter = 0;
   bool isCounterPositive = true;
 
-  // Use height as the scaling base for all sizes
   Icon get signIcon {
     IconData iconData = isCounterPositive ? Icons.add : Icons.remove;
     double h = MediaQuery.of(context).size.height;
@@ -45,7 +48,6 @@ class _ObjectivePageState extends State<ObjectivePage> {
     );
   }
 
-  // Update counter methods
   void updateL4() {
     setState(() {
       if (isCounterPositive) {
@@ -102,10 +104,8 @@ class _ObjectivePageState extends State<ObjectivePage> {
     });
   }
 
-  /// Save data to database
   Future<void> _saveDataToDatabase() async {
     try {
-      // Build an INSERT statement referencing your table and columns
       final sql = '''
         INSERT INTO [Match Data]
           (l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter)
@@ -113,18 +113,15 @@ class _ObjectivePageState extends State<ObjectivePage> {
           ($l4Counter, $l2l3Counter, $l1Counter, $netCounter, $processorCounter)
       ''';
 
-      // Prepare the bridging server message
       final cmd = {
         "type": "query",
         "text": sql,
       };
 
-      // Ensure the channel is available
       if (widget.channel == null) {
         throw Exception('No WebSocket channel available.');
       }
 
-      // Encode "length\r\njson" as the bridging server expects
       final encodedJson = jsonEncode(cmd);
       final prefix = '${encodedJson.length}\r\n';
       widget.channel!.sink.add(prefix + encodedJson);
@@ -137,15 +134,25 @@ class _ObjectivePageState extends State<ObjectivePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Use the screen height as our size basis
     double h = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Objective Page'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        centerTitle: true,
+        title: Column(
+          children: [
+            const Text(
+              "Objective Phase",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '${widget.id} is watching Team ${widget.teamName} "${widget.teamNickname}"',
+              style: const TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
       ),
-      // Wrap in SafeArea and SingleChildScrollView to help on smaller devices
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
@@ -153,7 +160,6 @@ class _ObjectivePageState extends State<ObjectivePage> {
               children: [
                 Row(
                   children: [
-                    // Reef image sized using height as the basis
                     SizedBox(
                       width: h * 0.17,
                       child: const Image(
@@ -320,18 +326,18 @@ class _ObjectivePageState extends State<ObjectivePage> {
         ),
         iconAlignment: IconAlignment.end,
         onPressed: () {
-          _saveDataToDatabase;
+          _saveDataToDatabase();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => Endgame(
-                teamName: "fake team name",
+                teamName: widget.teamName,
+                teamNickname: widget.teamNickname,
+                id: widget.id,
                 channel: widget.channel!,
-                onThemeChanged: (ThemeMode mode) {
-                  widget.onThemeChanged(mode);
-                },
-                webSocketService: WebSocketService(),
-              ), // placeholder until backend works
+                onThemeChanged: widget.onThemeChanged,
+                webSocketService: widget.webSocketService,
+              ),
             ),
           );
         },

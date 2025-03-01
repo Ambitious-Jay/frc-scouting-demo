@@ -4,7 +4,7 @@ import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:frc1148_2025_scouting_app/graphing_page.dart';
 import 'package:frc1148_2025_scouting_app/match_list.dart';
-import 'package:frc1148_2025_scouting_app/Flexiblescatter_plot.dart';
+import 'package:frc1148_2025_scouting_app/scatter_plot.dart';
 import 'package:frc1148_2025_scouting_app/team_search_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -15,40 +15,40 @@ import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 
 //This is a temporay placeholder for the team data
 final Map<String, Map<String, double>> teamData = {
-      "254": {
-        // The Cheesy Poofs
-        "avgAutoPoints": 14.2,
-        "avgTeleopPoints": 43.5,
-        "avgCycleTime": 11.8,
-        "defenseRating": 2.1,
-        "autoConsistency": 0.92,
-        "climbSuccessRate": 0.95,
-        "pickupSuccessRate": 0.98,
-        "maxMatchScore": 89,
-      },
-      "1678": {
-        // Citrus Circuits
-        "avgAutoPoints": 13.8,
-        "avgTeleopPoints": 42.1,
-        "avgCycleTime": 12.2,
-        "defenseRating": 1.8,
-        "autoConsistency": 0.94,
-        "climbSuccessRate": 0.90,
-        "pickupSuccessRate": 0.95,
-        "maxMatchScore": 85,
-      },
-      "118": {
-        // Robonauts
-        "avgAutoPoints": 12.5,
-        "avgTeleopPoints": 38.4,
-        "avgCycleTime": 13.1,
-        "defenseRating": 2.4,
-        "autoConsistency": 0.88,
-        "climbSuccessRate": 0.85,
-        "pickupSuccessRate": 0.92,
-        "maxMatchScore": 78,
-      },
-    };
+  "254": {
+    // The Cheesy Poofs
+    "avgAutoPoints": 14.2,
+    "avgTeleopPoints": 43.5,
+    "avgCycleTime": 11.8,
+    "defenseRating": 2.1,
+    "autoConsistency": 0.92,
+    "climbSuccessRate": 0.95,
+    "pickupSuccessRate": 0.98,
+    "maxMatchScore": 89,
+  },
+  "1678": {
+    // Citrus Circuits
+    "avgAutoPoints": 13.8,
+    "avgTeleopPoints": 42.1,
+    "avgCycleTime": 12.2,
+    "defenseRating": 1.8,
+    "autoConsistency": 0.94,
+    "climbSuccessRate": 0.90,
+    "pickupSuccessRate": 0.95,
+    "maxMatchScore": 85,
+  },
+  "118": {
+    // Robonauts
+    "avgAutoPoints": 12.5,
+    "avgTeleopPoints": 38.4,
+    "avgCycleTime": 13.1,
+    "defenseRating": 2.4,
+    "autoConsistency": 0.88,
+    "climbSuccessRate": 0.85,
+    "pickupSuccessRate": 0.92,
+    "maxMatchScore": 78,
+  },
+};
 
 class InfoPage extends StatelessWidget {
   final WebSocketService webSocketService;
@@ -196,7 +196,7 @@ class InfoPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FlexibleScatterPlot(teamData: teamData),
+                      builder: (context) => ScatterPlot(teamData: teamData),
                     ),
                   );
                 },

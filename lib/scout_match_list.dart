@@ -5,7 +5,6 @@ import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'color_scheme.dart';
 
-
 class ScoutMatchList extends StatefulWidget {
   final WebSocketService webSocketService;
   final Function(ThemeMode) onThemeChanged;
@@ -17,7 +16,7 @@ class ScoutMatchList extends StatefulWidget {
     required this.onThemeChanged,
     WebSocketChannel? channel,
   }) : super(key: key);
-    final String id;
+  final String id;
 
   @override
   State<ScoutMatchList> createState() => _ScoutMatchList();
@@ -36,7 +35,8 @@ class _ScoutMatchList extends State<ScoutMatchList> {
     searchController.addListener(filterMatches);
   }
 
-  void filterMatches() { // Renamed from filterTeams for clarity
+  void filterMatches() {
+    // Renamed from filterTeams for clarity
     setState(() {
       String query = searchController.text.toLowerCase();
       if (searchByMatch) {
@@ -108,7 +108,7 @@ class _ScoutMatchList extends State<ScoutMatchList> {
               itemBuilder: (BuildContext context, int index) {
                 String matchKey = filteredMatches[index];
                 String teamToScout = matches[matchKey] ?? "";
-                
+
                 return Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.white),
@@ -139,6 +139,8 @@ class _ScoutMatchList extends State<ScoutMatchList> {
                                 MaterialPageRoute(
                                   builder: (context) => AutoPage(
                                     teamName: teamToScout,
+                                    teamNickname:
+                                        "temporary filler fix mattin to do",
                                     id: matchKey,
                                     channel: widget.webSocketService.channel!,
                                     onThemeChanged: (ThemeMode) {},

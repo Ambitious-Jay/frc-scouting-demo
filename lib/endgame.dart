@@ -5,44 +5,9 @@ import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-// String Hang = "";
 bool triedHang = false;
 bool defensive = false;
 
-/**
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
- * HEY MILO ADD PRESENT COMMENTS HERE
-**/
 Map<String, bool> presets = <String, bool>{
   'Mechanism Broke': false,
   'Stopped Moving': false,
@@ -65,25 +30,28 @@ Map<String, bool> presets = <String, bool>{
 List<String> keys = presets.keys.toList();
 
 class Endgame extends StatefulWidget {
-  const Endgame({
-    super.key,
-    required this.teamName,
-    required this.channel,
-    required this.onThemeChanged,
-    required this.webSocketService,
-  });
   final String teamName;
+  final String teamNickname;
+  final String id;
   final WebSocketChannel channel;
   final Function(ThemeMode) onThemeChanged;
   final WebSocketService webSocketService;
+
+  const Endgame({
+    Key? key,
+    required this.teamName,
+    required this.teamNickname,
+    required this.id,
+    required this.channel,
+    required this.onThemeChanged,
+    required this.webSocketService,
+  }) : super(key: key);
 
   @override
   State<Endgame> createState() => _Endgame();
 }
 
 class _Endgame extends State<Endgame> {
-  /// Submits the endgame data to the SQL server.
-  /// Builds an INSERT statement targeting the EndgameData table.
   Future<void> _submitEndgameData() async {
     final sql = '''
       INSERT INTO EndgameData (
@@ -119,97 +87,63 @@ class _Endgame extends State<Endgame> {
     }
   }
 
-  String id = "";
-
-  void updatePark() {
-    triedHang = !triedHang;
-  }
-
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
         title: Column(
           children: [
-            const Text("Endgame"),
-            Text(widget.teamName),
+            const Text(
+              "Endgame Phase",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '${widget.id} is watching Team ${widget.teamName} "${widget.teamNickname}"',
+              style: const TextStyle(fontSize: 14),
+            ),
           ],
         ),
       ),
       body: Center(
         child: ListView(
           children: [
-            // Hang Dropdown
             SizedBox(
-                height: height / 3.5,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Text(
-                      "Attempt to park?",
-                      style: TextStyle(fontSize: 30),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          triedHang = !triedHang;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        // backgroundColor: park
-                        //     ? Theme.of(context).colorScheme.primary
-                        //     : Theme.of(context).colorScheme.secondary,
-                        // foregroundColor: park
-                        //     ? Theme.of(context).colorScheme.onPrimary
-                        //     : Theme.of(context).colorScheme.onSecondary,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
-                        minimumSize: const Size(100, 100),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
+              height: height / 3.5,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const Text(
+                    "Attempt to park?",
+                    style: TextStyle(fontSize: 30),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        triedHang = !triedHang;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                      minimumSize: const Size(100, 100),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
                       ),
-                      child: triedHang
-                          ? const Icon(
-                              // Icons.library_add_check,
-                              Icons.done,
-                              size: 44,
-                              color: Colors.white,
-                            )
-                          : const SizedBox.shrink(),
                     ),
-                  ],
-                )
-                // child: Center(
-                //   child: DropdownButtonFormField<String>(
-                //     value: "No Value Entered/Seen",
-                //     onChanged: (String? value) {
-                //       Hang = value!;
-                //     },
-                //     decoration: const InputDecoration(
-                //       labelText: 'Hang',
-                //       border: OutlineInputBorder(),
-                //     ),
-                //     items: [
-                //       'Deep Cage',
-                //       'Shallow Cage',
-                //       'Failed Deep Cage',
-                //       'Failed Shallow Cage',
-                //       'Did Not Try',
-                //       "No Value Entered/Seen"
-                //     ].map<DropdownMenuItem<String>>((String value) {
-                //       return DropdownMenuItem<String>(
-                //         value: value,
-                //         child: Text(value),
-                //       );
-                //     }).toList(),
-                //   ),
-                // ),
-                ),
+                    child: triedHang
+                        ? const Icon(
+                            Icons.done,
+                            size: 44,
+                            color: Colors.white,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
             const Divider(),
             SizedBox(
                 height: height / 3.5,

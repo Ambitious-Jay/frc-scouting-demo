@@ -7,6 +7,7 @@ import 'color_scheme.dart';
 // Example team data - in a real app, this would come from your database or API
 Map<String, Map<String, dynamic>> teamsData = {
   '1148': {
+    'Nickname': 'The Coral Crusaders',
     'Coral Per Match': 3.2,
     'L4 OPR Count': 2,
     'L3/L2 OPR Count': 1,
@@ -27,6 +28,7 @@ Map<String, Map<String, dynamic>> teamsData = {
     'APM': 2.7,
   },
   '254': {
+    'Nickname': 'The Cheesy Champs',
     'Coral Per Match': 2.8,
     'L4 OPR Count': 3,
     'L3/L2 OPR Count': 2,
@@ -47,6 +49,7 @@ Map<String, Map<String, dynamic>> teamsData = {
     'APM': 3.1,
   },
   '1678': {
+    'Nickname': 'The Robo Rangers',
     'Coral Per Match': 1.9,
     'L4 OPR Count': 1,
     'L3/L2 OPR Count': 3,
@@ -75,22 +78,24 @@ const String shallowCage = 'FALSE'; // Fixed the variable name to camelCase
 class AllianceData extends StatefulWidget {
   const AllianceData({super.key, required this.allianceNames});
   final String allianceNames;
+
   @override
   State<AllianceData> createState() => _AllianceData();
 }
 
 class _AllianceData extends State<AllianceData> {
   List<String> _teamNames = [];
-  
+
   // Add the ability to fetch or update team data
   Map<String, dynamic> getTeamData(String teamName) {
     // Return team data if exists, otherwise return empty data
     return teamsData[teamName] ?? createEmptyTeamData();
   }
-  
+
   // Create empty data structure for a new team
   Map<String, dynamic> createEmptyTeamData() {
     return {
+      'Nickname': 'No Nickname',
       'Coral Per Match': 0,
       'L4 OPR Count': 0,
       'L3/L2 OPR Count': 0,
@@ -116,8 +121,9 @@ class _AllianceData extends State<AllianceData> {
   void initState() {
     super.initState();
     // Split the alliance names string to get individual team names
-    _teamNames = widget.allianceNames.split(',').map((name) => name.trim()).toList();
-    
+    _teamNames =
+        widget.allianceNames.split(',').map((name) => name.trim()).toList();
+
     // Ensure we have at least 3 items in the list, even if empty strings
     while (_teamNames.length < 3) {
       _teamNames.add("Team ${_teamNames.length + 1}");
@@ -133,7 +139,8 @@ class _AllianceData extends State<AllianceData> {
   }
 
   // Custom container to display a single statistic
-  Widget buildStatItem(String label, double height, Map<String, dynamic> teamData) {
+  Widget buildStatItem(
+      String label, double height, Map<String, dynamic> teamData) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -160,28 +167,42 @@ class _AllianceData extends State<AllianceData> {
   Widget buildStatsContainer(double width, double height, String teamName) {
     // Get data for this specific team
     final teamData = getTeamData(teamName);
-    
+
     return Container(
       width: width,
       padding: EdgeInsets.all(width * 0.02),
       child: Column(
         children: [
-          // Team Name and Number at the top
+          // Team Name and Nickname at the top
           Container(
             width: width,
             padding: EdgeInsets.symmetric(vertical: height * 0.01),
-            child: Text(
-              teamName,
-              style: TextStyle(
-                fontSize: height * 0.025,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              children: [
+                Text(
+                  teamName,
+                  style: TextStyle(
+                    fontSize: height * 0.025,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: height * 0.005),
+                Text(
+                  teamData['Nickname'] ?? 'No Nickname',
+                  style: TextStyle(
+                    fontSize: height * 0.02,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[700],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.01),
-          
+
           // First row: EPA, Rank, WLR
           Container(
             width: width,
@@ -194,9 +215,9 @@ class _AllianceData extends State<AllianceData> {
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.02),
-          
+
           // Second row: Processor, Net, Hang
           Container(
             width: width,
@@ -209,9 +230,9 @@ class _AllianceData extends State<AllianceData> {
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.02),
-          
+
           // Third row: L1, L2/L3, L4
           Container(
             width: width,
@@ -224,10 +245,10 @@ class _AllianceData extends State<AllianceData> {
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.02),
-          
-          // Fourth row: CPM, APM, CPM
+
+          // Fourth row: CPM, APM, Coral Per Match
           Container(
             width: width,
             child: Row(
@@ -235,13 +256,14 @@ class _AllianceData extends State<AllianceData> {
               children: [
                 Expanded(child: buildStatItem("CPM", height, teamData)),
                 Expanded(child: buildStatItem("APM", height, teamData)),
-                Expanded(child: buildStatItem("Coral Per Match", height, teamData)),
+                Expanded(
+                    child: buildStatItem("Coral Per Match", height, teamData)),
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.03),
-          
+
           // OPR Table
           Container(
             width: width * 0.9,
@@ -254,8 +276,12 @@ class _AllianceData extends State<AllianceData> {
               headingRowHeight: height * 0.04,
               dataRowHeight: height * 0.04,
               columns: const [
-                DataColumn(label: Text('Metric', style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(label: Text('Value', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text('Metric',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text('Value',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
               ],
               rows: [
                 DataRow(cells: [
@@ -281,10 +307,10 @@ class _AllianceData extends State<AllianceData> {
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.02),
-          
-          // Buttons for Auto Table and Preset Comments
+
+          // Buttons for Auto Table, Preset Comments, and Graphing
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -295,18 +321,18 @@ class _AllianceData extends State<AllianceData> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AutoTablePage(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
+                        builder: (context) => AutoTablePage(
+                          teamNumber: teamName,
+                          onThemeChanged: (ThemeMode mode) {},
+                        ),
                       ),
                     );
                   },
-                  child: const Text(
-                    "Auto Table",
-                    style: TextStyle(
-                      color: Colors.lightBlue,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.lightBlue
-                    )
-                  ),
+                  child: const Text("Auto Table",
+                      style: TextStyle(
+                          color: Colors.lightBlue,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.lightBlue)),
                 ),
               ),
               Expanded(
@@ -316,39 +342,36 @@ class _AllianceData extends State<AllianceData> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PresetComment(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
+                        builder: (context) => PresetComment(
+                          teamNumber: teamName,
+                          onThemeChanged: (ThemeMode mode) {},
+                        ),
                       ),
                     );
                   },
-                  child: const Text(
-                    "Preset Comments",
-                    style: TextStyle(
-                      color: Colors.lightBlue,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.lightBlue
-                    )
-                  ),
+                  child: const Text("Preset Comments",
+                      style: TextStyle(
+                          color: Colors.lightBlue,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.lightBlue)),
                 ),
               ),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () async {
-                    // Navigate to Preset Comments page
+                    // Navigate to Graphing page
                     Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Graphing(),
-                    ),
-                  );
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Graphing(),
+                      ),
+                    );
                   },
-                  child: const Text(
-                    "Graphing",
-                    style: TextStyle(
-                      color: Colors.lightBlue,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.lightBlue
-                    )
-                  ),
+                  child: const Text("Graphing",
+                      style: TextStyle(
+                          color: Colors.lightBlue,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.lightBlue)),
                 ),
               ),
             ],
@@ -362,7 +385,7 @@ class _AllianceData extends State<AllianceData> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Column(

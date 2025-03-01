@@ -70,29 +70,34 @@ Map<String, Map<String, Map<String, dynamic>>> robotData = {
   },
 };
 
-
 final ScrollController compatibilityController = ScrollController();
 final ScrollController featsController = ScrollController();
 final ScrollController hPlayerController = ScrollController();
 
 class LeadScoutNotesVisPage extends StatefulWidget {
-  const LeadScoutNotesVisPage({super.key, required this.teamName});
+  const LeadScoutNotesVisPage({
+    super.key,
+    required this.teamName,
+    required this.teamNickname,
+    // required this.id,
+  });
   final String teamName;
+  final String teamNickname;
+  // final String id;
 
   @override
   State<LeadScoutNotesVisPage> createState() => _LeadScoutNotesVisPage();
 }
 
 class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
-  Future<void> setUp() async {}
   String teamName = "";
-  
+
   @override
   void initState() {
     super.initState();
     teamName = widget.teamName;
   }
-  
+
   Widget buildStatItem(String label, double height) {
     // First check if it's in the Performance Stats section
     if (robotData['Performance Stats']!['Scoring']!.containsKey(label)) {
@@ -114,9 +119,10 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
           ),
         ],
       );
-    } 
+    }
     // Check if it's in the Capabilities section
-    else if (robotData['Performance Stats']!['Capabilities']!.containsKey(label)) {
+    else if (robotData['Performance Stats']!['Capabilities']!
+        .containsKey(label)) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -161,7 +167,7 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
         }
       }
     }
-    
+
     // Fallback for any other items not found in the structure
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -202,9 +208,9 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
               textAlign: TextAlign.center,
             ),
           ),
-          
+
           SizedBox(height: height * 0.01),
-          
+
           // First row: EPA, Rank, WLR
           Container(
             width: width,
@@ -217,10 +223,10 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.02),
-          
-          // Second row: Processor, Net, Hang
+
+          // Second row: Processor, Net
           Container(
             width: width,
             child: Row(
@@ -231,10 +237,10 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.02),
-          
-          // Third row: CPM, APM, CPM
+
+          // Third row: CPM, APM, Coral Per Match
           Container(
             width: width,
             child: Row(
@@ -246,9 +252,9 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.03),
-          
+
           // OPR Table
           Container(
             width: width * 0.9,
@@ -261,37 +267,51 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
               headingRowHeight: height * 0.04,
               dataRowHeight: height * 0.04,
               columns: const [
-                DataColumn(label: Text('Metric', style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(label: Text('Value', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text('Metric',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text('Value',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
               ],
               rows: [
                 DataRow(cells: [
                   const DataCell(Text('L4 OPR Count')),
-                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['L4 OPR Count'].toString())),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']![
+                          'L4 OPR Count']
+                      .toString())),
                 ]),
                 DataRow(cells: [
                   const DataCell(Text('L3/L2 OPR Count')),
-                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['L3/L2 OPR Count'].toString())),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']![
+                          'L3/L2 OPR Count']
+                      .toString())),
                 ]),
                 DataRow(cells: [
                   const DataCell(Text('L1 OPR Count')),
-                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['L1 OPR Count'].toString())),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']![
+                          'L1 OPR Count']
+                      .toString())),
                 ]),
                 DataRow(cells: [
                   const DataCell(Text('Net OPR Count')),
-                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['Net OPR Count'].toString())),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']![
+                          'Net OPR Count']
+                      .toString())),
                 ]),
                 DataRow(cells: [
                   const DataCell(Text('Processor OPR Count')),
-                  DataCell(Text(robotData['Performance Stats']!['Scoring']!['Processor OPR Count'].toString())),
+                  DataCell(Text(robotData['Performance Stats']!['Scoring']![
+                          'Processor OPR Count']
+                      .toString())),
                 ]),
               ],
             ),
           ),
-          
+
           SizedBox(height: height * 0.02),
-          
-          // Buttons for Auto Table and Preset Comments
+
+          // Buttons for Auto Table, Preset Comments, and Graphing
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -302,7 +322,10 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AutoTablePage(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
+                        builder: (context) => AutoTablePage(
+                          teamNumber: teamName,
+                          onThemeChanged: (ThemeMode mode) {},
+                        ),
                       ),
                     );
                   },
@@ -311,8 +334,8 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                     style: TextStyle(
                       color: Colors.lightBlue,
                       decoration: TextDecoration.underline,
-                      decorationColor: Colors.lightBlue
-                    )
+                      decorationColor: Colors.lightBlue,
+                    ),
                   ),
                 ),
               ),
@@ -323,7 +346,10 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PresetComment(teamNumber: teamName, onThemeChanged: (ThemeMode ) {  },),
+                        builder: (context) => PresetComment(
+                          teamNumber: teamName,
+                          onThemeChanged: (ThemeMode mode) {},
+                        ),
                       ),
                     );
                   },
@@ -332,29 +358,29 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                     style: TextStyle(
                       color: Colors.lightBlue,
                       decoration: TextDecoration.underline,
-                      decorationColor: Colors.lightBlue
-                    )
+                      decorationColor: Colors.lightBlue,
+                    ),
                   ),
                 ),
               ),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () async {
-                    // Navigate to Preset Comments page
+                    // Navigate to Graphing page
                     Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Graphing(),
-                    ),
-                  );
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Graphing(),
+                      ),
+                    );
                   },
                   child: const Text(
                     "Graphing",
                     style: TextStyle(
                       color: Colors.lightBlue,
                       decoration: TextDecoration.underline,
-                      decorationColor: Colors.lightBlue
-                    )
+                      decorationColor: Colors.lightBlue,
+                    ),
                   ),
                 ),
               ),
@@ -373,7 +399,8 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
             child: Text(
               "Robot Specifications",
               style: TextStyle(
@@ -383,38 +410,40 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
             ),
           ),
           // For each category in Robot Specifications
-          ...robotData['Robot Specifications']!.entries.map((category) => 
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0, top: 15.0, bottom: 5.0),
-                  child: Text(
-                    category.key,
-                    style: TextStyle(
-                      fontSize: height * 0.02,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Wrap(
-                    alignment: WrapAlignment.spaceEvenly,
-                    spacing: 10.0,
-                    runSpacing: 15.0,
-                    children: category.value.keys.map((label) => 
-                      SizedBox(
-                        width: width * 0.45,
-                        child: buildStatItem(label, height),
-                      )
-                    ).toList(),
-                  ),
-                ),
-                SizedBox(height: 10),
-              ],
-            )
-          ).toList(),
+          ...robotData['Robot Specifications']!
+              .entries
+              .map((category) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20.0, top: 15.0, bottom: 5.0),
+                        child: Text(
+                          category.key,
+                          style: TextStyle(
+                            fontSize: height * 0.02,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Wrap(
+                          alignment: WrapAlignment.spaceEvenly,
+                          spacing: 10.0,
+                          runSpacing: 15.0,
+                          children: category.value.keys
+                              .map((label) => SizedBox(
+                                    width: width * 0.45,
+                                    child: buildStatItem(label, height),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                  ))
+              .toList(),
         ],
       ),
     );
@@ -426,116 +455,121 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.teamName),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        centerTitle: true,
+        title: Column(
+          children: [
+            const Text(
+              "Lead Scout Notes",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'Team ${widget.teamName} "${widget.teamNickname}"',
+              style: const TextStyle(fontSize: 14),
+            ),
+          ],
         ),
-        body: Center(
-          child: ListView(
-            children: [
-              buildStatsContainer(width, height),
-
-              const Divider(),
-              
-              buildRobotSpecificationsContainer(width, height),
-              
-              const Divider(),
-
-              // Team Compatibility
-              Column(
-                children: [
-                  Container(
-                    height: height * 0.05,
-                    width: width,
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Compatibility',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+      ),
+      body: Center(
+        child: ListView(
+          children: [
+            buildStatsContainer(width, height),
+            const Divider(),
+            buildRobotSpecificationsContainer(width, height),
+            const Divider(),
+            // Team Compatibility
+            Column(
+              children: [
+                Container(
+                  height: height * 0.05,
+                  width: width,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Compatibility',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 30.0),
-                    child: Text(
-                      robotData['Notes']!['Team Compatibility']!['Description'].toString(),
-                      textAlign: TextAlign.center,
-                      softWrap: true,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 30.0),
+                  child: Text(
+                    robotData['Notes']!['Team Compatibility']!['Description']
+                        .toString(),
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(),
+            // Notable Feats
+            Column(
+              children: [
+                Container(
+                  height: height * 0.05,
+                  width: width,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Notable Feats',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
-              ),
-
-              const Divider(),
-
-              // Notable Feats
-              Column(
-                children: [
-                  Container(
-                    height: height * 0.05,
-                    width: width,
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Notable Feats',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 30.0),
+                  child: Text(
+                    robotData['Notes']!['Notable Feats']!['Description']
+                        .toString(),
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(),
+            // Human Player Net ACC
+            Column(
+              children: [
+                Container(
+                  height: height * 0.05,
+                  width: width,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Human Player Net ACC',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 30.0),
-                    child: Text(
-                      robotData['Notes']!['Notable Feats']!['Description'].toString(),
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 30.0),
+                  child: Text(
+                    robotData['Notes']!['Human Player']!['Net ACC'].toString(),
+                    textAlign: TextAlign.center,
+                    softWrap: true,
                   ),
-                ],
-              ),
-
-              const Divider(),
-
-              // Human Player Net ACC
-              Column(
-                children: [
-                  Container(
-                    height: height * 0.05,
-                    width: width,
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Human Player Net ACC',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 30.0),
-                    child: Text(
-                      robotData['Notes']!['Human Player']!['Net ACC'].toString(),
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                    ),
-                  ),
-                ],
-              ),
-              
-              const Divider(),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const Divider(),
+          ],
         ),
-        bottomNavigationBar: ElevatedButton(
-          onPressed: () async {
-            // Navigation code would go here
-          },
-          child:
-              const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
-        ));
+      ),
+      bottomNavigationBar: ElevatedButton(
+        onPressed: () async {
+          // Navigation code would go here
+        },
+        child: const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
+      ),
+    );
   }
 }

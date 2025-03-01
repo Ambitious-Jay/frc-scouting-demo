@@ -7,7 +7,7 @@ import 'package:frc1148_2025_scouting_app/match_list.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart' as auto;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
-import 'package:frc1148_2025_scouting_app/Flexiblescatter_plot.dart';
+import 'package:frc1148_2025_scouting_app/scatter_plot.dart';
 import 'package:frc1148_2025_scouting_app/lead_scout_notes_vis_page.dart';
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
