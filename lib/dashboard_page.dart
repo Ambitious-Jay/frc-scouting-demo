@@ -98,9 +98,7 @@ class DashboardPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AutoPage(
-                          teamName: "1148",
-                          teamNickname: "Harvard-Westlake Robotics",
+                        builder: (context) => ScoutMatchList(
                           id: userId,
                           channel: webSocketService.channel!,
                           onThemeChanged: onThemeChanged,
