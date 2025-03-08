@@ -11,13 +11,11 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// Model representing a match assignment.
 class AssignmentItem {
-  final int rowSeq;
   final String matchID;
   final String teamNumber;
   final String role;
 
   AssignmentItem({
-    required this.rowSeq,
     required this.matchID,
     required this.teamNumber,
     required this.role,
@@ -25,9 +23,6 @@ class AssignmentItem {
 
   factory AssignmentItem.fromMap(Map<String, dynamic> map) {
     return AssignmentItem(
-      rowSeq: map['row_seq'] is int
-          ? map['row_seq']
-          : int.parse(map['row_seq'].toString()),
       matchID: map['MatchID'] as String,
       teamNumber: map['TeamNumber'] as String,
       role: map['role'] as String,
@@ -89,12 +84,35 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
       _loading = true;
       _errorMessage = null;
     });
-    final String sql =
-        "SELECT row_seq, 'qm' + CAST(match_number AS VARCHAR(10)) AS MatchID, "
-        "team_key AS TeamNumber, role "
-        "FROM Assignment "
-        "WHERE scout_name = '$_username' "
-        "ORDER BY row_seq;";
+    // The query now filters QualificationMatches by alliance:
+    // - If the scout is in R1-R3 or red_lead, only the red alliance row is returned.
+    // - If the scout is in B1-B3 or blue_lead, only the blue alliance row is returned.
+    final String sql = """
+      SELECT 
+        a.match_number,
+        CASE 
+          WHEN a.R1 = '$_username' THEN 'R1'
+          WHEN a.R2 = '$_username' THEN 'R2'
+          WHEN a.R3 = '$_username' THEN 'R3'
+          WHEN a.B1 = '$_username' THEN 'B1'
+          WHEN a.B2 = '$_username' THEN 'B2'
+          WHEN a.B3 = '$_username' THEN 'B3'
+          WHEN a.red_lead = '$_username' THEN 'red_lead'
+          WHEN a.blue_lead = '$_username' THEN 'blue_lead'
+        END as role,
+        qm.team_keys
+      FROM Assignment a
+      JOIN QualificationMatches qm ON a.match_number = qm.match_number
+      WHERE 
+      (
+        ((a.R1 = '$_username' OR a.R2 = '$_username' OR a.R3 = '$_username' OR a.red_lead = '$_username') 
+          AND qm.alliance = 'red')
+        OR
+        ((a.B1 = '$_username' OR a.B2 = '$_username' OR a.B3 = '$_username' OR a.blue_lead = '$_username') 
+          AND qm.alliance = 'blue')
+      )
+      ORDER BY a.match_number;
+    """;
     final Map<String, dynamic> queryCmd = {
       "type": "query",
       "text": sql,
@@ -124,8 +142,47 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
             _loading = false;
           });
         } else {
-          List<AssignmentItem> assignments =
-              rows.map((row) => AssignmentItem.fromMap(row)).toList();
+          List<AssignmentItem> assignments = [];
+          for (final row in rows) {
+            // Create matchID (e.g., "qm1", "qm2", etc.) from match_number.
+            final int matchNum = row['match_number'] is int
+                ? row['match_number']
+                : int.parse(row['match_number'].toString());
+            final String matchID = 'qm' + matchNum.toString();
+
+            // Normalize role value.
+            final String roleFromDB = row['role'].toString().trim();
+            final String roleUpper = roleFromDB.toUpperCase();
+
+            final String teamKeysStr = row['team_keys'];
+            final List<String> teamKeys =
+                teamKeysStr.split(',').map((s) => s.trim()).toList();
+            String teamName = "";
+            // For regular scouts: extract the digit from the role (e.g., "R1" -> index 0, "B2" -> index 1)
+            if (roleUpper == 'R1' || roleUpper == 'R2' || roleUpper == 'R3') {
+              int index = int.parse(roleUpper.substring(1)) - 1;
+              if (index < teamKeys.length) {
+                teamName = teamKeys[index];
+              }
+            } else if (roleUpper == 'B1' || roleUpper == 'B2' || roleUpper == 'B3') {
+              int index = int.parse(roleUpper.substring(1)) - 1;
+              if (index < teamKeys.length) {
+                teamName = teamKeys[index];
+              }
+            } else if (roleUpper == 'BLUE_LEAD' || roleUpper == 'RED_LEAD') {
+              // For lead scouts, pass all teams in the alliance.
+              teamName = teamKeys.join(", ");
+            }
+
+            final String displayRole =
+                roleUpper.contains('LEAD') ? 'Lead Scout' : 'Scout';
+
+            assignments.add(AssignmentItem(
+              matchID: matchID,
+              teamNumber: teamName,
+              role: displayRole,
+            ));
+          }
           setState(() {
             _assignments = assignments;
             _loading = false;
@@ -143,7 +200,7 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
   }
 
   void _onMatchPressed(AssignmentItem assignment) {
-    if (assignment.role.toLowerCase() == 'lead') {
+    if (assignment.role.toLowerCase().contains('lead')) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -175,7 +232,6 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
 
   @override
   Widget build(BuildContext context) {
-    final double h = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Matches to Scout"),
@@ -206,8 +262,8 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
                           child: ListTile(
                             title: Text(
                               "${assignment.matchID}: Team ${assignment.teamNumber}",
-                              style: TextStyle(
-                                color: const Color(0xFFFFA5A5),
+                              style: const TextStyle(
+                                color: Color(0xFFFFA5A5),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
