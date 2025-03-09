@@ -79,8 +79,8 @@ def webhook():
         return jsonify({"status": "pong"})
     
     # Process upcoming match notifications.
-    if message_type == 'upcoming_match':
-        process_upcoming_match_save(message_data)
+    # if message_type == 'upcoming_match':
+    #     process_upcoming_match_save(message_data)
         
     if message_type == 'match_score':
         process_match_score_save(message_data, "red")

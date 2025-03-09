@@ -110,7 +110,9 @@ class InfoPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MatchList(),
+                      builder: (context) => MatchList(
+                        webSocketService: webSocketService,
+                      ),
                     ),
                   );
                 },
@@ -139,7 +141,9 @@ class InfoPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TeamSearchPage(),
+                      builder: (context) => TeamSearchPage(
+                        webSocketService: webSocketService,
+                      ),
                     ),
                   );
                 },
