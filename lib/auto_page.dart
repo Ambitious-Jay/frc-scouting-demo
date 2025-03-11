@@ -15,7 +15,7 @@ class AutoPage extends StatefulWidget {
     Key? key,
     required this.teamName,
     required this.teamNickname,
-    required this.id,
+    required this.matchNumber,
     required this.channel,
     required this.onThemeChanged,
     required this.webSocketService,
@@ -23,7 +23,7 @@ class AutoPage extends StatefulWidget {
 
   final String teamName;
   final String teamNickname;
-  final String id;
+  final String matchNumber; // Renamed from id to matchNumber
   final WebSocketChannel channel;
   final Function(ThemeMode) onThemeChanged;
   final WebSocketService webSocketService;
@@ -82,7 +82,7 @@ class _AutoPageState extends State<AutoPage> {
         in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
       )
       VALUES (
-        '${widget.teamName}', '${widget.id}',
+        '${widget.teamName}', '${widget.matchNumber}',
         ${l4Counter.value}, ${l2l3Counter.value}, ${l1Counter.value},
         ${netCounter.value}, ${processorCounter.value},
         ${inCenterZone ? 1 : 0}, ${inLeftZone ? 1 : 0}, ${inRightZone ? 1 : 0},
@@ -137,7 +137,7 @@ class _AutoPageState extends State<AutoPage> {
           children: [
             const Text("Auto Phase"),
             Text(
-              '$_username: Team ${widget.teamName} in match ${widget.id}',
+              '$_username: Team ${widget.teamName} in match ${widget.matchNumber}',
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -184,8 +184,7 @@ class _AutoPageState extends State<AutoPage> {
                     Positioned(
                       top: fieldHeight / 2 - 25,
                       right:
-                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) -
-                              25,
+                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) - 25,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -462,7 +461,7 @@ class _AutoPageState extends State<AutoPage> {
               builder: (context) => ObjectivePage(
                 teamName: widget.teamName,
                 teamNickname: widget.teamNickname,
-                id: widget.id,
+                matchNumber: widget.matchNumber, // Updated here
                 channel: widget.webSocketService.channel,
                 onThemeChanged: widget.onThemeChanged,
                 webSocketService: widget.webSocketService,

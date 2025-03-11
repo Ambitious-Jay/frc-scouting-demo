@@ -18,18 +18,17 @@ String humanPlayerNetAcc1 = "";
 String humanPlayerNetAcc2 = "";
 String humanPlayerNetAcc3 = "";
 
-
 class LeadScoutingPage extends StatefulWidget {
   const LeadScoutingPage({
     super.key,
-    required this.teamName, // for lead scouting, this should be the alliance (e.g., "red" or "blue")
-    required this.id, // match identifier, e.g., "qm1"
+    required this.teamName, // For lead scouting, this should be the alliance (e.g., "red" or "blue")
+    required this.matchNumber, // Renamed from id to matchNumber
     required this.channel,
     required this.onThemeChanged,
     required this.webSocketService,
   });
   final String teamName;
-  final String id;
+  final String matchNumber;
   final WebSocketChannel channel;
   final Function(ThemeMode) onThemeChanged;
   final WebSocketService webSocketService;
@@ -56,26 +55,28 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
   /// Submits the lead scouting data to the SQL server.
   /// Builds an INSERT statement targeting the LeadScoutingData table.
   Future<void> _submitLeadScoutingData() async {
+    // Example commented-out SQL query (update as needed):
     // final sql = '''
     //   INSERT INTO LeadScouting (
-    //     team_number, compatibility, notable_feats, human_player_net_acc
+    //     team_number, match_number, compatibility, notable_feats, human_player_net_acc
     //   )
     //   VALUES (
     //     '${widget.teamName}',
+    //     '${widget.matchNumber}',
     //     '$compatibility',
     //     '$notableFeats',
     //     '$humanPlayerNetAcc'
     //   )
     // ''';
-
+    //
     // final cmd = {
     //   "type": "query",
     //   "text": sql,
     // };
-
+    //
     // final encodedJson = jsonEncode(cmd);
     // final prefix = '${encodedJson.length}\r\n';
-
+    //
     // try {
     //   widget.channel.sink.add(prefix + encodedJson);
     //   debugPrint('Successfully sent lead scouting INSERT command: $sql');
@@ -100,7 +101,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(
-              '$_username: ${widget.teamName} in Match ${widget.id}',
+              '$_username: ${widget.teamName} in Match ${widget.matchNumber}',
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -155,7 +156,8 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                             });
                           },
                         ),
-                      ),Expanded(
+                      ),
+                      Expanded(
                         child: TextField(
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
@@ -221,7 +223,8 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                             });
                           },
                         ),
-                      ),Expanded(
+                      ),
+                      Expanded(
                         child: TextField(
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
@@ -287,7 +290,8 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                             });
                           },
                         ),
-                      ),Expanded(
+                      ),
+                      Expanded(
                         child: TextField(
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
@@ -317,9 +321,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
             MaterialPageRoute(
               builder: (context) => DashboardPage(
                 teamName: widget.teamName,
-                // teamNickname: widget.teamNickname,
-                // id: widget.id,
-                channel: widget.channel, //!
+                channel: widget.channel,
                 onThemeChanged: widget.onThemeChanged,
                 webSocketService: widget.webSocketService,
               ),

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:frc1148_2025_scouting_app/info_page.dart';
@@ -172,7 +171,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       MaterialPageRoute(
                         builder: (context) => LeadScoutingPage(
                           teamName: "red", // for example, lead scouts watch the "red" alliance
-                          id: "qm1", // default match id; adjust as needed
+                          matchNumber: "qm1", // default match number; adjust as needed
                           channel: widget.webSocketService.channel!,
                           onThemeChanged: widget.onThemeChanged,
                           webSocketService: widget.webSocketService,

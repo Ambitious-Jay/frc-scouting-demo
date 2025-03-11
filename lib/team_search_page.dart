@@ -108,6 +108,7 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
         builder: (context) => LeadScoutNotesVisPage(
           teamName: team.number,
           teamNickname: team.name,
+          webSocketService: widget.webSocketService,
         ),
       ),
     );

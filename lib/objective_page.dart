@@ -11,8 +11,7 @@ class ObjectivePage extends StatefulWidget {
   final WebSocketChannel? channel;
   final WebSocketService webSocketService;
   final String teamName; // Team number
-  final String id; // Match ID (e.g., "qm1")
-  // We no longer use teamNickname in the title.
+  final String matchNumber; // Match number (e.g., "qm1")
   final String teamNickname;
 
   const ObjectivePage({
@@ -22,7 +21,7 @@ class ObjectivePage extends StatefulWidget {
     required this.webSocketService,
     required this.teamName,
     required this.teamNickname,
-    required this.id,
+    required this.matchNumber,
   }) : super(key: key);
 
   @override
@@ -164,7 +163,7 @@ class _ObjectivePageState extends State<ObjectivePage> {
             ),
             // Updated title: Show the username, team, and match.
             Text(
-              '$_username: Team ${widget.teamName} in match ${widget.id}',
+              '$_username: Team ${widget.teamName} in match ${widget.matchNumber}',
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -350,8 +349,8 @@ class _ObjectivePageState extends State<ObjectivePage> {
             MaterialPageRoute(
               builder: (context) => Endgame(
                 teamName: widget.teamName,
-                teamNickname: widget.teamNickname,
-                id: widget.id,
+                // teamNickname: widget.teamNickname,
+                // matchNumber: widget.matchNumber,
                 channel: widget.channel!,
                 onThemeChanged: widget.onThemeChanged,
                 webSocketService: widget.webSocketService,

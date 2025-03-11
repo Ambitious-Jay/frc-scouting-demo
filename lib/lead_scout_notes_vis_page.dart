@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/auto_table_page.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/graphing_page.dart';
@@ -75,10 +76,12 @@ final ScrollController featsController = ScrollController();
 final ScrollController hPlayerController = ScrollController();
 
 class LeadScoutNotesVisPage extends StatefulWidget {
+  final WebSocketService webSocketService;
   const LeadScoutNotesVisPage({
     super.key,
     required this.teamName,
     required this.teamNickname,
+    required this.webSocketService,
     // required this.id,
   });
   final String teamName;
@@ -347,8 +350,9 @@ class _LeadScoutNotesVisPage extends State<LeadScoutNotesVisPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PresetComment(
+                          teamName: teamName,
                           teamNumber: teamName,
-                          onThemeChanged: (ThemeMode mode) {},
+                          onThemeChanged: (ThemeMode mode) {},// webSocketService: widget.webSocketService,
                         ),
                       ),
                     );

@@ -11,21 +11,21 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// Model representing a match assignment.
 class AssignmentItem {
-  final String matchID;
+  final String matchNumber; // Renamed from matchID
   final String teamNumber;
   final String role;
 
   AssignmentItem({
-    required this.matchID,
+    required this.matchNumber,
     required this.teamNumber,
     required this.role,
   });
 
   factory AssignmentItem.fromMap(Map<String, dynamic> map) {
     return AssignmentItem(
-      matchID: map['MatchID'] as String,
-      teamNumber: map['TeamNumber'] as String,
-      role: map['role'] as String,
+      matchNumber: map['match_number'].toString(),
+      teamNumber: map['TeamNumber'].toString(),
+      role: map['role'].toString(),
     );
   }
 }
@@ -84,9 +84,7 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
       _loading = true;
       _errorMessage = null;
     });
-    // The query now filters QualificationMatches by alliance:
-    // - If the scout is in R1-R3 or red_lead, only the red alliance row is returned.
-    // - If the scout is in B1-B3 or blue_lead, only the blue alliance row is returned.
+    // The query now filters QualificationMatches by alliance.
     final String sql = """
       SELECT 
         a.match_number,
@@ -144,11 +142,11 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
         } else {
           List<AssignmentItem> assignments = [];
           for (final row in rows) {
-            // Create matchID (e.g., "qm1", "qm2", etc.) from match_number.
+            // Create matchNumber (e.g., "qm1", "qm2", etc.) from match_number.
             final int matchNum = row['match_number'] is int
                 ? row['match_number']
                 : int.parse(row['match_number'].toString());
-            final String matchID = 'qm' + matchNum.toString();
+            final String matchNumber = 'qm' + matchNum.toString();
 
             // Normalize role value.
             final String roleFromDB = row['role'].toString().trim();
@@ -178,7 +176,7 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
                 roleUpper.contains('LEAD') ? 'Lead Scout' : 'Scout';
 
             assignments.add(AssignmentItem(
-              matchID: matchID,
+              matchNumber: matchNumber,
               teamNumber: teamName,
               role: displayRole,
             ));
@@ -206,7 +204,7 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
         MaterialPageRoute(
           builder: (context) => LeadScoutingPage(
             teamName: assignment.teamNumber,
-            id: assignment.matchID,
+            matchNumber: assignment.matchNumber,
             channel: widget.webSocketService.channel!,
             onThemeChanged: widget.onThemeChanged,
             webSocketService: widget.webSocketService,
@@ -220,7 +218,7 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
           builder: (context) => AutoPage(
             teamName: assignment.teamNumber,
             teamNickname: "", // Optionally, add more info here.
-            id: assignment.matchID,
+            matchNumber: assignment.matchNumber,
             channel: widget.webSocketService.channel!,
             onThemeChanged: widget.onThemeChanged,
             webSocketService: widget.webSocketService,
@@ -261,7 +259,7 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
                           ),
                           child: ListTile(
                             title: Text(
-                              "${assignment.matchID}: Team ${assignment.teamNumber}",
+                              "${assignment.matchNumber}: Team ${assignment.teamNumber}",
                               style: const TextStyle(
                                 color: Color(0xFFFFA5A5),
                                 fontWeight: FontWeight.bold,
