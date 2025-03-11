@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 
@@ -13,7 +14,7 @@ class LeadScoutingPage extends StatefulWidget {
   const LeadScoutingPage({
     super.key,
     required this.teamName, // for lead scouting, this should be the alliance (e.g., "red" or "blue")
-    required this.id,       // match identifier, e.g., "qm1"
+    required this.id, // match identifier, e.g., "qm1"
     required this.channel,
     required this.onThemeChanged,
     required this.webSocketService,
@@ -47,7 +48,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
   /// Builds an INSERT statement targeting the LeadScoutingData table.
   Future<void> _submitLeadScoutingData() async {
     final sql = '''
-      INSERT INTO LeadScoutingData (
+      INSERT INTO LeadScouting (
         team_number, compatibility, notable_feats, human_player_net_acc
       )
       VALUES (
@@ -77,7 +78,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width  = MediaQuery.of(context).size.width;
+    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
@@ -212,6 +213,19 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
       bottomNavigationBar: ElevatedButton(
         onPressed: () async {
           await _submitLeadScoutingData();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardPage(
+                teamName: widget.teamName,
+                // teamNickname: widget.teamNickname,
+                // id: widget.id,
+                channel: widget.channel, //!
+                onThemeChanged: widget.onThemeChanged,
+                webSocketService: widget.webSocketService,
+              ),
+            ),
+          );
         },
         child: const Text("Next", style: TextStyle(color: colors.myOnPrimary)),
       ),

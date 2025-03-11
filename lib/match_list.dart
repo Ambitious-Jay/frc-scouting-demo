@@ -30,16 +30,16 @@ class _MatchListState extends State<MatchList> {
   final TextEditingController searchController = TextEditingController();
   List<QualificationMatch> matches = [];
   List<QualificationMatch> filteredMatches = [];
-  Timer? autoRefreshTimer;
+  // Timer? autoRefreshTimer;
   StreamSubscription? querySubscription;
 
   @override
   void initState() {
     super.initState();
     // Auto refresh every 30 seconds.
-    autoRefreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      _fillMatches();
-    });
+    // autoRefreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    //   _fillMatches();
+    // });
     _fillMatches();
     searchController.addListener(filterMatches);
   }
@@ -149,7 +149,7 @@ class _MatchListState extends State<MatchList> {
   @override
   void dispose() {
     searchController.dispose();
-    autoRefreshTimer?.cancel();
+    // autoRefreshTimer?.cancel();
     querySubscription?.cancel();
     super.dispose();
   }
@@ -240,6 +240,7 @@ class _MatchListState extends State<MatchList> {
                               MaterialPageRoute(
                                 builder: (context) => AllianceData(
                                   allianceNames: match.blueAlliance.join(","),
+                                  webSocketService: widget.webSocketService,
                                 ),
                               ),
                             );
@@ -263,6 +264,7 @@ class _MatchListState extends State<MatchList> {
                               MaterialPageRoute(
                                 builder: (context) => AllianceData(
                                   allianceNames: match.redAlliance.join(","),
+                                  webSocketService: widget.webSocketService,
                                 ),
                               ),
                             );

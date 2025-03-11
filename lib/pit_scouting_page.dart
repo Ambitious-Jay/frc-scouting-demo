@@ -1,25 +1,37 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'color_scheme.dart';
 import 'dart:convert';
-import 'dashboard_page.dart'; 
+import 'dashboard_page.dart';
 
-// Global variables for pit scouting values
 String robotWeight = "";
 String driveType = "";
 List<String> driveOptions = ['Swerve', 'Tank', 'Mechanum', 'Other'];
-String motorType = "";
-String motorNum = "";
-String bumperQuality = ""; // subjective
 
-// Intake
-bool intakeStation = false;
-bool coralGround = false;
-bool algaeGround = false; // not pushing
-bool algaeReefControlled = false; // not just knocking off
+String motorType = "";
+List<String> motorTypeOptions = ['Falcon', 'Kraken', 'Neo', 'CIM'];
+
+String motorNum = "";
+
+String bumperQuality = "";
+List<String> bumperQualityOptions = ['1', '2', '3', '4', '5'];
+
+String coralIntakeType = "";
+List<String> coralIntakeOptions = [
+  'Direct',
+  'Funnel',
+  'Ground',
+  'Direct/Ground',
+  'Funnel/Ground',
+  'None'
+];
+
+String algaeIntakeType = "";
+List<String> algaeIntakeOptions = ['Ground', 'Reef', 'Both', 'None'];
 
 // Scoring
 bool levelOne = false;
@@ -32,10 +44,9 @@ String climbType = "";
 List<String> climbOptions = ['Shallow', 'Deep', 'No Hang'];
 
 // Autonomous
-int coralPoints = 0;
+int coralPoints = 1;
 bool leavesStartLine = false;
 
-/// Custom scroll behavior that disables the default overscroll glow.
 class MyCustomScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(
@@ -45,11 +56,12 @@ class MyCustomScrollBehavior extends ScrollBehavior {
 }
 
 class PitScouting extends StatefulWidget {
-  const PitScouting(
-      {super.key,
-      required this.teamName,
-      required this.channel,
-      required WebSocketService webSocketService});
+  const PitScouting({
+    super.key,
+    required this.teamName,
+    required this.channel,
+    required WebSocketService webSocketService,
+  });
   final String teamName;
   final WebSocketChannel channel;
 
@@ -58,31 +70,21 @@ class PitScouting extends StatefulWidget {
 }
 
 class _PitScouting extends State<PitScouting> {
-  late TextEditingController _controller1;
-  late TextEditingController _controller2;
-  late TextEditingController _controller3;
-  late TextEditingController _controller4;
+  late TextEditingController _controller1; // for robot weight
+  late TextEditingController _controllerMotorNum; // for number of motors
 
   final List<String> entries = <String>[
     'Robot weight (lbs): ',
     'Type of drive: ',
-    'Type of motor: ',
+    'Motor Type: ',
     'Number of motors: ',
     'Bumper quality: ',
-    // ---
-    'Can pick up coral from Coral Station: ',
-    'Can pick up coral from ground: ',
-    'Can pick up algae from ground (not just pushing): ',
-    'Can remove algae from reef (controlled, not just knocking off): ',
-    // ---
-    'Can score coral onto L1: ',
-    'Can score coral onto L2: ',
-    'Can score coral onto L3: ',
-    'Can score coral onto L4: ',
+    'Coral Intake Type: ',
+    'Algae Intake Type: ',
+    'Scoring Levels (L1-L4): ',
     'Can score in processor: ',
     'Can score into net: ',
     'Type of Climb: ',
-    // ---
     'Coral scored during Autonomous: ',
     'Can robot move off of starting line during Autonomous: ',
   ];
@@ -91,26 +93,123 @@ class _PitScouting extends State<PitScouting> {
   void initState() {
     super.initState();
     _controller1 = TextEditingController();
-    _controller2 = TextEditingController();
-    _controller3 = TextEditingController();
-    _controller4 = TextEditingController();
+    _controllerMotorNum = TextEditingController();
   }
 
-  /// Submits the pit scouting data to the SQL server.
-  /// Builds an INSERT statement targeting "PitScoutingData" and sends it over the WebSocket.
+  /// Resets the form state and clears the input fields.
+  void _resetForm() {
+    setState(() {
+      robotWeight = "";
+      driveType = "";
+      motorType = "";
+      motorNum = "";
+      bumperQuality = "";
+      coralIntakeType = "";
+      algaeIntakeType = "";
+      levelOne = false;
+      levelTwo = false;
+      levelThree = false;
+      levelFour = false;
+      processor = false;
+      net = false;
+      climbType = "";
+      coralPoints = 1;
+      leavesStartLine = false;
+    });
+    _controller1.clear();
+    _controllerMotorNum.clear();
+  }
+
+  /// Opens a dialog simulating a dropdown for scoring levels with dynamic updates.
+  Future<void> _showScoringDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Select Scoring Levels"),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CheckboxListTile(
+                    title: const Text("Level 1"),
+                    value: levelOne,
+                    onChanged: (value) {
+                      setState(() {
+                        levelOne = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: const Text("Level 2"),
+                    value: levelTwo,
+                    onChanged: (value) {
+                      setState(() {
+                        levelTwo = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: const Text("Level 3"),
+                    value: levelThree,
+                    onChanged: (value) {
+                      setState(() {
+                        levelThree = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: const Text("Level 4"),
+                    value: levelFour,
+                    onChanged: (value) {
+                      setState(() {
+                        levelFour = value!;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            )
+          ],
+        );
+      },
+    );
+    setState(() {});
+  }
+
+  /// Returns a summary text of the selected scoring levels.
+  String _getSelectedLevelsText() {
+    List<String> selected = [];
+    if (levelOne) selected.add("L1");
+    if (levelTwo) selected.add("L2");
+    if (levelThree) selected.add("L3");
+    if (levelFour) selected.add("L4");
+    return selected.isNotEmpty ? selected.join(", ") : "None";
+  }
+
+  /// Submits the pit scouting data to the SQL server and resets the form.
   Future<void> _submitPitScoutingData() async {
     final sql = '''
       INSERT INTO PitScoutingData (
         team_number, robot_weight, drive_type, motor_type, motor_count, bumper_quality,
-        intake_station, coral_ground, algae_ground, algae_reef_controlled,
-        level_one, level_two, level_three, level_four, processor, net, climb_type,
+        coral_intake_type, algae_intake_type,
+        L1, L2, L3, L4, processor, net, climb_type,
         autonomous_coral_points, leaves_start_line
       )
       VALUES (
         '${widget.teamName}', '$robotWeight', '$driveType', '$motorType', '$motorNum', '$bumperQuality',
-        ${intakeStation ? 1 : 0}, ${coralGround ? 1 : 0}, ${algaeGround ? 1 : 0}, ${algaeReefControlled ? 1 : 0},
-        ${levelOne ? 1 : 0}, ${levelTwo ? 1 : 0}, ${levelThree ? 1 : 0}, ${levelFour ? 1 : 0},
-        ${processor ? 1 : 0}, ${net ? 1 : 0}, '$climbType', $coralPoints, ${leavesStartLine ? 1 : 0}
+        '$coralIntakeType', '$algaeIntakeType',
+        '${levelOne ? "true" : "false"}', '${levelTwo ? "true" : "false"}', '${levelThree ? "true" : "false"}', '${levelFour ? "true" : "false"}',
+        '${processor ? "true" : "false"}', '${net ? "true" : "false"}', '$climbType', $coralPoints, '${leavesStartLine ? "true" : "false"}'
       )
     ''';
 
@@ -124,12 +223,13 @@ class _PitScouting extends State<PitScouting> {
     try {
       widget.channel.sink.add(prefix + encodedJson);
       debugPrint('Successfully sent pit scouting INSERT command: $sql');
-      // After sending, redirect to DashboardPage
+      // Reset the form for next use
+      _resetForm();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => DashboardPage(
-            webSocketService: WebSocketService(), // pass your existing instance if available
+            webSocketService: WebSocketService(),
             onThemeChanged: (ThemeMode mode) {},
             teamName: widget.teamName,
           ),
@@ -142,7 +242,6 @@ class _PitScouting extends State<PitScouting> {
 
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -157,7 +256,7 @@ class _PitScouting extends State<PitScouting> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           children: <Widget>[
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Center(
               child: RichText(
                 text: TextSpan(
@@ -182,14 +281,14 @@ class _PitScouting extends State<PitScouting> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             const Center(
               child: Text(
                 "General Robot Information",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             // Robot Weight
             Column(
               children: [
@@ -202,13 +301,12 @@ class _PitScouting extends State<PitScouting> {
                       setState(() {
                         robotWeight = value;
                       });
-                      print("Robot weight: $value");
                     },
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             // Drive Type
             Column(
               children: [
@@ -230,203 +328,145 @@ class _PitScouting extends State<PitScouting> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Motor Type
+            const SizedBox(height: 16),
+            // Motor Type Dropdown
             Column(
               children: [
                 Text(entries[2], textScaleFactor: 1.3),
-                SizedBox(
-                  width: width / 3,
-                  child: TextField(
-                    controller: _controller2,
-                    onChanged: (String value) {
-                      setState(() {
-                        motorType = value;
-                      });
-                      print("Motor type: $value");
-                    },
-                  ),
+                DropdownButton<String>(
+                  value: motorType.isNotEmpty ? motorType : null,
+                  hint: const Text('Select Motor Type'),
+                  items: motorTypeOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      motorType = newValue!;
+                    });
+                  },
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Motor Count
+            const SizedBox(height: 16),
+            // Number of Motors as Text Entry
             Column(
               children: [
                 Text(entries[3], textScaleFactor: 1.3),
                 SizedBox(
                   width: width / 3,
                   child: TextField(
-                    controller: _controller3,
+                    controller: _controllerMotorNum,
+                    keyboardType: TextInputType.number,
                     onChanged: (String value) {
                       setState(() {
                         motorNum = value;
                       });
-                      print("Motor count: $value");
                     },
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Bumper Quality
+            const SizedBox(height: 16),
+            // Bumper Quality as Spin Wheel (CupertinoPicker)
             Column(
               children: [
                 Text(entries[4], textScaleFactor: 1.3),
                 SizedBox(
+                  height: 100,
                   width: width / 3,
-                  child: TextField(
-                    controller: _controller4,
-                    onChanged: (String value) {
+                  child: CupertinoPicker(
+                    itemExtent: 32,
+                    scrollController: FixedExtentScrollController(
+                      initialItem: bumperQualityOptions.indexOf(
+                          bumperQuality.isNotEmpty
+                              ? bumperQuality
+                              : bumperQualityOptions[0]),
+                    ),
+                    onSelectedItemChanged: (index) {
                       setState(() {
-                        bumperQuality = value;
+                        bumperQuality = bumperQualityOptions[index];
                       });
-                      print("Bumper quality: $value");
                     },
+                    children: List<Widget>.generate(
+                      bumperQualityOptions.length,
+                      (index) =>
+                          Center(child: Text(bumperQualityOptions[index])),
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Intake Information
+            const SizedBox(height: 16),
+            // Intake Information - New Dropdowns
             const Center(
               child: Text(
                 "Intake Information",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            // Coral Intake Type
             Column(
               children: [
                 Text(entries[5], textScaleFactor: 1.3),
-                Checkbox(
-                  value: intakeStation,
+                DropdownButton<String>(
+                  value: coralIntakeType.isNotEmpty ? coralIntakeType : null,
+                  hint: const Text('Select Coral Intake Type'),
+                  items: coralIntakeOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
                   onChanged: (newValue) {
                     setState(() {
-                      intakeStation = newValue!;
+                      coralIntakeType = newValue!;
                     });
                   },
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Coral from Ground
+            const SizedBox(height: 16),
+            // Algae Intake Type
             Column(
               children: [
                 Text(entries[6], textScaleFactor: 1.3),
-                Checkbox(
-                  value: coralGround,
+                DropdownButton<String>(
+                  value: algaeIntakeType.isNotEmpty ? algaeIntakeType : null,
+                  hint: const Text('Select Algae Intake Type'),
+                  items: algaeIntakeOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
                   onChanged: (newValue) {
                     setState(() {
-                      coralGround = newValue!;
+                      algaeIntakeType = newValue!;
                     });
                   },
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Algae from Ground
+            const SizedBox(height: 16),
+            // Scoring Information (L1-L4) as a dropdown dialog
             Column(
               children: [
                 Text(entries[7], textScaleFactor: 1.3),
-                Checkbox(
-                  value: algaeGround,
-                  onChanged: (newValue) {
-                    setState(() {
-                      algaeGround = newValue!;
-                    });
-                  },
+                ElevatedButton(
+                  onPressed: _showScoringDialog,
+                  child: Text("Selected: " + _getSelectedLevelsText()),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Algae Reef Controlled
+            const SizedBox(height: 16),
+            // Processor Checkbox
             Column(
               children: [
                 Text(entries[8], textScaleFactor: 1.3),
-                Checkbox(
-                  value: algaeReefControlled,
-                  onChanged: (newValue) {
-                    setState(() {
-                      algaeReefControlled = newValue!;
-                    });
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            // Scoring Information Header
-            const Center(
-              child: Text(
-                "Scoring Information",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 16),
-            // Level One
-            Column(
-              children: [
-                Text(entries[9], textScaleFactor: 1.3),
-                Checkbox(
-                  value: levelOne,
-                  onChanged: (newValue) {
-                    setState(() {
-                      levelOne = newValue!;
-                    });
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            // Level Two
-            Column(
-              children: [
-                Text(entries[10], textScaleFactor: 1.3),
-                Checkbox(
-                  value: levelTwo,
-                  onChanged: (newValue) {
-                    setState(() {
-                      levelTwo = newValue!;
-                    });
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            // Level Three
-            Column(
-              children: [
-                Text(entries[11], textScaleFactor: 1.3),
-                Checkbox(
-                  value: levelThree,
-                  onChanged: (newValue) {
-                    setState(() {
-                      levelThree = newValue!;
-                    });
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            // Level Four
-            Column(
-              children: [
-                Text(entries[12], textScaleFactor: 1.3),
-                Checkbox(
-                  value: levelFour,
-                  onChanged: (newValue) {
-                    setState(() {
-                      levelFour = newValue!;
-                    });
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            // Processor
-            Column(
-              children: [
-                Text(entries[13], textScaleFactor: 1.3),
                 Checkbox(
                   value: processor,
                   onChanged: (newValue) {
@@ -437,11 +477,11 @@ class _PitScouting extends State<PitScouting> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Net
+            const SizedBox(height: 16),
+            // Net Checkbox
             Column(
               children: [
-                Text(entries[14], textScaleFactor: 1.3),
+                Text(entries[9], textScaleFactor: 1.3),
                 Checkbox(
                   value: net,
                   onChanged: (newValue) {
@@ -452,11 +492,11 @@ class _PitScouting extends State<PitScouting> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Climb Type
+            const SizedBox(height: 16),
+            // Climb Type Dropdown
             Column(
               children: [
-                Text(entries[15], textScaleFactor: 1.3),
+                Text(entries[10], textScaleFactor: 1.3),
                 DropdownButton<String>(
                   value: climbType.isNotEmpty ? climbType : null,
                   hint: const Text('Select Climb Type'),
@@ -474,34 +514,43 @@ class _PitScouting extends State<PitScouting> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Autonomous - Coral Points
+            const SizedBox(height: 16),
+            // Autonomous - Coral Points as Spin Wheel out of 6
             const Center(
               child: Text(
                 "Autonomous",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Column(
               children: [
-                Text(entries[16], textScaleFactor: 1.3),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  onChanged: (String value) {
-                    setState(() {
-                      coralPoints = int.tryParse(value) ?? 0;
-                    });
-                    print("Coral Points: $value");
-                  },
+                Text(entries[11], textScaleFactor: 1.3),
+                SizedBox(
+                  height: 100,
+                  child: CupertinoPicker(
+                    itemExtent: 32,
+                    scrollController: FixedExtentScrollController(
+                      initialItem: coralPoints > 0 ? coralPoints - 1 : 0,
+                    ),
+                    onSelectedItemChanged: (index) {
+                      setState(() {
+                        coralPoints = index + 1;
+                      });
+                    },
+                    children: List<Widget>.generate(
+                      6,
+                      (index) => Center(child: Text('${index + 1}')),
+                    ),
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Autonomous - Leaves Start Line
+            const SizedBox(height: 16),
+            // Autonomous - Leaves Start Line Checkbox
             Column(
               children: [
-                Text(entries[17], textScaleFactor: 1.3),
+                Text(entries[12], textScaleFactor: 1.3),
                 Checkbox(
                   value: leavesStartLine,
                   onChanged: (newValue) {
@@ -512,15 +561,14 @@ class _PitScouting extends State<PitScouting> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            // Submission Button
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                await _submitPitScoutingData();
+                _submitPitScoutingData();
               },
               child: const Icon(Icons.send, color: colors.myOnPrimary),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
           ],
         ),
       ),

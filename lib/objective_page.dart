@@ -112,11 +112,11 @@ class _ObjectivePageState extends State<ObjectivePage> {
   Future<void> _saveDataToDatabase() async {
     try {
       final sql = '''
-        INSERT INTO [MatchData]
-          (l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter)
-        VALUES
-          ($l4Counter, $l2l3Counter, $l1Counter, $netCounter, $processorCounter)
-      ''';
+      INSERT INTO [MatchData]
+        (team_number, l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter)
+      VALUES
+        ('${widget.teamName}', $l4Counter, $l2l3Counter, $l1Counter, $netCounter, $processorCounter)
+    ''';
 
       final cmd = {
         "type": "query",
