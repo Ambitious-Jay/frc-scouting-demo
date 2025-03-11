@@ -277,12 +277,12 @@ def process_match_score_save(message_data, team_color):
                 teleop_coral_count, teleop_coral_points, algae_points, net_algae_count, wall_algae_count,
                 end_game_barge_points, auto_bonus_achieved, coral_bonus_achieved, barge_bonus_achieved,
                 coopertition_criteria_met, foul_count, tech_foul_count, adjust_points, foul_points,
-                ranking_points, total_points
+                ranking_points, total_points, team_colors
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """
         
@@ -305,7 +305,7 @@ def process_match_score_save(message_data, team_color):
                        teleop_coral_count, teleop_coral_points, algae_points, net_algae_count, wall_algae_count,
                        end_game_barge_points, auto_bonus_achieved, coral_bonus_achieved, barge_bonus_achieved,
                        coopertition_criteria_met, foul_count, tech_foul_count, adjust_points, foul_points,
-                       ranking_points, total_points)
+                       ranking_points, total_points, alliance_color)
         conn.commit()
         print("Upcoming match inserted into SQL Server.")
     except Exception as e:
