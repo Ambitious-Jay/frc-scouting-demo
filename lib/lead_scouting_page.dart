@@ -6,9 +6,18 @@ import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 
-String compatibility = "";
-String notableFeats = "";
-String humanPlayerNetAcc = "";
+String compatibility1 = "";
+String compatibility2 = "";
+String compatibility3 = "";
+
+String notableFeats1 = "";
+String notableFeats2 = "";
+String notableFeats3 = "";
+
+String humanPlayerNetAcc1 = "";
+String humanPlayerNetAcc2 = "";
+String humanPlayerNetAcc3 = "";
+
 
 class LeadScoutingPage extends StatefulWidget {
   const LeadScoutingPage({
@@ -47,32 +56,32 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
   /// Submits the lead scouting data to the SQL server.
   /// Builds an INSERT statement targeting the LeadScoutingData table.
   Future<void> _submitLeadScoutingData() async {
-    final sql = '''
-      INSERT INTO LeadScouting (
-        team_number, compatibility, notable_feats, human_player_net_acc
-      )
-      VALUES (
-        '${widget.teamName}',
-        '$compatibility',
-        '$notableFeats',
-        '$humanPlayerNetAcc'
-      )
-    ''';
+    // final sql = '''
+    //   INSERT INTO LeadScouting (
+    //     team_number, compatibility, notable_feats, human_player_net_acc
+    //   )
+    //   VALUES (
+    //     '${widget.teamName}',
+    //     '$compatibility',
+    //     '$notableFeats',
+    //     '$humanPlayerNetAcc'
+    //   )
+    // ''';
 
-    final cmd = {
-      "type": "query",
-      "text": sql,
-    };
+    // final cmd = {
+    //   "type": "query",
+    //   "text": sql,
+    // };
 
-    final encodedJson = jsonEncode(cmd);
-    final prefix = '${encodedJson.length}\r\n';
+    // final encodedJson = jsonEncode(cmd);
+    // final prefix = '${encodedJson.length}\r\n';
 
-    try {
-      widget.channel.sink.add(prefix + encodedJson);
-      debugPrint('Successfully sent lead scouting INSERT command: $sql');
-    } catch (e, st) {
-      debugPrint('Error sending lead scouting data to DB: $e\n$st');
-    }
+    // try {
+    //   widget.channel.sink.add(prefix + encodedJson);
+    //   debugPrint('Successfully sent lead scouting INSERT command: $sql');
+    // } catch (e, st) {
+    //   debugPrint('Error sending lead scouting data to DB: $e\n$st');
+    // }
   }
 
   @override
@@ -101,8 +110,7 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
         child: Column(
           children: [
             // Compatibility Field
-            SizedBox(
-              height: height * 0.3,
+            Container(
               width: width,
               child: Column(
                 children: [
@@ -118,27 +126,57 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              compatibility1 = value;
+                            });
+                          },
+                        ),
                       ),
-                      minLines: 1,
-                      maxLines: null,
-                      onChanged: (String value) {
-                        setState(() {
-                          compatibility = value;
-                        });
-                      },
-                    ),
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              compatibility2 = value;
+                            });
+                          },
+                        ),
+                      ),Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              compatibility3 = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             const Divider(),
             // Notable Feats Field
-            SizedBox(
-              height: height * 0.3,
+            Container(
               width: width,
               child: Column(
                 children: [
@@ -154,27 +192,57 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              notableFeats1 = value;
+                            });
+                          },
+                        ),
                       ),
-                      minLines: 1,
-                      maxLines: null,
-                      onChanged: (String value) {
-                        setState(() {
-                          notableFeats = value;
-                        });
-                      },
-                    ),
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              notableFeats2 = value;
+                            });
+                          },
+                        ),
+                      ),Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              notableFeats3 = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             const Divider(),
             // Human Player Net ACC Field
-            SizedBox(
-              height: height * 0.3,
+            Container(
               width: width,
               child: Column(
                 children: [
@@ -190,19 +258,50 @@ class _LeadScoutingPage extends State<LeadScoutingPage> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              humanPlayerNetAcc1 = value;
+                            });
+                          },
+                        ),
                       ),
-                      minLines: 1,
-                      maxLines: null,
-                      onChanged: (String value) {
-                        setState(() {
-                          humanPlayerNetAcc = value;
-                        });
-                      },
-                    ),
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              humanPlayerNetAcc2 = value;
+                            });
+                          },
+                        ),
+                      ),Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          minLines: 1,
+                          maxLines: null,
+                          onChanged: (String value) {
+                            setState(() {
+                              humanPlayerNetAcc3 = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
