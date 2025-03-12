@@ -27,7 +27,6 @@ Map<String, bool> presets = <String, bool>{
   'Slow Climb': false,
   'Consistent Auton': false,
   'Inconsistent Auton': false,
-  'Net Algae': false,
 };
 
 List<String> keys = presets.keys.toList();
@@ -214,46 +213,44 @@ WHEN NOT MATCHED THEN
             ),
             const Divider(),
             // Grid of preset buttons
-            SingleChildScrollView(
-              child: GridView.builder(
-                shrinkWrap: true,
-                padding: EdgeInsets.all(width / 50),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 2.0,
-                  crossAxisSpacing: width / 50,
-                  mainAxisSpacing: width / 50,
-                ),
-                itemCount: keys.length,
-                itemBuilder: (context, index) {
-                  String key = keys[index];
-                  bool value = presets[key]!;
-                  return ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        presets[key] = !value;
-                      });
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                        value ? Colors.red : Colors.black,
-                      ),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        key,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+            GridView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.all(width / 50),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 2.0,
+                crossAxisSpacing: width / 50,
+                mainAxisSpacing: width / 50,
               ),
+              itemCount: keys.length,
+              itemBuilder: (context, index) {
+                String key = keys[index];
+                bool value = presets[key]!;
+                return ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      presets[key] = !value;
+                    });
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                      value ? Colors.red : Colors.black,
+                    ),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      key,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
             const Divider(),
           ],
