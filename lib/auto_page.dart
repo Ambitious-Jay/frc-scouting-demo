@@ -78,7 +78,7 @@ class _AutoPageState extends State<AutoPage> {
   Future<void> _submitAutoScoutingData() async {
     final sql = '''
       INSERT INTO AutoScouting (
-        team_number, watcher_id, l4_count, l2_l3_count, l1_count, net_count, processor_count,
+        team_number, match_number, l4_count, l2_l3_count, l1_count, net_count, processor_count,
         in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
       )
       VALUES (
@@ -184,7 +184,8 @@ class _AutoPageState extends State<AutoPage> {
                     Positioned(
                       top: fieldHeight / 2 - 25,
                       right:
-                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) - 25,
+                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) -
+                              25,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -454,7 +455,7 @@ class _AutoPageState extends State<AutoPage> {
         ),
         iconAlignment: IconAlignment.end,
         onPressed: () async {
-          await _submitAutoScoutingData();
+          _submitAutoScoutingData();
           Navigator.push(
             context,
             MaterialPageRoute(
