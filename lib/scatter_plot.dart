@@ -1,386 +1,295 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'dart:math' as math;
 
-// -----------------------
-// TeamGraphing Widget
-// -----------------------
-class TeamGraphing extends StatefulWidget {
-  const TeamGraphing({
-    super.key,
-    required this.allTeams,
-    required this.teamNumber,
-    required this.teamNickname,
-  });
+// Import your WebSocketService (adjust path as needed):
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 
-  // Instead of a single teamName, we now have two separate variables.
-  final String teamNumber;
-  final String teamNickname;
-  final List<String> allTeams;
-
-  @override
-  State<TeamGraphing> createState() => _TeamGraphingState();
-}
-
-class _TeamGraphingState extends State<TeamGraphing> {
-  List<String> selectedTeams = List.empty(growable: true);
-  String selectedTeamsDisplay = "";
-  List<Widget> allTeamColorsDisplay = List.empty(growable: true);
-  Map<String, Color> allTeamColors = {};
-  String selectedMetric = "";
-  List<LineChartBarData> coordinates = List.empty(growable: true);
-  List<String> allMetricsName = List.empty(growable: true);
-
-  // A map to hold all team graph data (for demonstration purposes)
-  Map<String, List<Map<String, List<int>>>> all = {};
-
-  bool isNumeric(String s) {
-    return double.tryParse(s) != null;
-  }
-
-  void _updateTeams() {
-    try {
-      for (int i = 0; i < widget.allTeams.length; i++) {
-        allTeamColors[widget.allTeams[i]] =
-            Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
-                .withOpacity(1.0);
-      }
-      setState(() {});
-      print("Total teams: ${widget.allTeams.length}");
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> _updateGraphs() async {
-    try {
-      // For this example, assume sheet setup returns a valid sheet.
-      // Replace null with your actual sheet initialization code.
-      var sheet = null; // await SheetsHelper.sheetSetup("App results");
-
-      // Replace this with actual data fetching from your sheet.
-      final rows = await sheet!.values.allRows();
-      allMetricsName = rows[0];
-
-      for (int k = 0; k < widget.allTeams.length; k++) {
-        List<Map<String, List<int>>> teamMatches = List.empty(growable: true);
-        for (int i = 1; i < rows.length; i++) {
-          if (rows[i][0] != "") {
-            int spaceLoc = rows[i][0].indexOf(" ");
-            String teamNumberFromRow = rows[i][0].substring(spaceLoc + 1);
-            String matchNumber = rows[i][0].substring(1, spaceLoc);
-            if (teamNumberFromRow == widget.allTeams[k]) {
-              final allMetricsInAMatch = rows[i];
-              Map<String, List<int>> aMatch = {};
-
-              for (int j = 2; j < allMetricsInAMatch.length; j++) {
-                if (isNumeric(allMetricsInAMatch[j])) {
-                  String columnName = allMetricsName[j];
-                  List<int> coordinate = [
-                    int.parse(matchNumber),
-                    int.parse(allMetricsInAMatch[j])
-                  ];
-                  aMatch.putIfAbsent(columnName, () => coordinate);
-                }
-              }
-              teamMatches.add(aMatch);
-            }
-          }
-        }
-        if (all.containsKey(widget.allTeams[k])) {
-          all.update(widget.allTeams[k], (value) => teamMatches);
-        } else {
-          all.putIfAbsent(widget.allTeams[k], () => teamMatches);
-        }
-      }
-      setState(() {});
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    all = {};
-    _updateTeams();
-    _updateGraphs();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-    TextEditingController teamDrop = TextEditingController();
-    TextEditingController metricDrop = TextEditingController();
-
-    if (widget.allTeams.isEmpty || all.isEmpty) {
-      return const SafeArea(
-        child: Scaffold(
-          body: Center(
-            child: Text("loading ..."),
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        // Display both team number and nickname in the title.
-        title: Text(
-            "Graphing - Team ${widget.teamNumber} • ${widget.teamNickname}"),
-      ),
-      body: SizedBox(
-        height: height,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Display team number and nickname together.
-              Text(
-                "Team Number: ${widget.teamNumber}\nNickname: ${widget.teamNickname}",
-                style: const TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(selectedTeamsDisplay),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: allTeamColorsDisplay,
-              ),
-              Text(selectedMetric),
-              DropdownMenu<String>(
-                width: width,
-                hintText: "Select Teams To Compare",
-                requestFocusOnTap: true,
-                controller: teamDrop,
-                enableFilter: true,
-                label: const Text('Select Teams To Compare'),
-                onSelected: (String? value) {
-                  if (!selectedTeams.contains(value)) {
-                    setState(() {
-                      selectedTeamsDisplay += "$value, ";
-                      selectedTeams.add(value!);
-                      allTeamColorsDisplay
-                          .add(Icon(Icons.circle, color: allTeamColors[value]));
-                      allTeamColorsDisplay.add(const SizedBox(width: 10));
-                    });
-
-                    if (selectedMetric != "") {
-                      List<FlSpot> spots = [];
-                      for (int j = 0; j < all[value]!.length; j++) {
-                        FlSpot spot = FlSpot(
-                          all[value]![j][selectedMetric]![0].toDouble(),
-                          all[value]![j][selectedMetric]![1].toDouble(),
-                        );
-                        spots.add(spot);
-                      }
-                      LineChartBarData line = LineChartBarData(
-                        spots: spots,
-                        color: allTeamColors[value],
-                      );
-                      setState(() {
-                        coordinates.add(line);
-                      });
-                    }
-                  }
-                },
-                dropdownMenuEntries: widget.allTeams
-                    .map<DropdownMenuEntry<String>>((String menu) {
-                  return DropdownMenuEntry<String>(
-                    value: menu,
-                    label: menu,
-                  );
-                }).toList(),
-              ),
-              DropdownMenu<String>(
-                width: width,
-                hintText: "Select Metrics to Compare",
-                requestFocusOnTap: true,
-                controller: metricDrop,
-                enableFilter: true,
-                label: const Text('Select Metrics to Compare'),
-                onSelected: (String? value) {
-                  selectedMetric = value!;
-                  coordinates = List.empty(growable: true);
-                  try {
-                    for (int i = 0; i < selectedTeams.length; i++) {
-                      List<ScatterSpot> spots = [];
-                      for (int j = 0; j < all[selectedTeams[i]]!.length; j++) {
-                        if (all[selectedTeams[i]]![j][value] != null) {
-                          ScatterSpot spot = ScatterSpot(
-                            all[selectedTeams[i]]![j][value]![0].toDouble(),
-                            all[selectedTeams[i]]![j][value]![1].toDouble(),
-                          );
-                          spots.add(spot);
-                        }
-                      }
-                      // (Optional) Process your scatter chart data here.
-                    }
-                  } catch (e) {
-                    print(e);
-                  }
-                },
-                dropdownMenuEntries: allMetricsName
-                    .sublist(2)
-                    .map<DropdownMenuEntry<String>>((String menu) {
-                  return DropdownMenuEntry<String>(
-                    value: menu,
-                    label: menu,
-                  );
-                }).toList(),
-              ),
-              coordinates.isNotEmpty
-                  ? SizedBox(
-                      height: height * 0.5,
-                      width: width,
-                      child: LineChart(
-                        LineChartData(
-                          lineBarsData: coordinates,
-                        ),
-                      ),
-                    )
-                  : const SizedBox(),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            selectedTeams = List.empty(growable: true);
-            selectedTeamsDisplay = "";
-            allTeamColorsDisplay = List.empty(growable: true);
-            selectedMetric = "";
-            coordinates = List.empty(growable: true);
-          });
-        },
-        child: const Icon(Icons.delete),
-      ),
-    );
-  }
-}
-
-// -----------------------
-// ScatterPlot Widget
-// -----------------------
-
-// Updated data model to include both team number and team nickname.
+/// Holds a single data point for the scatter chart.
 class TeamSpotData {
   final String teamNumber;
-  final String teamNickname;
   final double x;
   final double y;
   final Color color;
 
-  TeamSpotData(this.teamNumber, this.teamNickname, this.x, this.y, this.color);
+  TeamSpotData({
+    required this.teamNumber,
+    required this.x,
+    required this.y,
+    required this.color,
+  });
 }
 
-// In this version we do not use a separate map for nicknames;
-// if needed, you could simply pass the nickname together with your team data.
 class ScatterPlot extends StatefulWidget {
-  // teamData is a map of team numbers as strings to a map of metric names and values.
-  final Map<String, Map<String, double>> teamData;
+  final WebSocketService webSocketService;
 
   const ScatterPlot({
-    super.key,
-    required this.teamData,
-  });
+    Key? key,
+    required this.webSocketService,
+  }) : super(key: key);
 
   @override
   State<ScatterPlot> createState() => _ScatterPlotState();
 }
 
 class _ScatterPlotState extends State<ScatterPlot> {
-  late Map<String, Color> teamsMap = {};
+  Map<String, Map<String, double>> teamData = {};
+  Map<String, Color> teamColorMap = {};
+  List<String> allMetrics = [];
+  String? selectedXMetric;
+  String? selectedYMetric;
+  List<TeamSpotData> allSpots = [];
   double? xMin, xMax, yMin, yMax;
+  StreamSubscription? querySubscription;
+  bool isLoading = false;
 
-  final Map<String, String> metricDisplayNames = {
-    'avgAutoPoints': 'Average Auto Points',
-    'avgTeleopPoints': 'Average Teleop Points',
-    'avgCycleTime': 'Average Cycle Time',
-    'defenseRating': 'Defense Rating',
-    'autoConsistency': 'Auto Consistency',
-    'climbSuccessRate': 'Climb Success Rate',
-    'pickupSuccessRate': 'Pickup Success Rate',
-    'maxMatchScore': 'Maximum Match Score'
-  };
-
-  String getDisplayName(String metric) {
-    return metricDisplayNames[metric] ?? _generateDisplayName(metric);
-  }
-
-  String _generateDisplayName(String metric) {
-    final words = metric
-        .replaceAllMapped(
-          RegExp(r'([A-Z])|(_)'),
-          (Match m) => ' ${m.group(0)}',
-        )
-        .split(' ');
-    return words
-        .where((word) => word.isNotEmpty)
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join(' ');
-  }
-
-  final List<Color> availableColors = [
+  final List<Color> presetColors = [
     Colors.blue,
     Colors.red,
     Colors.green,
     Colors.orange,
     Colors.purple,
     Colors.teal,
-    Colors.pink,
     Colors.amber,
+    Colors.pink,
   ];
-
-  String? selectedXMetric;
-  String? selectedYMetric;
-  List<TeamSpotData> teamSpots = [];
+  final math.Random rng = math.Random();
 
   @override
   void initState() {
     super.initState();
-    teamsMap = {};
-    for (String team in widget.teamData.keys) {
-      teamsMap[team] = getNextColor();
-    }
+    _fetchAllDesiredMetrics();
+  }
 
-    final metrics = availableMetrics;
-    if (metrics.length >= 2) {
-      selectedXMetric = metrics[0];
-      selectedYMetric = metrics[1];
+  @override
+  void dispose() {
+    querySubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchAllDesiredMetrics() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    const String sql = """
+      -- Coral Per Match
+      SELECT
+        OPR.Team AS team_number,
+        'Coral Per Match' AS metric_name,
+        OPR.OPR_teleop_coral_count AS metric_value
+      FROM OPR
+
+      UNION ALL
+      -- L4 OPR Count
+      SELECT
+        OPR.Team AS team_number,
+        'L4 OPR Count' AS metric_name,
+        OPR.OPR_teleop_reef_top_count AS metric_value
+      FROM OPR
+
+      UNION ALL
+      -- L3/L2 OPR Count
+      SELECT
+        OPR.Team AS team_number,
+        'L3/L2 OPR Count' AS metric_name,
+        OPR.OPR_teleop_reef_mid_count AS metric_value
+      FROM OPR
+
+      UNION ALL
+      -- L1 OPR Count
+      SELECT
+        OPR.Team AS team_number,
+        'L1 OPR Count' AS metric_name,
+        OPR.OPR_teleop_reef_bottom_count AS metric_value
+      FROM OPR
+
+      UNION ALL
+      -- Algae Per Match
+      SELECT
+        OPR.Team AS team_number,
+        'Algae Per Match' AS metric_name,
+        OPR.OPR_algae_points AS metric_value
+      FROM OPR
+
+      UNION ALL
+      -- Net OPR Count
+      SELECT
+        OPR.Team AS team_number,
+        'Net OPR Count' AS metric_name,
+        OPR.OPR_net_algae_count AS metric_value
+      FROM OPR
+
+      -- UNION ALL
+      -- Processor OPR Count
+      -- SELECT
+      --   OPR.Team AS team_number,
+      --   'Processor OPR Count' AS metric_name,
+      --   OPR_processor_count AS metric_value
+      -- FROM OPR
+
+      UNION ALL
+      -- EPA
+      SELECT
+        CAST(StatsboticsEPA.team AS varchar) AS team_number,
+        'EPA' AS metric_name,
+        StatsboticsEPA.current_EPA AS metric_value
+      FROM StatsboticsEPA
+
+      ORDER BY team_number
+    """;
+
+    final Map<String, dynamic> queryCmd = {
+      "type": "query",
+      "text": sql,
+    };
+
+    final completer = Completer<Map<String, Map<String, double>>>();
+    final Map<String, Map<String, double>> fetchedData = {};
+
+    querySubscription = widget.webSocketService.stream?.listen((rawMessage) {
+      try {
+        final idx = rawMessage.indexOf('\r\n');
+        if (idx < 0) return;
+        final lenStr = rawMessage.substring(0, idx);
+        final int len = int.parse(lenStr);
+        final jsonPart = rawMessage.substring(idx + 2);
+        if (jsonPart.length != len) return;
+
+        final msg = jsonDecode(jsonPart);
+        if (msg["type"] == "query") {
+          final List<dynamic> rows = msg["rows"];
+          for (var row in rows) {
+            final String teamNum = row["team_number"].toString();
+            final String metricName = row["metric_name"].toString();
+            final double metricValue =
+                double.tryParse(row["metric_value"].toString()) ?? 0.0;
+
+            if (!fetchedData.containsKey(teamNum)) {
+              fetchedData[teamNum] = {};
+            }
+            fetchedData[teamNum]![metricName] = metricValue;
+          }
+          completer.complete(fetchedData);
+        }
+      } catch (e) {
+        completer.completeError(e);
+      }
+    });
+
+    widget.webSocketService.sendLengthPrefixed(queryCmd);
+
+    try {
+      final result = await completer.future;
+
+      // Assign a color to each team
+      final Map<String, Color> newTeamColorMap = {};
+      int colorIndex = 0;
+      for (String t in result.keys) {
+        if (colorIndex < presetColors.length) {
+          newTeamColorMap[t] = presetColors[colorIndex];
+        } else {
+          newTeamColorMap[t] =
+              Color((rng.nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+        }
+        colorIndex++;
+      }
+
+      // Collect all unique metrics
+      final Set<String> metricNames = {};
+      for (var metricsMap in result.values) {
+        metricNames.addAll(metricsMap.keys);
+      }
+      final List<String> metricList = metricNames.toList()..sort();
+
+      // Auto-select first two metrics if available
+      String? defaultX;
+      String? defaultY;
+      if (metricList.length >= 2) {
+        defaultX = metricList[0];
+        defaultY = metricList[1];
+      }
+
+      setState(() {
+        teamData = result;
+        teamColorMap = newTeamColorMap;
+        allMetrics = metricList;
+        selectedXMetric = defaultX;
+        selectedYMetric = defaultY;
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Error fetching metrics: $e");
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      querySubscription?.cancel();
     }
   }
 
-  Color getNextColor() {
-    if (availableColors.isEmpty) {
-      return Colors.primaries[teamsMap.length % Colors.primaries.length];
-    }
-    return availableColors.removeAt(0);
-  }
+  List<ScatterSpot> _buildScatterSpots() {
+    allSpots.clear();
+    if (selectedXMetric == null || selectedYMetric == null) return [];
 
-  void calculateRanges() {
-    if (selectedXMetric == null || selectedYMetric == null) return;
     xMin = double.infinity;
     xMax = double.negativeInfinity;
     yMin = double.infinity;
     yMax = double.negativeInfinity;
 
-    for (var teamMetrics in widget.teamData.values) {
-      final xValue = teamMetrics[selectedXMetric];
-      final yValue = teamMetrics[selectedYMetric];
-      if (xValue != null) {
-        xMin = xMin!.compareTo(xValue) <= 0 ? xMin : xValue;
-        xMax = xMax!.compareTo(xValue) >= 0 ? xMax : xValue;
-      }
-      if (yValue != null) {
-        yMin = yMin!.compareTo(yValue) <= 0 ? yMin : yValue;
-        yMax = yMax!.compareTo(yValue) >= 0 ? yMax : yValue;
-      }
+    for (String team in teamData.keys) {
+      final metrics = teamData[team]!;
+      final xVal = metrics[selectedXMetric!];
+      final yVal = metrics[selectedYMetric!];
+      if (xVal == null || yVal == null) continue;
+
+      xMin = math.min(xMin!, xVal);
+      xMax = math.max(xMax!, xVal);
+      yMin = math.min(yMin!, yVal);
+      yMax = math.max(yMax!, yVal);
+
+      allSpots.add(
+        TeamSpotData(
+          teamNumber: team,
+          x: xVal,
+          y: yVal,
+          color: teamColorMap[team] ?? Colors.white,
+        ),
+      );
     }
+
+    if (allSpots.isEmpty) return [];
+
+    // Expand axis ranges slightly
+    final xRange = xMax! - xMin!;
+    final yRange = yMax! - yMin!;
+    if (xRange > 0) {
+      xMin = xMin! - (xRange * 0.05);
+      xMax = xMax! + (xRange * 0.05);
+    }
+    if (yRange > 0) {
+      yMin = yMin! - (yRange * 0.05);
+      yMax = yMax! + (yRange * 0.05);
+    }
+
+    return allSpots.map((ts) {
+      return ScatterSpot(
+        ts.x,
+        ts.y,
+        dotPainter: FlDotCirclePainter(
+          color: ts.color,
+          radius: 6,
+          strokeWidth: 1,
+          strokeColor: ts.color.withOpacity(0.5),
+        ),
+      );
+    }).toList();
   }
 
-  int getDecimalPlaces(double range) {
+  int _getAxisDecimalPlaces(double minVal, double maxVal) {
+    final range = (maxVal - minVal).abs();
     if (range < 0.01) return 4;
     if (range < 0.1) return 3;
     if (range < 1) return 2;
@@ -388,324 +297,228 @@ class _ScatterPlotState extends State<ScatterPlot> {
     return 0;
   }
 
-  int getAxisDecimalPlaces(bool isXAxis) {
-    if (isXAxis) {
-      if (xMin == null || xMax == null) return 2;
-      return getDecimalPlaces(xMax! - xMin!);
-    } else {
-      if (yMin == null || yMax == null) return 2;
-      return getDecimalPlaces(yMax! - yMin!);
-    }
-  }
-
-  List<String> get availableMetrics {
-    Set<String> metrics = {};
-    for (var teamMetrics in widget.teamData.values) {
-      metrics.addAll(teamMetrics.keys);
-    }
-    return metrics.toList()..sort();
-  }
-
-  List<String> get availableYMetrics {
-    return availableMetrics
-        .where((metric) => metric != selectedXMetric)
-        .toList();
-  }
-
-  List<String> get availableXMetrics {
-    return availableMetrics
-        .where((metric) => metric != selectedYMetric)
-        .toList();
-  }
-
-  List<ScatterSpot> getScatterSpots() {
-    List<ScatterSpot> spots = [];
-    teamSpots.clear();
-
-    if (selectedXMetric == null || selectedYMetric == null) return spots;
-
-    calculateRanges();
-
-    // Add padding to the ranges
-    if (xMin != null && xMax != null) {
-      double xRange = xMax! - xMin!;
-      xMin = xMin! - (xRange * 0.05); // 5% padding
-      xMax = xMax! + (xRange * 0.05);
-    }
-    if (yMin != null && yMax != null) {
-      double yRange = yMax! - yMin!;
-      yMin = yMin! - (yRange * 0.05);
-      yMax = yMax! + (yRange * 0.05);
-    }
-
-    for (String team in teamsMap.keys) {
-      final teamMetrics = widget.teamData[team];
-      if (teamMetrics == null) continue;
-
-      final xValue = teamMetrics[selectedXMetric];
-      final yValue = teamMetrics[selectedYMetric];
-      if (xValue == null || yValue == null) continue;
-
-      // Since we are not using a separate map for nicknames,
-      // here we simply set a default or placeholder nickname.
-      String nickname = "No Nickname";
-      teamSpots
-          .add(TeamSpotData(team, nickname, xValue, yValue, teamsMap[team]!));
-
-      spots.add(
-        ScatterSpot(
-          xValue,
-          yValue,
-          dotPainter: FlDotCirclePainter(
-            color: teamsMap[team]!,
-            strokeWidth: 1,
-            strokeColor: teamsMap[team]!.withOpacity(0.5),
-            radius: 6,
-          ),
-          show: true,
-        ),
-      );
-    }
-    return spots;
-  }
-
-  Widget _buildMetricDropdown({
-    required BuildContext context,
-    required String label,
-    required String? value,
-    required List<String> items,
-  }) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        inputDecorationTheme: const InputDecorationTheme(
-          labelStyle: TextStyle(color: Colors.white70),
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white24),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white24),
-          ),
-        ),
-      ),
-      child: DropdownButtonFormField<String>(
-        dropdownColor: Colors.grey[850],
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        value: value,
-        items: items.map((metric) {
-          return DropdownMenuItem(
-            value: metric,
-            child: Text(getDisplayName(metric)),
-          );
-        }).toList(),
-        onChanged: (newValue) {
-          setState(() {
-            if (label.startsWith('X')) {
-              selectedXMetric = newValue;
-            } else {
-              selectedYMetric = newValue;
-            }
-          });
-        },
-      ),
-    );
+  String _formatMetricName(String raw) {
+    return raw.replaceAll(RegExp(r'[_]+'), ' ');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.grey[900],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppBar(
-            title: const Text('Scatter Plot'),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (teamData.isEmpty || allMetrics.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('ScatterPlot Coral & Algae')),
+        body: const Center(child: Text("No data or metrics found.")),
+      );
+    }
+
+    final spots = _buildScatterSpots();
+    if (selectedXMetric == null ||
+        selectedYMetric == null ||
+        spots.isEmpty ||
+        xMin == null ||
+        xMax == null ||
+        yMin == null ||
+        yMax == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('ScatterPlot Coral & Algae')),
+        body: const Center(child: Text("Please pick valid metrics.")),
+      );
+    }
+
+    final xDecimalPlaces = _getAxisDecimalPlaces(xMin!, xMax!);
+    final yDecimalPlaces = _getAxisDecimalPlaces(yMin!, yMax!);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('ScatterPlot Coral & Algae')),
+      body: SafeArea(
+        child: Container(
+          color: Colors.grey[900],
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Two dropdowns for X & Y
+              Row(
                 children: [
-                  const Text(
-                    'Select Metrics to Compare:',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (constraints.maxWidth < 600) {
-                        return Column(
-                          children: [
-                            _buildMetricDropdown(
-                              context: context,
-                              label: 'X-Axis Metric',
-                              value: selectedXMetric,
-                              items: availableXMetrics,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildMetricDropdown(
-                              context: context,
-                              label: 'Y-Axis Metric',
-                              value: selectedYMetric,
-                              items: availableYMetrics,
-                            ),
-                          ],
-                        );
-                      }
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: _buildMetricDropdown(
-                              context: context,
-                              label: 'X-Axis Metric',
-                              value: selectedXMetric,
-                              items: availableXMetrics,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildMetricDropdown(
-                              context: context,
-                              label: 'Y-Axis Metric',
-                              value: selectedYMetric,
-                              items: availableYMetrics,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  if (selectedXMetric != null && selectedYMetric != null)
-                    Expanded(
-                      child: ScatterChart(
-                        ScatterChartData(
-                          scatterTouchData: ScatterTouchData(
-                            enabled: true,
-                            touchTooltipData: ScatterTouchTooltipData(
-                              getTooltipItems: (ScatterSpot touchedSpot) {
-                                final teamSpot = teamSpots.firstWhere(
-                                  (ts) =>
-                                      ts.x == touchedSpot.x &&
-                                      ts.y == touchedSpot.y,
-                                  orElse: () => TeamSpotData(
-                                      'Unknown', 'Unknown', 0, 0, Colors.grey),
-                                );
-                                return ScatterTooltipItem(
-                                  'Team ${teamSpot.teamNumber} • ${teamSpot.teamNickname}\n'
-                                  '${getDisplayName(selectedXMetric!)}: ${teamSpot.x.toStringAsFixed(getAxisDecimalPlaces(true))}\n'
-                                  '${getDisplayName(selectedYMetric!)}: ${teamSpot.y.toStringAsFixed(getAxisDecimalPlaces(false))}',
-                                  textStyle: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                );
-                              },
-                            ),
-                            mouseCursorResolver: (event, response) {
-                              return response == null ||
-                                      response.touchedSpot == null
-                                  ? MouseCursor.defer
-                                  : SystemMouseCursors.click;
-                            },
-                          ),
-                          scatterSpots: getScatterSpots(),
-                          titlesData: FlTitlesData(
-                            leftTitles: AxisTitles(
-                              axisNameWidget: Padding(
-                                padding: const EdgeInsets.only(bottom: 0.5),
-                                child: Text(
-                                  getDisplayName(selectedYMetric!),
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14.5,
-                                  ),
-                                ),
-                              ),
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 35,
-                                getTitlesWidget: (value, meta) => Text(
-                                  value.toStringAsFixed(
-                                      getAxisDecimalPlaces(false)),
-                                  style: const TextStyle(
-                                    color: Colors.white60,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Padding(
-                                padding: const EdgeInsets.only(),
-                                child: Text(
-                                  getDisplayName(selectedXMetric!),
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14.5,
-                                  ),
-                                ),
-                              ),
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                                interval: ((xMax ?? 0) - (xMin ?? 0)) / 6,
-                                getTitlesWidget: (value, meta) => Text(
-                                  value.toStringAsFixed(
-                                      getAxisDecimalPlaces(true)),
-                                  style: const TextStyle(
-                                    color: Colors.white60,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                          ),
-                          gridData: FlGridData(
-                            show: true,
-                            drawHorizontalLine: true,
-                            drawVerticalLine: true,
-                            getDrawingHorizontalLine: (value) => const FlLine(
-                              color: Colors.white10,
-                              strokeWidth: 1,
-                            ),
-                            getDrawingVerticalLine: (value) => const FlLine(
-                              color: Colors.white10,
-                              strokeWidth: 1,
-                            ),
-                          ),
-                          borderData: FlBorderData(
-                            show: true,
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          backgroundColor: Colors.grey[900],
-                          minX: xMin,
-                          maxX: xMax,
-                          minY: yMin,
-                          maxY: yMax,
-                        ),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: Colors.grey[850],
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'X-Axis Metric',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        border: OutlineInputBorder(),
                       ),
+                      value: selectedXMetric,
+                      onChanged: (val) {
+                        setState(() {
+                          selectedXMetric = val;
+                        });
+                      },
+                      items: allMetrics
+                          .where((m) => m != selectedYMetric)
+                          .map((m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(_formatMetricName(m)),
+                              ))
+                          .toList(),
                     ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: Colors.grey[850],
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Y-Axis Metric',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        border: OutlineInputBorder(),
+                      ),
+                      value: selectedYMetric,
+                      onChanged: (val) {
+                        setState(() {
+                          selectedYMetric = val;
+                        });
+                      },
+                      items: allMetrics
+                          .where((m) => m != selectedXMetric)
+                          .map((m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(_formatMetricName(m)),
+                              ))
+                          .toList(),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 16),
+
+              // Chart with moderate padding and adjusted axis settings
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 16, right: 8, bottom: 16, top: 8),
+                  child: ScatterChart(
+                    ScatterChartData(
+                      clipData: FlClipData.none(), // disable clipping
+                      scatterTouchData: ScatterTouchData(
+                        enabled: true,
+                        touchTooltipData: ScatterTouchTooltipData(
+                          getTooltipItems: (touchedSpot) {
+                            final match = allSpots.firstWhere(
+                              (ts) =>
+                                  ts.x == touchedSpot.x && ts.y == touchedSpot.y,
+                              orElse: () => TeamSpotData(
+                                teamNumber: 'Unknown',
+                                x: 0,
+                                y: 0,
+                                color: Colors.white,
+                              ),
+                            );
+                            return ScatterTooltipItem(
+                              'Team ${match.teamNumber}\n'
+                              '${_formatMetricName(selectedXMetric!)}: '
+                              '${match.x.toStringAsFixed(xDecimalPlaces)}\n'
+                              '${_formatMetricName(selectedYMetric!)}: '
+                              '${match.y.toStringAsFixed(yDecimalPlaces)}',
+                              textStyle: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            );
+                          },
+                        ),
+                        mouseCursorResolver: (event, response) {
+                          return (response == null ||
+                                  response.touchedSpot == null)
+                              ? MouseCursor.defer
+                              : SystemMouseCursors.click;
+                        },
+                      ),
+                      scatterSpots: spots,
+                      minX: xMin,
+                      maxX: xMax,
+                      minY: yMin,
+                      maxY: yMax,
+                      borderData: FlBorderData(
+                        show: true,
+                        border: Border.all(color: Colors.white24),
+                      ),
+                      gridData: FlGridData(
+                        show: true,
+                        drawHorizontalLine: true,
+                        drawVerticalLine: true,
+                        getDrawingHorizontalLine: (value) => const FlLine(
+                          color: Colors.white10,
+                          strokeWidth: 1,
+                        ),
+                        getDrawingVerticalLine: (value) => const FlLine(
+                          color: Colors.white10,
+                          strokeWidth: 1,
+                        ),
+                      ),
+                      titlesData: FlTitlesData(
+                        leftTitles: AxisTitles(
+                          axisNameSize: 20, // enough space for the axis title
+                          axisNameWidget: Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              _formatMetricName(selectedYMetric!),
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 42,
+                            getTitlesWidget: (val, _) => Text(
+                              val.toStringAsFixed(yDecimalPlaces),
+                              style: const TextStyle(
+                                color: Colors.white60,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          axisNameSize: 20,
+                          axisNameWidget: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              _formatMetricName(selectedXMetric!),
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 42,
+                            getTitlesWidget: (val, _) => Text(
+                              val.toStringAsFixed(xDecimalPlaces),
+                              style: const TextStyle(
+                                color: Colors.white60,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                      ),
+                      backgroundColor: Colors.grey[900],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
