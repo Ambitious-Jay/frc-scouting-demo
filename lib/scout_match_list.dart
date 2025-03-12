@@ -205,7 +205,7 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
           builder: (context) => LeadScoutingPage(
             teamName: assignment.teamNumber,
             matchNumber: assignment.matchNumber,
-            channel: widget.webSocketService.channel!,
+            // channel: widget.webSocketService.channel!,
             onThemeChanged: widget.onThemeChanged,
             webSocketService: widget.webSocketService,
           ),

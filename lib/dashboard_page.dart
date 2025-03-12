@@ -172,7 +172,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         builder: (context) => LeadScoutingPage(
                           teamName: "red", // for example, lead scouts watch the "red" alliance
                           matchNumber: "qm1", // default match number; adjust as needed
-                          channel: widget.webSocketService.channel!,
+                          // channel: widget.webSocketService.channel!,
                           onThemeChanged: widget.onThemeChanged,
                           webSocketService: widget.webSocketService,
                         ),
