@@ -1,234 +1,269 @@
-import 'package:fl_chart/fl_chart.dart';
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 
+/// Fetches teleop data from the MatchData table via the WebSocket bridging server.
+/// Returns a nested map of team → stat → list of [matchNumber (as String), value] pairs.
+/// The available stats are:
+///   "L1", "L2/3", "L4", "Coral Total" (L1+L2/3+L4), "Net", "Processor", "Algae Total" (Net+Processor).
+Future<Map<String, Map<String, List<List<dynamic>>>>> fetchTeleopData(
+    WebSocketService webSocketService) async {
+  String sql =
+      "SELECT team_number, match_number, l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter FROM MatchData";
+
+  final Map<String, dynamic> queryCmd = {
+    "type": "query",
+    "text": sql,
+  };
+
+  final completer = Completer<List<Map<String, dynamic>>>();
+  late StreamSubscription sub;
+  List<Map<String, dynamic>> rowsResult = [];
+
+  sub = webSocketService.stream!.listen((rawMessage) {
+    try {
+      final int idx = rawMessage.indexOf('\r\n');
+      if (idx < 0) return;
+      final int len = int.parse(rawMessage.substring(0, idx));
+      final String jsonPart = rawMessage.substring(idx + 2);
+      if (jsonPart.length != len) return;
+      final Map<String, dynamic> msg = jsonDecode(jsonPart);
+      if (msg["type"] == "query") {
+        final List<dynamic> rows = msg["rows"];
+        rowsResult = rows.map((r) => Map<String, dynamic>.from(r)).toList();
+        completer.complete(rowsResult);
+      }
+    } catch (e) {
+      completer.completeError(e);
+    }
+  });
+
+  webSocketService.sendLengthPrefixed(queryCmd);
+
+  final rows =
+      await completer.future.timeout(const Duration(seconds: 5), onTimeout: () {
+    print("Timeout on fetching teleop match scores");
+    return [];
+  });
+  await sub.cancel();
+
+  // Group and transform rows.
+  Map<String, Map<String, List<List<dynamic>>>> data = {};
+
+  for (var row in rows) {
+    String team = row["team_number"].toString();
+    String matchNumber = row["match_number"].toString();
+    num l1Val = row["l1Counter"];
+    num l2l3Val = row["l2l3Counter"];
+    num l4Val = row["l4Counter"];
+    num netVal = row["netCounter"];
+    num procVal = row["processorCounter"];
+    num coralTotal = l1Val + l2l3Val + l4Val;
+    num algaeTotal = netVal + procVal;
+
+    if (!data.containsKey(team)) {
+      data[team] = {
+        "L1": [],
+        "L2/3": [],
+        "L4": [],
+        "Coral Total": [],
+        "Net": [],
+        "Processor": [],
+        "Algae Total": [],
+      };
+    }
+
+    data[team]!["L1"]!.add([matchNumber, l1Val]);
+    data[team]!["L2/3"]!.add([matchNumber, l2l3Val]);
+    data[team]!["L4"]!.add([matchNumber, l4Val]);
+    data[team]!["Coral Total"]!.add([matchNumber, coralTotal]);
+    data[team]!["Net"]!.add([matchNumber, netVal]);
+    data[team]!["Processor"]!.add([matchNumber, procVal]);
+    data[team]!["Algae Total"]!.add([matchNumber, algaeTotal]);
+  }
+
+  return data;
+}
+
+/// Fetches autonomous data from the AutoScouting table via the WebSocket bridging server.
+/// Returns a nested map of team → stat → list of [matchNumber (as String), value] pairs.
+/// The available stats are:
+///   "L1", "L2/3", "L4", "Coral Total" (L1+L2/3+L4), "Net", "Processor", "Algae Total" (Net+Processor).
+Future<Map<String, Map<String, List<List<dynamic>>>>> fetchAutoData(
+    WebSocketService webSocketService) async {
+  String sql =
+      "SELECT team_number, match_number, l4_count, l2_l3_count, l1_count, net_count, processor_count FROM AutoScouting";
+
+  final Map<String, dynamic> queryCmd = {
+    "type": "query",
+    "text": sql,
+  };
+
+  final completer = Completer<List<Map<String, dynamic>>>();
+  late StreamSubscription sub;
+  List<Map<String, dynamic>> rowsResult = [];
+
+  sub = webSocketService.stream!.listen((rawMessage) {
+    try {
+      final int idx = rawMessage.indexOf('\r\n');
+      if (idx < 0) return;
+      final int len = int.parse(rawMessage.substring(0, idx));
+      final String jsonPart = rawMessage.substring(idx + 2);
+      if (jsonPart.length != len) return;
+      final Map<String, dynamic> msg = jsonDecode(jsonPart);
+      if (msg["type"] == "query") {
+        final List<dynamic> rows = msg["rows"];
+        rowsResult = rows.map((r) => Map<String, dynamic>.from(r)).toList();
+        completer.complete(rowsResult);
+      }
+    } catch (e) {
+      completer.completeError(e);
+    }
+  });
+
+  webSocketService.sendLengthPrefixed(queryCmd);
+
+  final rows =
+      await completer.future.timeout(const Duration(seconds: 5), onTimeout: () {
+    print("Timeout on fetching autonomous match scores");
+    return [];
+  });
+  await sub.cancel();
+
+  Map<String, Map<String, List<List<dynamic>>>> data = {};
+
+  for (var row in rows) {
+    String team = row["team_number"].toString();
+    String matchNumber = row["match_number"].toString();
+    num l1Val = row["l1_count"];
+    num l2l3Val = row["l2_l3_count"];
+    num l4Val = row["l4_count"];
+    num netVal = row["net_count"];
+    num procVal = row["processor_count"];
+    num coralTotal = l1Val + l2l3Val + l4Val;
+    num algaeTotal = netVal + procVal;
+
+    if (!data.containsKey(team)) {
+      data[team] = {
+        "L1": [],
+        "L2/3": [],
+        "L4": [],
+        "Coral Total": [],
+        "Net": [],
+        "Processor": [],
+        "Algae Total": [],
+      };
+    }
+
+    data[team]!["L1"]!.add([matchNumber, l1Val]);
+    data[team]!["L2/3"]!.add([matchNumber, l2l3Val]);
+    data[team]!["L4"]!.add([matchNumber, l4Val]);
+    data[team]!["Coral Total"]!.add([matchNumber, coralTotal]);
+    data[team]!["Net"]!.add([matchNumber, netVal]);
+    data[team]!["Processor"]!.add([matchNumber, procVal]);
+    data[team]!["Algae Total"]!.add([matchNumber, algaeTotal]);
+  }
+
+  return data;
+}
+
+/// Graphing page that displays a line chart for selected match data.
 class Graphing extends StatefulWidget {
-  // The first element is the match number, the second is the score.
-  //Top-level key: Team number (as a String, e.g., "1678")
-  //   Value: A Map where:
-  //       Key: Stat type (e.g., "Auton Score")
-  //       Value: A List of pairs, each in the form [matchNumber, score]
-  //           matchNumber (int): The match number.
-  //           score (num): The score for that match.
-  final Map<String, Map<String, List<List<num>>>> allData = {
-  "1678": {
-    "Auton Score": [
-      [1, 15.0],
-      [5, 18.0],
-      [43, 12.0],
-      [44, 20.0],
-      [61, 22.0],
-      [70, 19.0],
-      [75, 21.0],
-      [80, 23.0],
-    ],
-    "Teleop Score": [
-      [1, 35.0],
-      [5, 40.0],
-      [43, 32.0],
-      [44, 45.0],
-      [61, 38.0],
-      [70, 39.0],
-      [75, 42.0],
-      [80, 41.0],
-    ],
-    "Endgame Score": [
-      [1, 10.0],
-      [5, 15.0],
-      [43, 10.0],
-      [44, 20.0],
-      [61, 18.0],
-      [70, 16.0],
-      [75, 19.0],
-      [80, 21.0],
-    ],
-  },
-  "254": {
-    "Auton Score": [
-      [2, 20.0],
-      [6, 22.0],
-      [10, 18.0],
-      [12, 24.0],
-      [16, 21.0],
-      [18, 23.0],
-    ],
-    "Teleop Score": [
-      [2, 40.0],
-      [6, 38.0],
-      [10, 42.0],
-      [12, 45.0],
-      [16, 44.0],
-      [18, 46.0],
-    ],
-    "Endgame Score": [
-      [2, 12.0],
-      [6, 15.0],
-      [10, 14.0],
-      [12, 16.0],
-      [16, 18.0],
-      [18, 20.0],
-    ],
-  },
-  "1114": {
-    "Auton Score": [
-      [1, 10.0],
-      [3, 12.0],
-      [7, 14.0],
-      [15, 16.0],
-      [20, 18.0],
-      [22, 20.0],
-      [30, 22.0],
-      [35, 24.0],
-    ],
-    "Teleop Score": [
-      [1, 30.0],
-      [3, 32.0],
-      [7, 34.0],
-      [15, 36.0],
-      [20, 38.0],
-      [22, 40.0],
-      [30, 42.0],
-      [35, 44.0],
-    ],
-    "Endgame Score": [
-      [1, 8.0],
-      [3, 10.0],
-      [7, 12.0],
-      [15, 14.0],
-      [20, 56.0],
-      [22, 18.0],
-      [30, 20.0],
-      [35, 22.0],
-    ],
-  },
-  "2056": {
-    "Auton Score": [
-      [5, 22.0],
-      [7, 24.0],
-      [20, 21.0],
-      [33, 23.0],
-      [38, 25.0],
-      [42, 26.0],
-    ],
-    "Teleop Score": [
-      [5, 40.0],
-      [7, 42.0],
-      [20, 45.0],
-      [33, 47.0],
-      [38, 48.0],
-      [42, 50.0],
-    ],
-    "Endgame Score": [
-      [5, 12.0],
-      [7, 14.0],
-      [20, 16.0],
-      [33, 18.0],
-      [38, 20.0],
-      [42, 22.0],
-    ],
-  },
-  "148": {
-    "Auton Score": [
-      [1, 16.0],
-      [5, 17.0],
-      [6, 18.0],
-      [9, 15.0],
-      [15, 20.0],
-      [25, 21.0],
-      [28, 22.0],
-    ],
-    "Teleop Score": [
-      [1, 30.0],
-      [5, 32.0],
-      [6, 34.0],
-      [9, 36.0],
-      [15, 38.0],
-      [25, 40.0],
-      [28, 42.0],
-    ],
-    "Endgame Score": [
-      [1, 10.0],
-      [5, 12.0],
-      [6, 11.0],
-      [9, 13.0],
-      [15, 14.0],
-      [25, 15.0],
-      [28, 16.0],
-    ],
-  },
-  "118": {
-    "Auton Score": [
-      [3, 25.0],
-      [8, 26.0],
-      [13, 27.0],
-      [27, 28.0],
-      [40, 29.0],
-      [50, 30.0],
-      [60, 31.0],
-      [65, 32.0],
-    ],
-    "Teleop Score": [
-      [3, 42.0],
-      [8, 40.0],
-      [13, 44.0],
-      [27, 46.0],
-      [40, 48.0],
-      [50, 47.0],
-      [60, 49.0],
-      [65, 51.0],
-    ],
-    "Endgame Score": [
-      [3, 18.0],
-      [8, 20.0],
-      [13, 22.0],
-      [27, 24.0],
-      [40, 26.0],
-      [50, 28.0],
-      [60, 30.0],
-      [65, 32.0],
-    ],
-  },
-};
-
+  const Graphing({Key? key}) : super(key: key);
 
   @override
   State<Graphing> createState() => _GraphingState();
 }
 
 class _GraphingState extends State<Graphing> {
+  bool isLoading = true;
+  // Toggle between teleop and autonomous.
+  bool _isAutonomous = false;
+
+  // Data sets.
+  Map<String, Map<String, List<List<dynamic>>>> teleopData = {};
+  Map<String, Map<String, List<List<dynamic>>>> autoData = {};
+
+  // Dropdown selections.
   late String _selectedTeam;
-  late String _selectedStat;
+  late String
+      _selectedStat; // Options: "L1", "L2/3", "L4", "Coral Total", "Net", "Processor", "Algae Total"
+
+  // Use the WebSocketService singleton.
+  final WebSocketService webSocketService = WebSocketService();
 
   @override
   void initState() {
     super.initState();
-    if (widget.allData.isNotEmpty) {
-      _selectedTeam = widget.allData.keys.first;
-      _selectedStat = widget.allData[_selectedTeam]!.keys.first;
+    webSocketService.connect();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      Map<String, Map<String, List<List<dynamic>>>> fetchedTeleop =
+          await fetchTeleopData(webSocketService);
+      Map<String, Map<String, List<List<dynamic>>>> fetchedAuto =
+          await fetchAutoData(webSocketService);
+      setState(() {
+        teleopData = fetchedTeleop;
+        autoData = fetchedAuto;
+        isLoading = false;
+        if (teleopData.isNotEmpty) {
+          _selectedTeam = teleopData.keys.first;
+          _selectedStat = teleopData[_selectedTeam]!.keys.first;
+        }
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Retrieve the optimized data for the selected team & stat.
-    final List<List<num>> statData =
-        widget.allData[_selectedTeam]?[_selectedStat] ?? [];
+    if (isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Graphing')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    final Map<String, Map<String, List<List<dynamic>>>> currentData =
+        _isAutonomous ? autoData : teleopData;
 
-    // Sort the data by match number (the first element in each pair).
-    statData.sort((a, b) => a[0].compareTo(b[0]));
+    if (currentData.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Graphing')),
+        body: const Center(child: Text('No data found')),
+      );
+    }
 
-    // Create chart spots: x-values are the index in the sorted list,
-    // y-values are the score (second element in each pair).
+    if (!currentData.containsKey(_selectedTeam)) {
+      _selectedTeam = currentData.keys.first;
+      _selectedStat = currentData[_selectedTeam]!.keys.first;
+    }
+
+    // Get the series for the selected team and stat.
+    List<List<dynamic>> statData =
+        currentData[_selectedTeam]?[_selectedStat] ?? [];
+
+    // Sort series by match number (as strings).
+    statData.sort((a, b) => a[0].toString().compareTo(b[0].toString()));
+
+    // Create chart spots using the list index as the x-axis.
     final spots = statData.asMap().entries.map((entry) {
       final index = entry.key;
-      final value = (entry.value[1] as num).toDouble();
+      final value = (entry.value[1]).toDouble();
       return FlSpot(index.toDouble(), value);
     }).toList();
 
-    // Compute the average score.
     double average = spots.isNotEmpty
         ? spots.map((s) => s.y).reduce((a, b) => a + b) / spots.length
         : 0;
-
     final double minX = 0;
     final double maxX = spots.isNotEmpty ? (spots.length - 1).toDouble() : 0;
 
@@ -243,52 +278,78 @@ class _GraphingState extends State<Graphing> {
           heightFactor: 0.6,
           child: Column(
             children: [
+              // Row for toggling Autonomous mode.
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _isAutonomous,
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _isAutonomous = value;
+                              final newData =
+                                  _isAutonomous ? autoData : teleopData;
+                              if (newData.isNotEmpty) {
+                                _selectedTeam = newData.keys.first;
+                                _selectedStat =
+                                    newData[_selectedTeam]!.keys.first;
+                              }
+                            });
+                          }
+                        },
+                      ),
+                      const Text("Autonomous?")
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               // Dropdowns for selecting team and stat.
-              Material(
-                color: Colors.transparent,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    DropdownButton<String>(
-                      value: _selectedTeam,
-                      items: widget.allData.keys.map((team) {
-                        return DropdownMenuItem<String>(
-                          value: team,
-                          child: Text('Team $team'),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedTeam = value;
-                            _selectedStat =
-                                widget.allData[_selectedTeam]!.keys.first;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 20),
-                    DropdownButton<String>(
-                      value: _selectedStat,
-                      items: widget.allData[_selectedTeam]!.keys.map((stat) {
-                        return DropdownMenuItem<String>(
-                          value: stat,
-                          child: Text(stat),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedStat = value;
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  DropdownButton<String>(
+                    value: _selectedTeam,
+                    items: currentData.keys.map((team) {
+                      return DropdownMenuItem<String>(
+                        value: team,
+                        child: Text('Team $team'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedTeam = value;
+                          _selectedStat =
+                              currentData[_selectedTeam]!.keys.first;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 20),
+                  DropdownButton<String>(
+                    value: _selectedStat,
+                    items: currentData[_selectedTeam]!.keys.map((stat) {
+                      return DropdownMenuItem<String>(
+                        value: stat,
+                        child: Text(stat),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedStat = value;
+                        });
+                      }
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
-              // The chart.
+              // Line chart.
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -308,12 +369,10 @@ class _GraphingState extends State<Graphing> {
                               if (value % 1 != 0)
                                 return const SizedBox.shrink();
                               final index = value.toInt();
-                              if (index < 0 || index >= statData.length) {
+                              if (index < 0 || index >= statData.length)
                                 return const SizedBox.shrink();
-                              }
-                              // Use the actual match number from the data.
-                              final matchNumber = statData[index][0];
-                              return Text(matchNumber.toString());
+                              final matchNumber = statData[index][0].toString();
+                              return Text(matchNumber);
                             },
                           ),
                         ),
@@ -351,7 +410,7 @@ class _GraphingState extends State<Graphing> {
                               final index = spot.x.toInt();
                               final matchNumber =
                                   (index >= 0 && index < statData.length)
-                                      ? statData[index][0]
+                                      ? statData[index][0].toString()
                                       : "N/A";
                               return LineTooltipItem(
                                 'Match $matchNumber\nValue: ${spot.y}',
