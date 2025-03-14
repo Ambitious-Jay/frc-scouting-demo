@@ -1,17 +1,22 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/scroll_controller.dart';
+import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 
 class PresetComment extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
   final String teamNumber;
   final String teamName;
+  final WebSocketService webSocketService;
 
   const PresetComment({
     Key? key,
     required this.onThemeChanged,
     required this.teamNumber,
     required this.teamName,
+    required this.webSocketService,
   }) : super(key: key);
 
   @override
@@ -24,46 +29,143 @@ class _PresetCommentState extends State<PresetComment> {
   @override
   void initState() {
     super.initState();
-    presetDataFuture = _fetchPresetData();
+    presetDataFuture = _fetchPresetData(widget.teamNumber);
   }
 
-  Future<Map<String, int>> _fetchPresetData() async {
-    // Replace this simulated delay and dummy data with your actual
-    // database call to fetch the EndgameData row for widget.teamNumber.
-    // For example, send a query like:
-    // SELECT attempt_to_park, defense, mechanism_broke, stopped_moving, fast, good_driving, bad_driving,
-    //        tippy, not_tippy, consistent_coral, inaccurate_coral, good_defense, bad_defense,
-    //        jams_often, fast_climb, slow_climb, consistent_auton, inconsistent_auton, net_algae
-    // FROM EndgameData WHERE team_number = '${widget.teamNumber}'
-    await Future.delayed(Duration(seconds: 1));
-    // Dummy data returned for demonstration:
-    return {
-      'attempt_to_park': 2,
-      'defense': 3,
-      'mechanism_broke': 1,
-      'stopped_moving': 0,
-      'fast': 4,
-      'good_driving': 5,
-      'bad_driving': 2,
-      'tippy': 1,
-      'not_tippy': 0,
-      'consistent_coral': 3,
-      'inaccurate_coral': 1,
-      'good_defense': 4,
-      'bad_defense': 1,
-      'jams_often': 2,
-      'fast_climb': 3,
-      'slow_climb': 1,
-      'consistent_auton': 4,
-      'inconsistent_auton': 0,
-      'net_algae': 2,
+  Future<Map<String, int>> _fetchPresetData(String normalizedTeam) async {
+    final String sql = """
+      SELECT 
+        attempt_to_park,
+        defense,
+        mechanism_broke,
+        stopped_moving,
+        fast,
+        good_driving,
+        bad_driving,
+        tippy,
+        not_tippy,
+        consistent_coral,
+        inaccurate_coral,
+        good_defense,
+        bad_defense,
+        jams_often,
+        fast_climb,
+        slow_climb,
+        consistent_auton,
+        inconsistent_auton
+      FROM EndgameData
+      WHERE team_number = 'frc$normalizedTeam'
+    """;
+    print("Sending PitScoutingData query: $sql");
+
+    final Map<String, dynamic> queryCmd = {
+      "type": "query",
+      "text": sql,
+    };
+    final completer = Completer<Map<String, dynamic>?>();
+
+    late StreamSubscription sub;
+    sub = widget.webSocketService.stream!.listen((rawMessage) {
+      try {
+        final int idx = rawMessage.indexOf('\r\n');
+        if (idx < 0) return;
+        final int len = int.parse(rawMessage.substring(0, idx));
+        final String jsonPart = rawMessage.substring(idx + 2);
+        if (jsonPart.length != len) return;
+
+        final Map<String, dynamic> msg = jsonDecode(jsonPart);
+        if (msg["type"] == "query") {
+          final rows = msg["rows"] as List<dynamic>;
+          if (rows.isNotEmpty) {
+            completer.complete(rows.first);
+          } else {
+            completer.complete(null);
+          }
+        }
+      } catch (e) {
+        completer.completeError(e);
+      }
+    });
+
+    widget.webSocketService.sendLengthPrefixed(queryCmd);
+
+    final row = await completer.future.timeout(const Duration(seconds: 5),
+        onTimeout: () {
+      print("Timeout on PitScoutingData query for team $normalizedTeam");
+      return null;
+    });
+    await sub.cancel();
+
+    print(row);
+
+    if (row == null) return <String, int>{};
+
+    // bool parseBool(dynamic val) {
+    //   if (val == null) return false;
+    //   final str = val.toString().toLowerCase();
+    //   return (str == "true" || str == "1" || str == "yes");
+    // }
+    print("Not null");
+
+    return <String, int>{
+      "attemptToPark": row["attempt_to_park"] ?? 0,
+      "defense": row["defense"],
+      "mechanismBroke": row["mechanism_broke"],
+      "stoppedMoving": row["stopped_moving"],
+      "row": row["fast"],
+      "goodDriving": row["good_driving"],
+      "badDriving": row["bad_driving"],
+      "tippy": row["tippy"],
+      "notTippy": row["not_tippy"],
+      "consistentCoral": row["consistent_coral"],
+      "inaccurateCoral": row["inaccurate_coral"],
+      "goodDefense": row["good_defense"],
+      "badDefense": row["bad_defense"],
+      "jamsOften": row["jams_often"],
+      "fastClimb": row["fast_climb"],
+      "slowClimb": row["slow_climb"],
+      "consistentAuton": row["consistent_auton"],
+      "inconsistentAuton": row["inconsistent_auton"]
     };
   }
+
+  // Future<Map<String, int>> _fetchPresetData() async {
+  //   // Replace this simulated delay and dummy data with your actual
+  //   // database call to fetch the EndgameData row for widget.teamNumber.
+  //   // For example, send a query like:
+  //   // SELECT attempt_to_park, defense, mechanism_broke, stopped_moving, fast, good_driving, bad_driving,
+  //   //        tippy, not_tippy, consistent_coral, inaccurate_coral, good_defense, bad_defense,
+  //   //        jams_often, fast_climb, slow_climb, consistent_auton, inconsistent_auton, net_algae
+  //   // FROM EndgameData WHERE team_number = '${widget.teamNumber}'
+  //   await Future.delayed(Duration(seconds: 1));
+  //   // Dummy data returned for demonstration:
+  //   return {
+  //     'attempt_to_park': 2,
+  //     'defense': 3,
+  //     'mechanism_broke': 1,
+  //     'stopped_moving': 0,
+  //     'fast': 4,
+  //     'good_driving': 5,
+  //     'bad_driving': 2,
+  //     'tippy': 1,
+  //     'not_tippy': 0,
+  //     'consistent_coral': 3,
+  //     'inaccurate_coral': 1,
+  //     'good_defense': 4,
+  //     'bad_defense': 1,
+  //     'jams_often': 2,
+  //     'fast_climb': 3,
+  //     'slow_climb': 1,
+  //     'consistent_auton': 4,
+  //     'inconsistent_auton': 0,
+  //     'net_algae': 2,
+  //   };
+  // }
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width  = MediaQuery.of(context).size.width;
+    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(

@@ -870,6 +870,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
               builder: (context) => AutoTablePage(
                 teamNumber: widget.teamNumber,
                 onThemeChanged: (ThemeMode mode) {},
+                webSocketService: widget.webSocketService,
               ),
             ),
           );
@@ -1114,64 +1115,70 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
           ),
 
           Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              alignment: WrapAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AutoTablePage(
-                          teamNumber: widget.teamNumber,
-                          onThemeChanged: (ThemeMode mode) {},
-                        ),
+            spacing: 8.0,
+            runSpacing: 4.0,
+            alignment: WrapAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AutoTablePage(
+                        teamNumber: widget.teamNumber,
+                        onThemeChanged: (ThemeMode mode) {},
+                        webSocketService: widget.webSocketService,
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    textStyle: TextStyle(fontSize: fontSize),
-                  ),
-                  child: const Text("Auto Table"),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  textStyle: TextStyle(fontSize: fontSize),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PresetComment(
-                          teamNumber: widget.teamNumber,
-                          teamName: widget.teamName,
-                          onThemeChanged: (ThemeMode mode) {},
-                        ),
+                child: const Text("Auto Table"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PresetComment(
+                        teamNumber: widget.teamNumber,
+                        teamName: widget.teamName,
+                        onThemeChanged: (ThemeMode mode) {},
+                        webSocketService: widget.webSocketService,
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    textStyle: TextStyle(fontSize: 14),
-                  ),
-                  child: const Text("Preset Comments"),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  textStyle: TextStyle(fontSize: 14),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Graphing(initialTeam: widget.teamNumber),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    textStyle: TextStyle(fontSize: 14),
-                  ),
-                  child: const Text("Graphing"),
+                child: const Text("Preset Comments"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          Graphing(initialTeam: widget.teamNumber),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  textStyle: TextStyle(fontSize: 14),
                 ),
-              ],
-            ),
+                child: const Text("Graphing"),
+              ),
+            ],
+          ),
         ],
       ),
     );

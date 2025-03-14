@@ -49,6 +49,7 @@ class _AutoPageState extends State<AutoPage> {
 
   bool doIncrement = true;
 
+  // Using radio buttons for start position
   String? startPos = "Option one";
 
   double min(double valOne, double valTwo) {
@@ -78,11 +79,11 @@ class _AutoPageState extends State<AutoPage> {
   Future<void> _submitAutoScoutingData() async {
     final sql = '''
       INSERT INTO AutoScouting (
-        team_number, match_number, l4_count, l2_l3_count, l1_count, net_count, processor_count,
+        team_number, match_number, start_position, l4_count, l2_l3_count, l1_count, net_count, processor_count,
         in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
       )
       VALUES (
-        '${widget.teamName}', '${widget.matchNumber}',
+        '${widget.teamName}', '${widget.matchNumber}', '${startPos ?? ""}',
         ${l4Counter.value}, ${l2l3Counter.value}, ${l1Counter.value},
         ${netCounter.value}, ${processorCounter.value},
         ${inCenterZone ? 1 : 0}, ${inLeftZone ? 1 : 0}, ${inRightZone ? 1 : 0},
@@ -258,7 +259,7 @@ class _AutoPageState extends State<AutoPage> {
                                   ListTile(
                                       title: const Text(""),
                                       leading: Radio<String>(
-                                          value: "Option one",
+                                          value: "rightStart",
                                           groupValue: startPos,
                                           onChanged: (String? value) {
                                             setState(() {
@@ -270,7 +271,7 @@ class _AutoPageState extends State<AutoPage> {
                                   ListTile(
                                       title: const Text(""),
                                       leading: Radio<String>(
-                                          value: "Option two",
+                                          value: "centerStart",
                                           groupValue: startPos,
                                           onChanged: (String? value) {
                                             setState(() {
@@ -282,7 +283,7 @@ class _AutoPageState extends State<AutoPage> {
                                   ListTile(
                                       title: const Text(""),
                                       leading: Radio<String>(
-                                          value: "Option three",
+                                          value: "leftStart",
                                           groupValue: startPos,
                                           onChanged: (String? value) {
                                             setState(() {
@@ -462,7 +463,7 @@ class _AutoPageState extends State<AutoPage> {
               builder: (context) => ObjectivePage(
                 teamName: widget.teamName,
                 teamNickname: widget.teamNickname,
-                matchNumber: widget.matchNumber, // Updated here
+                matchNumber: widget.matchNumber,
                 channel: widget.webSocketService.channel,
                 onThemeChanged: widget.onThemeChanged,
                 webSocketService: widget.webSocketService,

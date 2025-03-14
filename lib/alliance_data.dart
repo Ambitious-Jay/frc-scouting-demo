@@ -30,8 +30,8 @@ class TeamDataModel {
   final String teamName; // from StatsboticsEPA
 
   // From StatsboticsEPA
-  final double epa;     // current_EPA
-  final double maxEpa;  // max_EPA
+  final double epa; // current_EPA
+  final double maxEpa; // max_EPA
 
   // From EventRankings
   final int rank;
@@ -39,15 +39,15 @@ class TeamDataModel {
 
   // From PitScoutingData
   final bool processor; // Boolean
-  final bool net;       // Boolean
-  final String hang;    // e.g. "shallow" or "deep"
+  final bool net; // Boolean
+  final String hang; // e.g. "shallow" or "deep"
   final bool l1;
   final bool l2;
   final bool l3;
   final bool l4;
   final String coralIntakeType; // "Coral intake type"
   final String algaeIntakeType; // "Algae intake type"
-  final bool leavesAuto;        // from leaves_start_line
+  final bool leavesAuto; // from leaves_start_line
 
   // CPM/APM (averages only)
   final double cpmAvg;
@@ -64,12 +64,12 @@ class TeamDataModel {
   final double processorMin, processorMax, processorAvg;
 
   // OPR fields for each row
-  final double oprL1;        
-  final double oprL2;        
-  final double oprL3;        
-  final double oprL4;        
-  final double oprProcessor; 
-  final double oprNet;       
+  final double oprL1;
+  final double oprL2;
+  final double oprL3;
+  final double oprL4;
+  final double oprProcessor;
+  final double oprNet;
 
   const TeamDataModel({
     required this.teamNumber,
@@ -137,7 +137,8 @@ class _AllianceDataState extends State<AllianceData> {
   void initState() {
     super.initState();
     // Split allianceNames into exactly 3 teams
-    _teamNumbers = widget.allianceNames.split(',').map((s) => s.trim()).toList();
+    _teamNumbers =
+        widget.allianceNames.split(',').map((s) => s.trim()).toList();
     while (_teamNumbers.length < 3) {
       _teamNumbers.add("0");
     }
@@ -390,7 +391,8 @@ class _AllianceDataState extends State<AllianceData> {
       return base;
     }
 
-    double safeDouble(dynamic val) => (val == null) ? 0.0 : (val as num).toDouble();
+    double safeDouble(dynamic val) =>
+        (val == null) ? 0.0 : (val as num).toDouble();
 
     final double oprScore = safeDouble(row["OPR_Score"]);
     final double oprL1 = safeDouble(row["oprL1"]);
@@ -995,7 +997,8 @@ class _AllianceDataState extends State<AllianceData> {
             // Row 2: Processor, Net, Hang
             Row(
               children: [
-                dataItem("Processor", team.processor ? "TRUE" : "FALSE", fontSize),
+                dataItem(
+                    "Processor", team.processor ? "TRUE" : "FALSE", fontSize),
                 dataItem("Net", team.net ? "TRUE" : "FALSE", fontSize),
                 dataItem("Hang", team.hang, fontSize),
               ],
@@ -1019,7 +1022,8 @@ class _AllianceDataState extends State<AllianceData> {
             // Row 5: Leaves Auto, CPM (avg), APM (avg)
             Row(
               children: [
-                dataItem("Leaves Auto", team.leavesAuto ? "TRUE" : "FALSE", fontSize),
+                dataItem("Leaves Auto", team.leavesAuto ? "TRUE" : "FALSE",
+                    fontSize),
                 dataItem("CPM", team.cpmAvg.toStringAsFixed(2), fontSize),
                 dataItem("APM", team.apmAvg.toStringAsFixed(2), fontSize),
               ],
@@ -1042,11 +1046,18 @@ class _AllianceDataState extends State<AllianceData> {
                 horizontalMargin: 8.0,
                 dataRowHeight: 32.0,
                 columns: [
-                  DataColumn(label: Text("Stat", style: TextStyle(fontSize: fontSize))),
-                  DataColumn(label: Text("Average", style: TextStyle(fontSize: fontSize))),
-                  DataColumn(label: Text("OPR", style: TextStyle(fontSize: fontSize))),
-                  DataColumn(label: Text("Min", style: TextStyle(fontSize: fontSize))),
-                  DataColumn(label: Text("Max", style: TextStyle(fontSize: fontSize))),
+                  DataColumn(
+                      label:
+                          Text("Stat", style: TextStyle(fontSize: fontSize))),
+                  DataColumn(
+                      label: Text("Average",
+                          style: TextStyle(fontSize: fontSize))),
+                  DataColumn(
+                      label: Text("OPR", style: TextStyle(fontSize: fontSize))),
+                  DataColumn(
+                      label: Text("Min", style: TextStyle(fontSize: fontSize))),
+                  DataColumn(
+                      label: Text("Max", style: TextStyle(fontSize: fontSize))),
                 ],
                 rows: [
                   // L1
@@ -1063,7 +1074,8 @@ class _AllianceDataState extends State<AllianceData> {
                   ]),
                   // L2/3
                   DataRow(cells: [
-                    DataCell(Text("L2/3", style: TextStyle(fontSize: fontSize))),
+                    DataCell(
+                        Text("L2/3", style: TextStyle(fontSize: fontSize))),
                     DataCell(Text(team.l23Avg.toStringAsFixed(2),
                         style: TextStyle(fontSize: fontSize))),
                     // OPR for L2/3 is "L2 OPR / L3 OPR"
@@ -1090,7 +1102,8 @@ class _AllianceDataState extends State<AllianceData> {
                   ]),
                   // Processor
                   DataRow(cells: [
-                    DataCell(Text("Processor", style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text("Processor",
+                        style: TextStyle(fontSize: fontSize))),
                     DataCell(Text(team.processorAvg.toStringAsFixed(2),
                         style: TextStyle(fontSize: fontSize))),
                     DataCell(Text(team.oprProcessor.toStringAsFixed(2),
@@ -1121,7 +1134,8 @@ class _AllianceDataState extends State<AllianceData> {
             // Overall OPR (if you want to show it separately)
             Row(
               children: [
-                dataItem("Overall OPR", team.teamOpr.toStringAsFixed(2), fontSize),
+                dataItem(
+                    "Overall OPR", team.teamOpr.toStringAsFixed(2), fontSize),
               ],
             ),
 
@@ -1141,12 +1155,14 @@ class _AllianceDataState extends State<AllianceData> {
                         builder: (context) => AutoTablePage(
                           teamNumber: team.teamNumber,
                           onThemeChanged: (ThemeMode mode) {},
+                          webSocketService: widget.webSocketService,
                         ),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     textStyle: TextStyle(fontSize: fontSize),
                   ),
                   child: const Text("Auto Table"),
@@ -1160,12 +1176,14 @@ class _AllianceDataState extends State<AllianceData> {
                           teamNumber: team.teamNumber,
                           teamName: team.teamName,
                           onThemeChanged: (ThemeMode mode) {},
+                          webSocketService: widget.webSocketService,
                         ),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     textStyle: TextStyle(fontSize: 14),
                   ),
                   child: const Text("Preset Comments"),
@@ -1175,12 +1193,14 @@ class _AllianceDataState extends State<AllianceData> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Graphing(initialTeam: team.teamNumber),
+                        builder: (context) =>
+                            Graphing(initialTeam: team.teamNumber),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     textStyle: TextStyle(fontSize: 14),
                   ),
                   child: const Text("Graphing"),
@@ -1222,7 +1242,8 @@ class _AllianceDataState extends State<AllianceData> {
                 ),
                 child: Text(
                   "Loading data for team ${_teamNumbers[i]}...",
-                  style: TextStyle(fontSize: (width * 0.03).clamp(12, 16).toDouble()),
+                  style: TextStyle(
+                      fontSize: (width * 0.03).clamp(12, 16).toDouble()),
                 ),
               ),
         ],

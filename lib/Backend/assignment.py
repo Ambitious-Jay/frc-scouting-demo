@@ -431,17 +431,24 @@ class ScoutScheduler:
 
 def run_scout_scheduling():
     """Main function to run the scout assignment algorithm."""
-    scout_names = ['Hunter', 'Emma', 'Gabrielle', 'Demir',
-                   'Chase', 'Quinn', 'Jake', 'Zidaan',
-                   'Alex Lee', 'Asher', 'Felicia', 'Vikram',
-                   'Sean', 'Alex Segor', 'Claudia', 'Matthew Ren',
-                   'Morgan', 'Thomas', 'Michael', 'Isabel',
-                   'Daniel', 'Yari', 'Niko']
+    scout_names = ['Emma',
+                   'Demir',
+                   'Felicia',
+                   'Jake',
+                   'Zidaan',
+                   'Alex Gavin',
+                   'Vikram',
+                   'Asher',
+                   'Daniel',
+                   'Morgan',
+                   'Matthew Ahn',
+                   'Chase',
+                   ]
     total_matches = 74
-    lead_scout_names = ['Joseph','Mattin','Max','Andrew']
+    lead_scout_names = ['CJ','Mattin','Max','Andrew']
     unavailability = {
-        'Yari': [56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74],
-        'Niko': [56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73]
+        'Chase': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        # 'Vikram': [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
     }
     breaks = [22, 55]
     scheduler = ScoutScheduler(
