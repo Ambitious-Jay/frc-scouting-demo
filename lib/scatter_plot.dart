@@ -78,7 +78,7 @@ class _ScatterPlotState extends State<ScatterPlot> {
       -- Coral Per Match
       SELECT
         OPR.Team AS team_number,
-        'Coral Per Match' AS metric_name,
+        'Coral' AS metric_name,
         OPR.OPR_teleop_coral_count AS metric_value
       FROM OPR
 
@@ -110,7 +110,7 @@ class _ScatterPlotState extends State<ScatterPlot> {
       -- Algae Per Match
       SELECT
         OPR.Team AS team_number,
-        'Algae Per Match' AS metric_name,
+        'Algae' AS metric_name,
         OPR.OPR_algae_points AS metric_value
       FROM OPR
 

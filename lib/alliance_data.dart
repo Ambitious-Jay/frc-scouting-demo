@@ -1175,7 +1175,7 @@ class _AllianceDataState extends State<AllianceData> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Graphing(),
+                        builder: (context) => Graphing(initialTeam: team.teamNumber),
                       ),
                     );
                   },

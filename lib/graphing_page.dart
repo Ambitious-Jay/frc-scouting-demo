@@ -171,7 +171,12 @@ Future<Map<String, Map<String, List<List<dynamic>>>>> fetchAutoData(
 
 /// Graphing page that displays a line chart for selected match data.
 class Graphing extends StatefulWidget {
-  const Graphing({Key? key}) : super(key: key);
+  final String? initialTeam;
+  
+  const Graphing({
+    Key? key,
+    this.initialTeam,
+  }) : super(key: key);
 
   @override
   State<Graphing> createState() => _GraphingState();
@@ -211,19 +216,27 @@ class _GraphingState extends State<Graphing> {
         teleopData = fetchedTeleop;
         autoData = fetchedAuto;
         isLoading = false;
-        if (teleopData.isNotEmpty) {
-          _selectedTeam = teleopData.keys.first;
+      //   if (teleopData.isNotEmpty) {
+      //     _selectedTeam = teleopData.keys.first;
+      //     _selectedStat = teleopData[_selectedTeam]!.keys.first;
+      //   }
+      // });
+      if (teleopData.isNotEmpty) {
+          if (widget.initialTeam != null && teleopData.containsKey(widget.initialTeam)) {
+            _selectedTeam = widget.initialTeam!;
+          } else {
+            _selectedTeam = teleopData.keys.first;
+          }
           _selectedStat = teleopData[_selectedTeam]!.keys.first;
         }
       });
-    } catch (e) {
-      print("Error fetching data: $e");
-      setState(() {
-        isLoading = false;
-      });
+      } catch (e) {
+        print("Error fetching data: $e");
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
