@@ -35,24 +35,24 @@ class _PresetCommentState extends State<PresetComment> {
   Future<Map<String, int>> _fetchPresetData(String normalizedTeam) async {
     final String sql = """
       SELECT 
-        'attempt_to_park',
-        'defense',
-        'mechanism_broke',
-        'stopped_moving',
-        'fast',
-        'good_driving',
-        'bad_driving',
-        'tippy',
-        'not_tippy',
-        'consistent_coral',
-        'inaccurate_coral',
-        'good_defense',
-        'bad_defense',
-        'jams_often',
-        'fast_climb',
-        'slow_climb',
-        'consistent_auton',
-        'inconsistent_auton'
+        attempt_to_park,
+        defense,
+        mechanism_broke,
+        stopped_moving,
+        fast,
+        good_driving,
+        bad_driving,
+        tippy,
+        not_tippy,
+        consistent_coral,
+        inaccurate_coral,
+        good_defense,
+        bad_defense,
+        jams_often,
+        fast_climb,
+        slow_climb,
+        consistent_auton,
+        inconsistent_auton
       FROM EndgameData
       WHERE team_number = 'frc$normalizedTeam'
     """;
@@ -96,13 +96,16 @@ class _PresetCommentState extends State<PresetComment> {
     });
     await sub.cancel();
 
+    print(row);
+
     if (row == null) return <String, int>{};
 
-    bool parseBool(dynamic val) {
-      if (val == null) return false;
-      final str = val.toString().toLowerCase();
-      return (str == "true" || str == "1" || str == "yes");
-    }
+    // bool parseBool(dynamic val) {
+    //   if (val == null) return false;
+    //   final str = val.toString().toLowerCase();
+    //   return (str == "true" || str == "1" || str == "yes");
+    // }
+    print("Not null");
 
     return <String, int>{
       "attemptToPark": row["attempt_to_park"] ?? 0,
