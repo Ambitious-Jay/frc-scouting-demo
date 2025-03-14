@@ -1145,6 +1145,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
                           teamNumber: widget.teamNumber,
                           teamName: widget.teamName,
                           onThemeChanged: (ThemeMode mode) {},
+                          webSocketService: widget.webSocketService,
                         ),
                       ),
                     );

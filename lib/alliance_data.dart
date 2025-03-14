@@ -1160,6 +1160,7 @@ class _AllianceDataState extends State<AllianceData> {
                           teamNumber: team.teamNumber,
                           teamName: team.teamName,
                           onThemeChanged: (ThemeMode mode) {},
+                          webSocketService: widget.webSocketService,
                         ),
                       ),
                     );
