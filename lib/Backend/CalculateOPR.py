@@ -125,7 +125,7 @@ try:
         return opr_results
 
     if __name__ == '__main__':
-        event = "2025caoc"
+        event = "2025cala"
         opr_results = calculateAllOPRs(event)
         print("Calculated OPRs:")
         print(opr_results)

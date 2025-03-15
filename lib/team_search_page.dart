@@ -37,6 +37,9 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
 
   Future<void> loadTeams() async {
     teams = await fetchTeamsFromSQL();
+    // Pad team numbers to a fixed width (e.g., 5) to ensure proper numeric sorting.
+    teams.sort(
+        (a, b) => a.number.padLeft(5, '0').compareTo(b.number.padLeft(5, '0')));
     setState(() {
       filteredTeams = teams;
     });
@@ -68,7 +71,6 @@ class _TeamSearchPageState extends State<TeamSearchPage> {
           final List<dynamic> rows = msg["rows"];
           // Convert each row to a Team instance.
           List<Team> fetchedTeams = rows.map((row) {
-            // Assume each row is a Map with keys "team" and "team_name".
             return Team(
               number: row["team"].toString(),
               name: row["team_name"] ?? "",

@@ -32,9 +32,8 @@ class LeadScoutDataModel {
   final String wlr;
   final bool processor;
   final bool net;
-  final double cpmAvg;
-  final double apmAvg;
-  final double coralPerMatch;
+  final double cpmAvg; // Teleop coral per match (average)
+  final double apmAvg; // Teleop (net + processor) per match (average)
 
   // OPR fields
   final double oprL1;
@@ -62,9 +61,11 @@ class LeadScoutDataModel {
   final String algaeIntakeType;
   final String climbType;
 
-  // Autonomous (from AutoScouting and PitScoutingData)
-  final String autonomousCoral;
+  // Autonomous (from PitScoutingData and AutoScouting)
+  final String
+      autonomousCoral; // Fetched from PitScoutingData.autonomous_coral_points
   final String leaveAutoLine;
+  final double autonCpmAvg; // Average of (l1+l2_l3+l4) from AutoScouting
 
   // Lead Scouting Notes
   final String compatibility;
@@ -81,7 +82,7 @@ class LeadScoutDataModel {
     required this.net,
     required this.cpmAvg,
     required this.apmAvg,
-    required this.coralPerMatch,
+    // OPR
     required this.oprL1,
     required this.oprL2,
     required this.oprL3,
@@ -89,6 +90,7 @@ class LeadScoutDataModel {
     required this.oprProcessor,
     required this.oprNet,
     required this.teamOpr,
+    // Aggregator stats
     required this.l1Min,
     required this.l1Max,
     required this.l1Avg,
@@ -104,6 +106,7 @@ class LeadScoutDataModel {
     required this.processorMin,
     required this.processorMax,
     required this.processorAvg,
+    // Pit data
     required this.robotWeight,
     required this.driveType,
     required this.motorType,
@@ -112,8 +115,11 @@ class LeadScoutDataModel {
     required this.coralIntakeType,
     required this.algaeIntakeType,
     required this.climbType,
+    // Auto data
     required this.autonomousCoral,
     required this.leaveAutoLine,
+    required this.autonCpmAvg,
+    // Lead scouting
     required this.compatibility,
     required this.notableFeats,
     required this.humanPlayerNetAcc,
@@ -129,7 +135,6 @@ class LeadScoutDataModel {
     bool? net,
     double? cpmAvg,
     double? apmAvg,
-    double? coralPerMatch,
     double? oprL1,
     double? oprL2,
     double? oprL3,
@@ -162,6 +167,7 @@ class LeadScoutDataModel {
     String? climbType,
     String? autonomousCoral,
     String? leaveAutoLine,
+    double? autonCpmAvg,
     String? compatibility,
     String? notableFeats,
     String? humanPlayerNetAcc,
@@ -176,7 +182,6 @@ class LeadScoutDataModel {
       net: net ?? this.net,
       cpmAvg: cpmAvg ?? this.cpmAvg,
       apmAvg: apmAvg ?? this.apmAvg,
-      coralPerMatch: coralPerMatch ?? this.coralPerMatch,
       oprL1: oprL1 ?? this.oprL1,
       oprL2: oprL2 ?? this.oprL2,
       oprL3: oprL3 ?? this.oprL3,
@@ -209,6 +214,7 @@ class LeadScoutDataModel {
       climbType: climbType ?? this.climbType,
       autonomousCoral: autonomousCoral ?? this.autonomousCoral,
       leaveAutoLine: leaveAutoLine ?? this.leaveAutoLine,
+      autonCpmAvg: autonCpmAvg ?? this.autonCpmAvg,
       compatibility: compatibility ?? this.compatibility,
       notableFeats: notableFeats ?? this.notableFeats,
       humanPlayerNetAcc: humanPlayerNetAcc ?? this.humanPlayerNetAcc,
@@ -221,7 +227,7 @@ class LeadScoutNotesVisPage extends StatefulWidget {
   final WebSocketService webSocketService;
   final String teamName;
   final String teamNickname;
-  final String teamNumber; // e.g. "1148" or "frc1148" (will be normalized)
+  final String teamNumber; // e.g. "599" or "frc599" (will be normalized)
 
   const LeadScoutNotesVisPage({
     Key? key,
@@ -254,8 +260,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
     data = await _fetchTBAMatchData(normalized, data);
     data = await _fetchMatchDataAggregator(normalized, data);
     data = await _fetchPitData(normalized, data);
-    data = await _fetchAutoData(normalized, data);
-    // This is where we fetch from LeadScoutingData:
+    data = await _fetchAutoCPMData(normalized, data); // Uses AutoScouting table
     data = await _fetchNotesData(normalized, data);
 
     setState(() {
@@ -267,7 +272,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
   Future<LeadScoutDataModel> _fetchPerformanceData(String teamNum) async {
     final int teamInt = parseTeamNumberAsInt(teamNum);
     final String sql = """
-      SELECT team_name, current_EPA
+      SELECT team_name, total_epa
       FROM StatsboticsEPA
       WHERE team = $teamInt
     """;
@@ -304,14 +309,13 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
     return LeadScoutDataModel(
       teamNumber: teamNum,
       teamName: row?["team_name"] ?? "Unknown",
-      epa: (row?["current_EPA"] ?? 0).toDouble(),
+      epa: (row?["total_epa"] ?? 0).toDouble(),
       rank: 0,
       wlr: "0-0-0",
       processor: false,
       net: false,
       cpmAvg: 0,
       apmAvg: 0,
-      coralPerMatch: 0,
       // OPR
       oprL1: 0,
       oprL2: 0,
@@ -348,6 +352,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
       // Auto data
       autonomousCoral: "",
       leaveAutoLine: "",
+      autonCpmAvg: 0,
       // Lead scouting
       compatibility: "",
       notableFeats: "",
@@ -461,13 +466,15 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
     );
   }
 
-  /// 4) Fetch aggregated TBAMatchScores for CPM and APM.
+  /// 4) Fetch teleop CPM and APM from MatchData.
+  /// For CPM, sum l1Counter, l2l3Counter, and l4Counter for each match and average over the number of rows returned.
+  /// For APM, sum netCounter and processorCounter for each match and average similarly.
   Future<LeadScoutDataModel> _fetchTBAMatchData(
       String teamNum, LeadScoutDataModel base) async {
     final String sql = """
-      SELECT teleop_coral_count, net_algae_count
-      FROM TBAMatchScores
-      WHERE team_keys LIKE '%frc$teamNum%'
+      SELECT l1Counter, l2l3Counter, l4Counter, netCounter, processorCounter
+      FROM MatchData
+      WHERE team_number = 'frc$teamNum'
     """;
     final Map<String, dynamic> queryCmd = {
       "type": "query",
@@ -499,34 +506,28 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
 
     final rows = await completer.future
         .timeout(const Duration(seconds: 5), onTimeout: () => []);
-
     await sub.cancel();
     if (rows.isEmpty) return base;
 
-    List<double> coralVals = [];
-    List<double> algaeVals = [];
-
+    double totalTeleop = 0;
+    double totalAP = 0;
     for (var r in rows) {
-      double cVal =
-          double.tryParse(r["teleop_coral_count"]?.toString() ?? "") ?? 0;
-      if (cVal > 0) coralVals.add(cVal);
-
-      double aVal =
-          double.tryParse(r["net_algae_count"]?.toString() ?? "") ?? 0;
-      if (aVal > 0) algaeVals.add(aVal);
+      double l1 = double.tryParse(r["l1Counter"]?.toString() ?? "0") ?? 0;
+      double l23 = double.tryParse(r["l2l3Counter"]?.toString() ?? "0") ?? 0;
+      double l4 = double.tryParse(r["l4Counter"]?.toString() ?? "0") ?? 0;
+      double net = double.tryParse(r["netCounter"]?.toString() ?? "0") ?? 0;
+      double processor =
+          double.tryParse(r["processorCounter"]?.toString() ?? "0") ?? 0;
+      totalTeleop += (l1 + l23 + l4);
+      totalAP += (net + processor);
     }
-
-    double coralAvg = coralVals.isNotEmpty
-        ? coralVals.reduce((a, b) => a + b) / coralVals.length
-        : 0;
-    double algaeAvg = algaeVals.isNotEmpty
-        ? algaeVals.reduce((a, b) => a + b) / algaeVals.length
-        : 0;
+    int numMatches = rows.length;
+    double teleopAvg = numMatches > 0 ? totalTeleop / numMatches : 0;
+    double apAvg = numMatches > 0 ? totalAP / numMatches : 0;
 
     return base.copyWith(
-      cpmAvg: coralAvg,
-      apmAvg: algaeAvg,
-      coralPerMatch: coralAvg,
+      cpmAvg: teleopAvg,
+      apmAvg: apAvg,
     );
   }
 
@@ -664,13 +665,13 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
     );
   }
 
-  /// 5) Fetch pit scouting data (robot specs, booleans).
+  /// 5) Fetch pit scouting data (robot specs, booleans, autonomous coral from PitScoutingData).
   Future<LeadScoutDataModel> _fetchPitData(
       String teamNum, LeadScoutDataModel base) async {
     final String sql = """
       SELECT robot_weight, drive_type, motor_type, motor_count, bumper_quality,
              coral_intake_type, algae_intake_type, climb_type, leaves_start_line,
-             processor, net
+             processor, net, autonomous_coral_points
       FROM PitScoutingData
       WHERE team_number = '$teamNum'
     """;
@@ -726,22 +727,24 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
       algaeIntakeType: row["algae_intake_type"] ?? "",
       climbType: row["climb_type"] ?? "",
       leaveAutoLine: parseBool(row["leaves_start_line"]) ? "TRUE" : "FALSE",
+      // Fetched from PitScoutingData (stored as autonomous_coral_points)
+      autonomousCoral: row["autonomous_coral_points"]?.toString() ?? "0",
     );
   }
 
-  /// 6) Fetch autonomous data from AutoScouting.
-  Future<LeadScoutDataModel> _fetchAutoData(
+  /// 6) Fetch the "Auton CPM" from AutoScouting by summing l1_count, l2_l3_count, and l4_count per row, then averaging.
+  Future<LeadScoutDataModel> _fetchAutoCPMData(
       String teamNum, LeadScoutDataModel base) async {
     final String sql = """
-      SELECT TOP 1 l4_count
+      SELECT l1_count, l2_l3_count, l4_count
       FROM AutoScouting
-      WHERE team_number = '$teamNum'
+      WHERE team_number = 'frc$teamNum'
     """;
     final Map<String, dynamic> queryCmd = {
       "type": "query",
       "text": sql,
     };
-    final completer = Completer<Map<String, dynamic>?>();
+    final completer = Completer<List<Map<String, dynamic>>>();
     late StreamSubscription sub;
 
     sub = widget.webSocketService.stream!.listen((rawMessage) {
@@ -754,7 +757,9 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
         final Map<String, dynamic> msg = jsonDecode(jsonPart);
         if (msg["type"] == "query") {
           final List<dynamic> rows = msg["rows"];
-          completer.complete(rows.isNotEmpty ? rows.first : null);
+          final List<Map<String, dynamic>> listRows =
+              rows.map((r) => Map<String, dynamic>.from(r)).toList();
+          completer.complete(listRows);
         }
       } catch (e) {
         completer.completeError(e);
@@ -763,12 +768,28 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
 
     widget.webSocketService.sendLengthPrefixed(queryCmd);
 
-    final row = await completer.future
-        .timeout(const Duration(seconds: 5), onTimeout: () => null);
+    final rows = await completer.future
+        .timeout(const Duration(seconds: 5), onTimeout: () => []);
     await sub.cancel();
 
-    String autoCoral = row != null ? "${row["l4_count"]} L4" : "0 L4";
-    return base.copyWith(autonomousCoral: autoCoral);
+    if (rows.isEmpty) return base;
+
+    List<double> autonCpmValues = [];
+    for (var r in rows) {
+      double l1 = double.tryParse(r["l1_count"]?.toString() ?? "0") ?? 0;
+      double l2l3 = double.tryParse(r["l2_l3_count"]?.toString() ?? "0") ?? 0;
+      double l4 = double.tryParse(r["l4_count"]?.toString() ?? "0") ?? 0;
+      double totalAutonCoral = l1 + l2l3 + l4;
+      autonCpmValues.add(totalAutonCoral);
+    }
+
+    double autonCpmAvg = 0;
+    if (autonCpmValues.isNotEmpty) {
+      final sum = autonCpmValues.reduce((a, b) => a + b);
+      autonCpmAvg = sum / autonCpmValues.length;
+    }
+
+    return base.copyWith(autonCpmAvg: autonCpmAvg);
   }
 
   /// 7) Fetch lead scouting notes from LeadScoutingData (compatibility, feats, HP net ACC).
@@ -933,35 +954,34 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
             ],
           ),
           SizedBox(height: height * 0.02),
-          // Row 3: CPM, APM, Coral Per Match
+          // Row 3: Teleop CPM, APM, and Auton CPM
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
                 child: _buildStatItem(
-                  "CPM",
+                  "CPM", // Teleop coral per match (average)
                   leadData!.cpmAvg.toStringAsFixed(2),
                   height,
                 ),
               ),
               Expanded(
                 child: _buildStatItem(
-                  "APM",
+                  "APM", // (net + processor) per match (average)
                   leadData!.apmAvg.toStringAsFixed(2),
                   height,
                 ),
               ),
               Expanded(
                 child: _buildStatItem(
-                  "Coral Per Match",
-                  leadData!.coralPerMatch.toStringAsFixed(2),
+                  "Auton CPM", // Average from AutoScouting table
+                  leadData!.autonCpmAvg.toStringAsFixed(2),
                   height,
                 ),
               ),
             ],
           ),
           SizedBox(height: height * 0.03),
-
           // Aggregator table with columns: Stat, Average, OPR, Min, Max
           Text(
             "Match Data Aggregation (L1, L2/3, L4, Processor, Net)",
@@ -1097,7 +1117,6 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
             ),
           ),
           SizedBox(height: height * 0.02),
-
           // Overall OPR row
           Row(
             children: [
@@ -1113,7 +1132,6 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
               ),
             ],
           ),
-
           Wrap(
             spacing: 8.0,
             runSpacing: 4.0,
@@ -1274,11 +1292,19 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
-                  child: _buildStatItem("Coral scored during Auton",
-                      leadData!.autonomousCoral, height)),
+                child: _buildStatItem(
+                  "Coral scored during Auton",
+                  leadData!.autonomousCoral,
+                  height,
+                ),
+              ),
               Expanded(
-                  child: _buildStatItem("Leave AutoLine in Auton",
-                      leadData!.leaveAutoLine, height)),
+                child: _buildStatItem(
+                  "Leave AutoLine in Auton",
+                  leadData!.leaveAutoLine,
+                  height,
+                ),
+              ),
             ],
           ),
         ],

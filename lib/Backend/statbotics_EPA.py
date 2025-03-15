@@ -21,15 +21,19 @@ print(Teams)
 
 sb = statbotics.Statbotics()
 
-def saveEPA(team, name, current, recent, mean, max):
+def saveEPA(team, name, total, auto, teleop, endgame, current, recent, mean, max):
     insert_sql = """
-    INSERT INTO StatsboticsEPA (team, team_name, current_EPA, recent_EPA, mean_EPA, max_EPA)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO StatsboticsEPA (team, team_name, total_epa, auto_epa, teleop_epa, endgame_epa, norm_epa_current, norm_epa_recent, norm_epa_mean, norm_epa_max)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
     
     cursor.execute(insert_sql,
                     team,
                     name,
+                    total,
+                    auto,
+                    teleop,
+                    endgame,
                     current,
                     recent,
                     mean,
@@ -61,13 +65,27 @@ try:
     for i in range(len(Teams)):
         team = Teams[i].replace("frc", "")
         team = int(team)
-        print(team)
-        name = (sb.get_team(team).get('name'))
-        current = (sb.get_team(team).get('norm_epa').get('current'))
-        recent = (sb.get_team(team).get('norm_epa').get('recent'))
-        mean = (sb.get_team(team).get('norm_epa').get('mean'))
-        max = (sb.get_team(team).get('norm_epa').get('max'))
-        saveEPA(team, name, current, recent, mean, max)
+        epa = (sb.get_team_event(team, curEvent).get('epa').get('breakdown'))
+        team_data = (sb.get_team(team))
+        name = (team_data.get('name'))
+        # print(name)
+        total = (epa.get('total_points'))
+        # print(total)
+        auto = (epa.get('auto_points'))
+        # print(auto)
+        teleop = (epa.get('teleop_points'))
+        # print(teleop)
+        endgame = (epa.get('endgame_points'))
+        # print(endgame)
+        current = (team_data.get('norm_epa').get('current'))
+        # print(current)
+        recent = (team_data.get('norm_epa').get('recent'))
+        # print(recent)
+        mean = (team_data.get('norm_epa').get('mean'))
+        # print(mean)
+        max = (team_data.get('norm_epa').get('max'))
+        # print(max)
+        saveEPA(team, name, total, auto, teleop, endgame, current, recent, mean, max)
     
     
 except Exception as e:
@@ -76,4 +94,4 @@ finally:
     try:
         conn.close()
     except Exception:
-        pass  
+        pass
