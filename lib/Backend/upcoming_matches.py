@@ -6,7 +6,7 @@ import urllib.parse
 
 # --- Step 1: Fetch Data from TBA ---
 api_key = "tcS4SqWjusf1dO6Nqi3kzMO0aHUg9wcJk2MUaPbtH4xnZmWQj5lfW43ab3speDKA"
-event_key = "2025caoc"  # Event key for the event
+event_key = "2025cala"  # Event key for the event
 url = f"https://www.thebluealliance.com/api/v3/event/{event_key}/matches"
 headers = {"X-TBA-Auth-Key": api_key}
 

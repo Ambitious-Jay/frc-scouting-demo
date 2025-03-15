@@ -434,21 +434,28 @@ def run_scout_scheduling():
     scout_names = ['Emma',
                    'Demir',
                    'Felicia',
+                   'Hunter',
                    'Jake',
                    'Zidaan',
-                   'Alex Gavin',
                    'Vikram',
                    'Asher',
                    'Daniel',
                    'Morgan',
-                   'Matthew Ahn',
                    'Chase',
+                   'Thomas',
+                   'Gabrielle',
+                   'Matthew Ren',
+                   'Alex Gavin',
+                   'Michael',
+                   'Isabel',
+                   'Claudia',
+                   'Sean',
+                   'Niko',
                    ]
     total_matches = 74
     lead_scout_names = ['CJ','Mattin','Max','Andrew']
     unavailability = {
-        'Chase': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        # 'Vikram': [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        
     }
     breaks = [22, 55]
     scheduler = ScoutScheduler(

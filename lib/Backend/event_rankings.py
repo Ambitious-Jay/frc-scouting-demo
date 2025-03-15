@@ -75,7 +75,7 @@ def fetch_and_insert_rankings():
     """
     # --- Fetch Rankings Data from TBA ---
     api_key = "tcS4SqWjusf1dO6Nqi3kzMO0aHUg9wcJk2MUaPbtH4xnZmWQj5lfW43ab3speDKA"
-    event_key = "2025caoc"
+    event_key = "2025cala"
     base_url = "https://www.thebluealliance.com/api/v3"
     headers = {"X-TBA-Auth-Key": api_key}
     

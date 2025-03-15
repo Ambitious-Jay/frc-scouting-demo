@@ -27,6 +27,7 @@ Map<String, bool> presets = <String, bool>{
   'Slow Climb': false,
   'Consistent Auton': false,
   'Inconsistent Auton': false,
+  'Net Algae': false,
 };
 
 List<String> keys = presets.keys.toList();
@@ -50,7 +51,6 @@ class Endgame extends StatefulWidget {
 }
 
 class _Endgame extends State<Endgame> {
-
   Future<void> _submitEndgameData() async {
     // Build the MSSQL MERGE statement for upsert based on team_number.
     final sql = '''
@@ -129,7 +129,7 @@ WHEN NOT MATCHED THEN
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width  = MediaQuery.of(context).size.width;
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -265,7 +265,7 @@ WHEN NOT MATCHED THEN
         ),
         iconAlignment: IconAlignment.end,
         onPressed: () async {
-          await _submitEndgameData();
+          _submitEndgameData();
           Navigator.push(
             context,
             MaterialPageRoute(

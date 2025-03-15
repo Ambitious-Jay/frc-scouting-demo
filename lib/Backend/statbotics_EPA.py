@@ -3,7 +3,7 @@ import statbotics
 import requests
 import pyodbc
 
-curEvent = "2025caoc"
+curEvent = "2025cala"
 
 def TBA_AddressFetcher(path):
     request_url = "https://www.thebluealliance.com/api/v3/" + path
