@@ -51,6 +51,21 @@ class Endgame extends StatefulWidget {
 }
 
 class _Endgame extends State<Endgame> {
+  // Controller for the comments text field.
+  late final TextEditingController _commentsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _commentsController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _commentsController.dispose();
+    super.dispose();
+  }
+
   Future<void> _submitEndgameData() async {
     final sql = '''
 MERGE EndgameData AS target
@@ -202,7 +217,7 @@ WHEN NOT MATCHED THEN
             ),
           ),
           const Divider(),
-          // Grid of preset buttons
+          // Grid of preset buttons (remains in the ListView so is scrollable)
           GridView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.all(width / 50),
@@ -264,7 +279,7 @@ WHEN NOT MATCHED THEN
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left Column: "Attempt to park?" and "Defense?" arranged in vertical stacks.
+          // Left Column: "Attempt to park?" and "Defense?" arranged vertically.
           Expanded(
             flex: 1,
             child: Column(
@@ -343,103 +358,87 @@ WHEN NOT MATCHED THEN
             ),
           ),
           SizedBox(width: dynamicPadding * 2),
-          // Middle Column: Grid of preset buttons.
+          // Middle Column: Grid of preset buttons wrapped in Expanded so it scrolls.
           Expanded(
             flex: 2,
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 2.0,
-                crossAxisSpacing: dynamicPadding,
-                mainAxisSpacing: dynamicPadding,
-              ),
-              itemCount: keys.length,
-              itemBuilder: (context, index) {
-                String key = keys[index];
-                bool value = presets[key]!;
-                return ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      presets[key] = !value;
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                      value ? Colors.red : Colors.black,
-                    ),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      key,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: dynamicFontSize * 0.6,
+            child: Expanded(
+              child: GridView.builder(
+                // Removed shrinkWrap and NeverScrollableScrollPhysics to allow scrolling.
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 2.0,
+                  crossAxisSpacing: dynamicPadding,
+                  mainAxisSpacing: dynamicPadding,
+                ),
+                itemCount: keys.length,
+                itemBuilder: (context, index) {
+                  String key = keys[index];
+                  bool value = presets[key]!;
+                  return ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        presets[key] = !value;
+                      });
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        value ? Colors.red : Colors.black,
                       ),
                     ),
-                  ),
-                );
-              },
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        key,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: dynamicFontSize * 0.6,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           SizedBox(width: dynamicPadding * 2),
-          // Right Column: Excel and Notes buttons.
+          // Right Column: Excel button with a comments text field underneath.
           Expanded(
             flex: 1,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
-                  children: [
-                    Text("Excel",
-                        style: TextStyle(fontSize: dynamicFontSize * 0.6)),
-                    SizedBox(height: dynamicPadding),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Theme.of(context).colorScheme.primary,
-                        minimumSize:
-                            Size(dynamicExcelNotesSize, dynamicExcelNotesSize),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      onPressed: () {
-                        // Navigate to Excel functionality.
-                      },
-                      child: Icon(Icons.rectangle, size: dynamicIconSize),
-                    ),
-                  ],
+                SizedBox(
+                  height: height * 0.25,
                 ),
-                SizedBox(height: dynamicPadding * 2),
-                Column(
-                  children: [
-                    Text("Notes",
-                        style: TextStyle(fontSize: dynamicFontSize * 0.6)),
-                    SizedBox(height: dynamicPadding),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Theme.of(context).colorScheme.primary,
-                        minimumSize:
-                            Size(dynamicExcelNotesSize, dynamicExcelNotesSize),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      onPressed: () {
-                        // Open notes popup or navigate accordingly.
-                      },
-                      child: Icon(Icons.receipt, size: dynamicIconSize),
+
+                SizedBox(height: dynamicPadding),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    minimumSize:
+                        Size(dynamicExcelNotesSize, dynamicExcelNotesSize),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                  ],
+                  ),
+                  onPressed: () {
+                    // Navigate to Excel functionality.
+                  },
+                  child: Text("Capabilities",
+                      style: TextStyle(fontSize: dynamicFontSize * 0.6)),
+                ),
+                SizedBox(height: dynamicPadding),
+                // Comments text field added underneath Excel.
+                TextField(
+                  controller: _commentsController,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    labelText: "Comments",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ],
             ),

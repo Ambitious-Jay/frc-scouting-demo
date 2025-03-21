@@ -34,6 +34,9 @@ class _ObjectivePageState extends State<ObjectivePage> {
   // We'll fetch the username from AuthService.
   String _username = "";
 
+  // Controllers for notes
+  late final TextEditingController _notesController;
+
   // Counters
   int l4Counter = 0;
   int l2l3Counter = 0;
@@ -110,11 +113,12 @@ class _ObjectivePageState extends State<ObjectivePage> {
 
   Future<void> _saveDataToDatabase() async {
     try {
+      // Update the SQL query to include the notes field.
       final sql = '''
     INSERT INTO [MatchData]
-      (team_number, match_number, l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter)
+      (team_number, match_number, l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter, notes)
     VALUES
-      ('${widget.teamName}', '${widget.matchNumber}', $l4Counter, $l2l3Counter, $l1Counter, $netCounter, $processorCounter)
+      ('${widget.teamName}', '${widget.matchNumber}', $l4Counter, $l2l3Counter, $l1Counter, $netCounter, $processorCounter, '${_notesController.text}')
     ''';
 
       final cmd = {
@@ -139,12 +143,19 @@ class _ObjectivePageState extends State<ObjectivePage> {
   @override
   void initState() {
     super.initState();
+    _notesController = TextEditingController();
     // Retrieve the logged-in username.
     AuthService.getUsername().then((value) {
       setState(() {
         _username = value ?? "";
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   /// Helper: builds a counter button with its label.
@@ -173,19 +184,15 @@ class _ObjectivePageState extends State<ObjectivePage> {
   }
 
   /// Desktop Controls Section: mimics the AutoPage desktop section (without the field view).
-  /// Desktop Controls Section: Scales to screen size.
+  /// Scales to screen size.
   Widget buildControlsSectionDesktop() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Use the constraints' maxWidth as available width.
         final double availableWidth = constraints.maxWidth;
-        // Baseline width of 1200 is used to compute a scaling factor.
         final double scaleFactor = availableWidth / 1200;
 
-        // Compute dynamic sizes based on the scaleFactor.
         final double dynamicReefSize = 400 * scaleFactor;
         final double dynamicButtonSize = 80 * scaleFactor;
-        final double dynamicExcelNotesSize = 100 * scaleFactor;
         final double spacingBetweenCounters = 20 * scaleFactor;
         final double spacingGroupOneTwo = 200 * scaleFactor;
         final double spacingGroupTwoThree = 100 * scaleFactor;
@@ -259,56 +266,24 @@ class _ObjectivePageState extends State<ObjectivePage> {
                   ],
                 ),
                 SizedBox(width: spacingGroupTwoThree),
-                // Group 3: Excel and Notes buttons.
+                // Group 3: Excel button (Notes are now at the bottom of the page).
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      children: [
-                        Text("Excel",
-                            style: TextStyle(fontSize: 16 * scaleFactor)),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                            foregroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            minimumSize: Size(
-                                dynamicExcelNotesSize, dynamicExcelNotesSize),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          onPressed: () {
-                            // navigate to the excel functionality
-                          },
-                          child: Icon(Icons.rectangle, size: 24 * scaleFactor),
+                    Text("Excel", style: TextStyle(fontSize: 16 * scaleFactor)),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        minimumSize: Size(dynamicButtonSize, dynamicButtonSize),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: spacingBetweenCounters),
-                    Column(
-                      children: [
-                        Text("Notes",
-                            style: TextStyle(fontSize: 16 * scaleFactor)),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                            foregroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            minimumSize: Size(
-                                dynamicExcelNotesSize, dynamicExcelNotesSize),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                          onPressed: () {
-                            // notes popup
-                          },
-                          child: Icon(Icons.receipt, size: 24 * scaleFactor),
-                        ),
-                      ],
+                      ),
+                      onPressed: () {
+                        // Navigate to the excel functionality.
+                      },
+                      child: Icon(Icons.rectangle, size: 24 * scaleFactor),
                     ),
                   ],
                 ),
@@ -320,153 +295,161 @@ class _ObjectivePageState extends State<ObjectivePage> {
     );
   }
 
-  /// Fallback mobile layout (kept similar to your original).
+  /// Mobile layout.
   Widget buildMobileLayout() {
     double h = MediaQuery.of(context).size.height;
     return SingleChildScrollView(
-        child: Center(
-      child: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: h * 0.17,
-                child: const Image(
-                  image: AssetImage('assets/reef.png'),
-                  fit: BoxFit.contain,
+      child: Center(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: h * 0.17,
+                  child: const Image(
+                    image: AssetImage('assets/reef.png'),
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-              SizedBox(width: h * 0.025),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(h * 0.0045),
-                    child: Text("L4", style: TextStyle(fontSize: h * 0.045)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: Size(h * 0.225, h * 0.15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
+                SizedBox(width: h * 0.025),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(h * 0.0045),
+                      child: Text("L4", style: TextStyle(fontSize: h * 0.045)),
                     ),
-                    onPressed: updateL4,
-                    child: Text('$l4Counter',
-                        style: TextStyle(fontSize: h * 0.0675)),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(h * 0.0045),
-                    child:
-                        Text("L2 & L3", style: TextStyle(fontSize: h * 0.045)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: Size(h * 0.225, h * 0.15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        minimumSize: Size(h * 0.225, h * 0.15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
                       ),
+                      onPressed: updateL4,
+                      child: Text('$l4Counter',
+                          style: TextStyle(fontSize: h * 0.0675)),
                     ),
-                    onPressed: updateL2L3,
-                    child: Text('$l2l3Counter',
-                        style: TextStyle(fontSize: h * 0.0675)),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(h * 0.0045),
-                    child: Text("L1", style: TextStyle(fontSize: h * 0.045)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: Size(h * 0.225, h * 0.15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+                    Padding(
+                      padding: EdgeInsets.all(h * 0.0045),
+                      child: Text("L2 & L3",
+                          style: TextStyle(fontSize: h * 0.045)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        minimumSize: Size(h * 0.225, h * 0.15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
                       ),
+                      onPressed: updateL2L3,
+                      child: Text('$l2l3Counter',
+                          style: TextStyle(fontSize: h * 0.0675)),
                     ),
-                    onPressed: updateL1,
-                    child: Text('$l1Counter',
-                        style: TextStyle(fontSize: h * 0.0675)),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: h * 0.0056),
-                    child: Text("Net", style: TextStyle(fontSize: h * 0.0225)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: Size(h * 0.125, h * 0.125),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+                    Padding(
+                      padding: EdgeInsets.all(h * 0.0045),
+                      child: Text("L1", style: TextStyle(fontSize: h * 0.045)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        minimumSize: Size(h * 0.225, h * 0.15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
                       ),
+                      onPressed: updateL1,
+                      child: Text('$l1Counter',
+                          style: TextStyle(fontSize: h * 0.0675)),
                     ),
-                    onPressed: updateNet,
-                    child: Text('$netCounter',
-                        style: TextStyle(fontSize: h * 0.045)),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: h * 0.0056),
-                    child: Text("Processor",
-                        style: TextStyle(fontSize: h * 0.025)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                      minimumSize: Size(h * 0.125, h * 0.125),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+                  ],
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: h * 0.0056),
+                      child:
+                          Text("Net", style: TextStyle(fontSize: h * 0.0225)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        minimumSize: Size(h * 0.125, h * 0.125),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
                       ),
+                      onPressed: updateNet,
+                      child: Text('$netCounter',
+                          style: TextStyle(fontSize: h * 0.045)),
                     ),
-                    onPressed: updateProcessor,
-                    child: Text('$processorCounter',
-                        style: TextStyle(fontSize: h * 0.045)),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: h * 0.0055),
-                    child: Text("+/-", style: TextStyle(fontSize: h * 0.034)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      foregroundColor: Theme.of(context).colorScheme.primary,
-                      minimumSize: Size.square(h * 0.1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: h * 0.0056),
+                      child: Text("Processor",
+                          style: TextStyle(fontSize: h * 0.025)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        minimumSize: Size(h * 0.125, h * 0.125),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
                       ),
+                      onPressed: updateProcessor,
+                      child: Text('$processorCounter',
+                          style: TextStyle(fontSize: h * 0.045)),
                     ),
-                    onPressed: toggleNegative,
-                    child: signIcon,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+                  ],
+                ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: h * 0.0055),
+                      child: Text("+/-", style: TextStyle(fontSize: h * 0.034)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        minimumSize: Size.square(h * 0.1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: toggleNegative,
+                      child: signIcon,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   @override
@@ -493,12 +476,31 @@ class _ObjectivePageState extends State<ObjectivePage> {
             ),
           ),
           body: SafeArea(
-            child: isDesktop
-                ? SingleChildScrollView(
-                    padding: const EdgeInsets.all(12),
-                    child: buildControlsSectionDesktop(),
-                  )
-                : buildMobileLayout(),
+            child: Column(
+              children: [
+                Expanded(
+                  child: isDesktop
+                      ? SingleChildScrollView(
+                          padding: const EdgeInsets.all(12),
+                          child: buildControlsSectionDesktop(),
+                        )
+                      : buildMobileLayout(),
+                ),
+                // Notes text field added at the bottom (modeled after AutoPage)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _notesController,
+                    decoration: const InputDecoration(
+                      labelText: "Notes",
+                      border: OutlineInputBorder(),
+                    ),
+                    minLines: 1,
+                    maxLines: null,
+                  ),
+                ),
+              ],
+            ),
           ),
           bottomNavigationBar: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(

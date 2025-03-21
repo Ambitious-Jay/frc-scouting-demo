@@ -50,6 +50,8 @@ class _AutoPageState extends State<AutoPage> {
   bool doIncrement = true;
   String? startPos = "Option one";
 
+  late final TextEditingController _notesController;
+
   double min(double valOne, double valTwo) {
     return valOne > valTwo ? valTwo : valOne;
   }
@@ -108,11 +110,18 @@ class _AutoPageState extends State<AutoPage> {
   @override
   void initState() {
     super.initState();
+    _notesController = TextEditingController();
     AuthService.getUsername().then((value) {
       setState(() {
         _username = value ?? "";
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   @override
@@ -143,8 +152,6 @@ class _AutoPageState extends State<AutoPage> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Wrap the layout in a ConstrainedBox so that even if the content is small,
-          // it fills the available height.
           if (constraints.maxWidth >= 800) {
             return buildLeadScoutLayout(constraints);
           } else {
@@ -186,9 +193,7 @@ class _AutoPageState extends State<AutoPage> {
   Widget buildMatchScoutLayout(BoxConstraints constraints) {
     const double screenPadding = 12;
     final double screenWidth = MediaQuery.of(context).size.width;
-    // Instead of capping the field width at 400, use the full width (minus padding)
     final double fieldWidth = screenWidth - 2 * screenPadding;
-    // Maintain a square field view.
     final double fieldHeight = fieldWidth;
 
     AssetImage bg = isBlue
@@ -201,10 +206,8 @@ class _AutoPageState extends State<AutoPage> {
         child: Padding(
           padding: const EdgeInsets.all(screenPadding),
           child: Column(
-            // Distribute extra space evenly so that the content fills the screen.
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Field view with overlay buttons.
               Container(
                 width: fieldWidth,
                 height: fieldHeight,
@@ -340,8 +343,6 @@ class _AutoPageState extends State<AutoPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Place your additional mobile widgets (such as counters) here.
-              // They will be spaced evenly so that the whole column fills the available height.
             ],
           ),
         ),
@@ -349,30 +350,52 @@ class _AutoPageState extends State<AutoPage> {
     );
   }
 
-  /// Desktop layout updated to fill available vertical space.
+  /// Desktop layout now uses an Expanded widget for the main Row so that the TextField remains at the bottom without extra gap.
   Widget buildLeadScoutLayout(BoxConstraints constraints) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: constraints.maxHeight),
-      child: Row(
-        children: [
-          // Left side: Field view.
-          Expanded(
-            flex: 1,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(12),
-              child: buildFieldSectionDesktop(),
+    return Column(
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              // Left side: Field view.
+              Expanded(
+                flex: 1,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: buildFieldSectionDesktop(),
+                ),
+              ),
+              // Right side: Controls.
+              Expanded(
+                flex: 2,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: buildControlsSectionDesktop(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: EdgeInsets.only(left: 8.0, bottom: 4.0),
+            child: Text(
+              "Notes:",
+              style: TextStyle(fontSize: 16),
             ),
           ),
-          // Right side: Controls.
-          Expanded(
-            flex: 2,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(12),
-              child: buildControlsSectionDesktop(),
-            ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: _notesController,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+            minLines: 1,
+            maxLines: null,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -380,7 +403,7 @@ class _AutoPageState extends State<AutoPage> {
   Widget buildFieldSectionDesktop() {
     double availableWidth = MediaQuery.of(context).size.width / 2 - 24;
     double fieldWidth = min(availableWidth, 400);
-    double fieldHeight = fieldWidth; // square field view
+    double fieldHeight = fieldWidth;
 
     AssetImage bg = isBlue
         ? const AssetImage('assets/reefscape_blue_field.jpg')
@@ -414,14 +437,15 @@ class _AutoPageState extends State<AutoPage> {
               children: [
                 const Text("Center", style: TextStyle(color: Colors.black)),
                 Checkbox(
-                    value: inCenterZone,
-                    checkColor: Colors.black,
-                    activeColor: Colors.black,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        inCenterZone = value!;
-                      });
-                    })
+                  value: inCenterZone,
+                  checkColor: Colors.black,
+                  activeColor: Colors.black,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      inCenterZone = value!;
+                    });
+                  },
+                ),
               ],
             ),
           ),
@@ -435,14 +459,15 @@ class _AutoPageState extends State<AutoPage> {
                   children: [
                     const Text("Left", style: TextStyle(color: Colors.black)),
                     Checkbox(
-                        value: inLeftZone,
-                        checkColor: Colors.black,
-                        activeColor: Colors.black,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            inLeftZone = value!;
-                          });
-                        })
+                      value: inLeftZone,
+                      checkColor: Colors.black,
+                      activeColor: Colors.black,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          inLeftZone = value!;
+                        });
+                      },
+                    ),
                   ],
                 ),
                 SizedBox(height: fieldHeight / 2 - 50),
@@ -450,14 +475,15 @@ class _AutoPageState extends State<AutoPage> {
                   children: [
                     const Text("Right", style: TextStyle(color: Colors.black)),
                     Checkbox(
-                        value: inRightZone,
-                        checkColor: Colors.black,
-                        activeColor: Colors.black,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            inRightZone = value!;
-                          });
-                        })
+                      value: inRightZone,
+                      checkColor: Colors.black,
+                      activeColor: Colors.black,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          inRightZone = value!;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -475,37 +501,40 @@ class _AutoPageState extends State<AutoPage> {
                   ListTile(
                     title: const Text(""),
                     leading: Radio<String>(
-                        value: "rightStart",
-                        groupValue: startPos,
-                        onChanged: (String? value) {
-                          setState(() {
-                            startPos = value;
-                          });
-                        }),
+                      value: "rightStart",
+                      groupValue: startPos,
+                      onChanged: (String? value) {
+                        setState(() {
+                          startPos = value;
+                        });
+                      },
+                    ),
                   ),
                   SizedBox(height: max(0, fieldHeight / 4 - 75)),
                   ListTile(
                     title: const Text(""),
                     leading: Radio<String>(
-                        value: "centerStart",
-                        groupValue: startPos,
-                        onChanged: (String? value) {
-                          setState(() {
-                            startPos = value;
-                          });
-                        }),
+                      value: "centerStart",
+                      groupValue: startPos,
+                      onChanged: (String? value) {
+                        setState(() {
+                          startPos = value;
+                        });
+                      },
+                    ),
                   ),
                   SizedBox(height: max(0, fieldHeight / 4 - 75)),
                   ListTile(
                     title: const Text(""),
                     leading: Radio<String>(
-                        value: "leftStart",
-                        groupValue: startPos,
-                        onChanged: (String? value) {
-                          setState(() {
-                            startPos = value;
-                          });
-                        }),
+                      value: "leftStart",
+                      groupValue: startPos,
+                      onChanged: (String? value) {
+                        setState(() {
+                          startPos = value;
+                        });
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -523,20 +552,18 @@ class _AutoPageState extends State<AutoPage> {
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Group reef image with the first set of counters.
             Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: reefSize,
                   height: reefSize,
                   child: Image(
-                    image: const AssetImage('assets/reef.png'),
+                    image: AssetImage('assets/reef.png'),
                     fit: BoxFit.contain,
                   ),
                 ),
-                // const SizedBox(
-                //     width: 20), // Smaller gap to group with reef image.
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -549,7 +576,7 @@ class _AutoPageState extends State<AutoPage> {
                 ),
               ],
             ),
-            const SizedBox(width: 200), // Larger gap before the next group.
+            const SizedBox(width: 200),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -576,59 +603,29 @@ class _AutoPageState extends State<AutoPage> {
                           doIncrement = !doIncrement;
                         });
                       },
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: signIcon,
-                      ),
+                      child: Center(child: signIcon),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(width: 100),
+            const SizedBox(width: 300),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
-                  children: [
-                    const Text("Excel", style: TextStyle(fontSize: 16)),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Theme.of(context).colorScheme.primary,
-                        minimumSize: const Size(100, 100),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      onPressed: () {
-                        // navigate to the excel thing
-                      },
-                      child: const Icon(Icons.rectangle),
+                const Text("Excel", style: TextStyle(fontSize: 16)),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    minimumSize: const Size(100, 100),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Column(
-                  children: [
-                    const Text("Notes", style: TextStyle(fontSize: 16)),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Theme.of(context).colorScheme.primary,
-                        minimumSize: const Size(100, 100),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      onPressed: () {
-                        // notes popup
-                      },
-                      child: const Icon(Icons.receipt),
-                    ),
-                  ],
+                  ),
+                  onPressed: () {
+                    // Navigate to the excel functionality.
+                  },
+                  child: const Icon(Icons.rectangle),
                 ),
               ],
             ),
