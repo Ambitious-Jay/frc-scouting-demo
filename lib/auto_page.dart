@@ -23,7 +23,7 @@ class AutoPage extends StatefulWidget {
 
   final String teamName;
   final String teamNickname;
-  final String matchNumber; // Renamed from id to matchNumber
+  final String matchNumber;
   final WebSocketChannel channel;
   final Function(ThemeMode) onThemeChanged;
   final WebSocketService webSocketService;
@@ -34,7 +34,7 @@ class AutoPage extends StatefulWidget {
 
 class _AutoPageState extends State<AutoPage> {
   ThemeMode themeMode = ThemeMode.system;
-  String _username = ""; // Define the _username variable
+  String _username = "";
   bool isBlue = true;
   bool inCenterZone = false;
   bool inLeftZone = false;
@@ -48,8 +48,6 @@ class _AutoPageState extends State<AutoPage> {
   IntegerWrapper processorCounter = IntegerWrapper(0);
 
   bool doIncrement = true;
-
-  // Using radio buttons for start position
   String? startPos = "Option one";
 
   double min(double valOne, double valTwo) {
@@ -73,7 +71,7 @@ class _AutoPageState extends State<AutoPage> {
     IconData iconData = doIncrement ? Icons.add : Icons.remove;
     return Icon(iconData,
         color: Theme.of(context).colorScheme.primary,
-        size: MediaQuery.of(context).size.width * 0.1);
+        size: MediaQuery.of(context).size.width * 0.05);
   }
 
   Future<void> _submitAutoScoutingData() async {
@@ -110,7 +108,6 @@ class _AutoPageState extends State<AutoPage> {
   @override
   void initState() {
     super.initState();
-    // Retrieve the logged-in username from SharedPreferences via AuthService.
     AuthService.getUsername().then((value) {
       setState(() {
         _username = value ?? "";
@@ -120,16 +117,6 @@ class _AutoPageState extends State<AutoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final double screenWidth = MediaQuery.of(context).size.width;
-    const double screenPadding = 12;
-    const double imageWidthToHeight = 1;
-    final double fieldWidth = min(screenWidth - 2 * screenPadding, 400);
-    final double fieldHeight = fieldWidth / imageWidthToHeight;
-    AssetImage bg = isBlue
-        ? const AssetImage('assets/reefscape_blue_field.jpg')
-        : const AssetImage('assets/reefscape_red_field.jpg');
-    AssetImage reefImg = const AssetImage('assets/reef.png');
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -154,298 +141,16 @@ class _AutoPageState extends State<AutoPage> {
           ),
         ],
       ),
-      body: Container(
-        padding: const EdgeInsets.all(screenPadding),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: double.infinity,
-                alignment: Alignment.center,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: fieldWidth,
-                      height: fieldHeight,
-                      child: Transform.rotate(
-                        angle: fieldFlipped ? 3.14159265 : 0,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: bg,
-                              fit: BoxFit.fitWidth,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: fieldHeight / 2 - 25,
-                      right:
-                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) -
-                              25,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Text("Center",
-                              style: TextStyle(color: Colors.black)),
-                          Checkbox(
-                              value: inCenterZone,
-                              checkColor: Colors.black,
-                              activeColor: Colors.black,
-                              onChanged: (bool? value) => {
-                                    setState(() {
-                                      inCenterZone = value!;
-                                    })
-                                  })
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                        left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
-                        top: fieldHeight / 4 - 25,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Text("Left",
-                                      style: TextStyle(color: Colors.black)),
-                                  Checkbox(
-                                      value: inLeftZone,
-                                      checkColor: Colors.black,
-                                      activeColor: Colors.black,
-                                      onChanged: (bool? value) => {
-                                            setState(() {
-                                              inLeftZone = value!;
-                                            })
-                                          })
-                                ]),
-                            SizedBox(height: fieldHeight / 2 - 50),
-                            Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Text("Right",
-                                      style: TextStyle(color: Colors.black)),
-                                  Checkbox(
-                                      value: inRightZone,
-                                      checkColor: Colors.black,
-                                      activeColor: Colors.black,
-                                      onChanged: (bool? value) => {
-                                            setState(() {
-                                              inRightZone = value!;
-                                            })
-                                          })
-                                ]),
-                          ],
-                        )),
-                    Positioned(
-                        left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
-                        top: fieldHeight / 4,
-                        child: SizedBox(
-                            width: 80,
-                            height: fieldHeight / 3 * 2,
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                      title: const Text(""),
-                                      leading: Radio<String>(
-                                          value: "rightStart",
-                                          groupValue: startPos,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              startPos = value;
-                                            });
-                                          })),
-                                  SizedBox(
-                                      height: max(0, fieldHeight / 4 - 75)),
-                                  ListTile(
-                                      title: const Text(""),
-                                      leading: Radio<String>(
-                                          value: "centerStart",
-                                          groupValue: startPos,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              startPos = value;
-                                            });
-                                          })),
-                                  SizedBox(
-                                      height: max(0, fieldHeight / 4 - 75)),
-                                  ListTile(
-                                      title: const Text(""),
-                                      leading: Radio<String>(
-                                          value: "leftStart",
-                                          groupValue: startPos,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              startPos = value;
-                                            });
-                                          })),
-                                ])))
-                  ],
-                ),
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(width: screenWidth * 0.03),
-                  SizedBox(
-                      width: screenWidth * 0.375,
-                      height: screenWidth,
-                      child: Image(
-                        image: reefImg,
-                        fit: BoxFit.contain,
-                      )),
-                  SizedBox(width: screenWidth * 0.10),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(screenWidth * 0.03),
-                        child: Text("L4",
-                            style: TextStyle(fontSize: screenWidth * 0.05)),
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              minimumSize:
-                                  Size(screenWidth * 0.30, screenWidth * 0.20),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          onPressed: () =>
-                              updateCounter(l4Counter, doIncrement),
-                          child: Text('${l4Counter.value}',
-                              style: TextStyle(fontSize: screenWidth * 0.10))),
-                      Padding(
-                        padding: EdgeInsets.all(screenWidth * 0.05),
-                        child: Text("L2 & L3",
-                            style: TextStyle(fontSize: screenWidth * 0.05)),
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              minimumSize:
-                                  Size(screenWidth * 0.30, screenWidth * 0.20),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          onPressed: () =>
-                              updateCounter(l2l3Counter, doIncrement),
-                          child: Text('${l2l3Counter.value}',
-                              style: TextStyle(fontSize: screenWidth * 0.10))),
-                      Padding(
-                        padding: EdgeInsets.all(screenWidth * 0.05),
-                        child: Text("L1",
-                            style: TextStyle(fontSize: screenWidth * 0.05)),
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              minimumSize:
-                                  Size(screenWidth * 0.30, screenWidth * 0.20),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          onPressed: () =>
-                              updateCounter(l1Counter, doIncrement),
-                          child: Text('${l1Counter.value}',
-                              style: TextStyle(fontSize: screenWidth * 0.10))),
-                    ],
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(bottom: screenWidth * 0.0125),
-                        child: Text("Net",
-                            style: TextStyle(fontSize: screenWidth * 0.05)),
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              minimumSize: Size.square(screenWidth * 0.15),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          onPressed: () =>
-                              updateCounter(netCounter, doIncrement),
-                          child: Text('${netCounter.value}',
-                              style: TextStyle(fontSize: screenWidth * 0.1))),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(bottom: screenWidth * 0.0125),
-                        child: Text("Processor",
-                            style: TextStyle(fontSize: screenWidth * 0.05)),
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              minimumSize: Size.square(screenWidth * 0.15),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          onPressed: () =>
-                              updateCounter(processorCounter, doIncrement),
-                          child: Text('${processorCounter.value}',
-                              style: TextStyle(fontSize: screenWidth * 0.1))),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(bottom: screenWidth * 0.0125),
-                        child: Text("+/-",
-                            style: TextStyle(fontSize: screenWidth * 0.075)),
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              minimumSize: Size.square(screenWidth * 0.15),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          onPressed: () {
-                            setState(() {
-                              doIncrement = !doIncrement;
-                            });
-                          },
-                          child: signIcon),
-                    ],
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Wrap the layout in a ConstrainedBox so that even if the content is small,
+          // it fills the available height.
+          if (constraints.maxWidth >= 800) {
+            return buildLeadScoutLayout(constraints);
+          } else {
+            return buildMatchScoutLayout(constraints);
+          }
+        },
       ),
       bottomNavigationBar: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
@@ -474,6 +179,488 @@ class _AutoPageState extends State<AutoPage> {
         icon: const Icon(Icons.arrow_forward_rounded),
         label: const Text('Submit'),
       ),
+    );
+  }
+
+  /// Mobile layout updated to fill available height.
+  Widget buildMatchScoutLayout(BoxConstraints constraints) {
+    const double screenPadding = 12;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    // Instead of capping the field width at 400, use the full width (minus padding)
+    final double fieldWidth = screenWidth - 2 * screenPadding;
+    // Maintain a square field view.
+    final double fieldHeight = fieldWidth;
+
+    AssetImage bg = isBlue
+        ? const AssetImage('assets/reefscape_blue_field.jpg')
+        : const AssetImage('assets/reefscape_red_field.jpg');
+
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+        child: Padding(
+          padding: const EdgeInsets.all(screenPadding),
+          child: Column(
+            // Distribute extra space evenly so that the content fills the screen.
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Field view with overlay buttons.
+              Container(
+                width: fieldWidth,
+                height: fieldHeight,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: fieldWidth,
+                      height: fieldHeight,
+                      child: Transform.rotate(
+                        angle: fieldFlipped ? 3.14159265 : 0,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: bg,
+                              fit: BoxFit.fitWidth,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Center checkbox.
+                    Positioned(
+                      top: fieldHeight / 2 - 25,
+                      right:
+                          (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) -
+                              25,
+                      child: Column(
+                        children: [
+                          const Text("Center",
+                              style: TextStyle(color: Colors.black)),
+                          Checkbox(
+                              value: inCenterZone,
+                              checkColor: Colors.black,
+                              activeColor: Colors.black,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  inCenterZone = value!;
+                                });
+                              })
+                        ],
+                      ),
+                    ),
+                    // Left and Right checkboxes.
+                    Positioned(
+                      left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
+                      top: fieldHeight / 4 - 25,
+                      child: Column(
+                        children: [
+                          Column(
+                            children: [
+                              const Text("Left",
+                                  style: TextStyle(color: Colors.black)),
+                              Checkbox(
+                                  value: inLeftZone,
+                                  checkColor: Colors.black,
+                                  activeColor: Colors.black,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      inLeftZone = value!;
+                                    });
+                                  })
+                            ],
+                          ),
+                          SizedBox(height: fieldHeight / 2 - 50),
+                          Column(
+                            children: [
+                              const Text("Right",
+                                  style: TextStyle(color: Colors.black)),
+                              Checkbox(
+                                  value: inRightZone,
+                                  checkColor: Colors.black,
+                                  activeColor: Colors.black,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      inRightZone = value!;
+                                    });
+                                  })
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Radio buttons for start position.
+                    Positioned(
+                      left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
+                      top: fieldHeight / 4,
+                      child: SizedBox(
+                        width: 80,
+                        height: fieldHeight / 3 * 2,
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: const Text(""),
+                              leading: Radio<String>(
+                                  value: "rightStart",
+                                  groupValue: startPos,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      startPos = value;
+                                    });
+                                  }),
+                            ),
+                            SizedBox(height: max(0, fieldHeight / 4 - 75)),
+                            ListTile(
+                              title: const Text(""),
+                              leading: Radio<String>(
+                                  value: "centerStart",
+                                  groupValue: startPos,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      startPos = value;
+                                    });
+                                  }),
+                            ),
+                            SizedBox(height: max(0, fieldHeight / 4 - 75)),
+                            ListTile(
+                              title: const Text(""),
+                              leading: Radio<String>(
+                                  value: "leftStart",
+                                  groupValue: startPos,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      startPos = value;
+                                    });
+                                  }),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Place your additional mobile widgets (such as counters) here.
+              // They will be spaced evenly so that the whole column fills the available height.
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Desktop layout updated to fill available vertical space.
+  Widget buildLeadScoutLayout(BoxConstraints constraints) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+      child: Row(
+        children: [
+          // Left side: Field view.
+          Expanded(
+            flex: 1,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(12),
+              child: buildFieldSectionDesktop(),
+            ),
+          ),
+          // Right side: Controls.
+          Expanded(
+            flex: 2,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(12),
+              child: buildControlsSectionDesktop(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Desktop Field Section: re-using the same Stack with all overlayed buttons.
+  Widget buildFieldSectionDesktop() {
+    double availableWidth = MediaQuery.of(context).size.width / 2 - 24;
+    double fieldWidth = min(availableWidth, 400);
+    double fieldHeight = fieldWidth; // square field view
+
+    AssetImage bg = isBlue
+        ? const AssetImage('assets/reefscape_blue_field.jpg')
+        : const AssetImage('assets/reefscape_red_field.jpg');
+
+    return Container(
+      alignment: Alignment.center,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: fieldWidth,
+            height: fieldHeight,
+            child: Transform.rotate(
+              angle: fieldFlipped ? 3.14159265 : 0,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: bg,
+                    fit: BoxFit.fitWidth,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Center zone.
+          Positioned(
+            top: fieldHeight / 2 - 25,
+            right: (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) - 25,
+            child: Column(
+              children: [
+                const Text("Center", style: TextStyle(color: Colors.black)),
+                Checkbox(
+                    value: inCenterZone,
+                    checkColor: Colors.black,
+                    activeColor: Colors.black,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        inCenterZone = value!;
+                      });
+                    })
+              ],
+            ),
+          ),
+          // Left and Right zones.
+          Positioned(
+            left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
+            top: fieldHeight / 4 - 25,
+            child: Column(
+              children: [
+                Column(
+                  children: [
+                    const Text("Left", style: TextStyle(color: Colors.black)),
+                    Checkbox(
+                        value: inLeftZone,
+                        checkColor: Colors.black,
+                        activeColor: Colors.black,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            inLeftZone = value!;
+                          });
+                        })
+                  ],
+                ),
+                SizedBox(height: fieldHeight / 2 - 50),
+                Column(
+                  children: [
+                    const Text("Right", style: TextStyle(color: Colors.black)),
+                    Checkbox(
+                        value: inRightZone,
+                        checkColor: Colors.black,
+                        activeColor: Colors.black,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            inRightZone = value!;
+                          });
+                        })
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Radio buttons for start position.
+          Positioned(
+            left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
+            top: fieldHeight / 4,
+            child: SizedBox(
+              width: 80,
+              height: fieldHeight / 3 * 2,
+              child: Column(
+                children: [
+                  ListTile(
+                    title: const Text(""),
+                    leading: Radio<String>(
+                        value: "rightStart",
+                        groupValue: startPos,
+                        onChanged: (String? value) {
+                          setState(() {
+                            startPos = value;
+                          });
+                        }),
+                  ),
+                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
+                  ListTile(
+                    title: const Text(""),
+                    leading: Radio<String>(
+                        value: "centerStart",
+                        groupValue: startPos,
+                        onChanged: (String? value) {
+                          setState(() {
+                            startPos = value;
+                          });
+                        }),
+                  ),
+                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
+                  ListTile(
+                    title: const Text(""),
+                    leading: Radio<String>(
+                        value: "leftStart",
+                        groupValue: startPos,
+                        onChanged: (String? value) {
+                          setState(() {
+                            startPos = value;
+                          });
+                        }),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Desktop Controls Section: shows a reef image next to counter buttons.
+  Widget buildControlsSectionDesktop() {
+    const double reefSize = 400;
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Group reef image with the first set of counters.
+            Row(
+              children: [
+                SizedBox(
+                  width: reefSize,
+                  height: reefSize,
+                  child: Image(
+                    image: const AssetImage('assets/reef.png'),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                // const SizedBox(
+                //     width: 20), // Smaller gap to group with reef image.
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    buildCounterButton("L4", l4Counter, doIncrement, 80),
+                    const SizedBox(height: 20),
+                    buildCounterButton("L2 & L3", l2l3Counter, doIncrement, 80),
+                    const SizedBox(height: 20),
+                    buildCounterButton("L1", l1Counter, doIncrement, 80),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(width: 200), // Larger gap before the next group.
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildCounterButton("Net", netCounter, doIncrement, 80),
+                const SizedBox(height: 20),
+                buildCounterButton(
+                    "Processor", processorCounter, doIncrement, 80),
+                const SizedBox(height: 20),
+                Column(
+                  children: [
+                    const Text("+/-", style: TextStyle(fontSize: 16)),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        maximumSize: const Size(80, 80),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          doIncrement = !doIncrement;
+                        });
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: signIcon,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(width: 100),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    const Text("Excel", style: TextStyle(fontSize: 16)),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        minimumSize: const Size(100, 100),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {
+                        // navigate to the excel thing
+                      },
+                      child: const Icon(Icons.rectangle),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Column(
+                  children: [
+                    const Text("Notes", style: TextStyle(fontSize: 16)),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        minimumSize: const Size(100, 100),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {
+                        // notes popup
+                      },
+                      child: const Icon(Icons.receipt),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Helper: builds a counter button with its label.
+  Widget buildCounterButton(String label, IntegerWrapper counter,
+      bool doIncrement, double buttonSize) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(buttonSize * 0.1),
+          child: Text(label, style: TextStyle(fontSize: buttonSize * 0.15)),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.secondary,
+            minimumSize: Size(buttonSize, buttonSize),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+          onPressed: () => updateCounter(counter, doIncrement),
+          child: Text('${counter.value}',
+              style: TextStyle(fontSize: buttonSize * 0.3)),
+        ),
+      ],
     );
   }
 }

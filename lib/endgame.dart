@@ -52,7 +52,6 @@ class Endgame extends StatefulWidget {
 
 class _Endgame extends State<Endgame> {
   Future<void> _submitEndgameData() async {
-    // Build the MSSQL MERGE statement for upsert based on team_number.
     final sql = '''
 MERGE EndgameData AS target
 USING (
@@ -126,101 +125,235 @@ WHEN NOT MATCHED THEN
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  /// Mobile layout: a single ListView stacking the rows vertically.
+  Widget buildMobileLayout(BoxConstraints constraints) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        centerTitle: true,
-        title: const Text(
-          "Endgame Phase",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+    return Center(
+      child: ListView(
+        children: [
+          // Attempt to Park Row
+          SizedBox(
+            height: height / 3.5,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text(
+                  "Attempt to park?",
+                  style: TextStyle(fontSize: 30),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      triedHang = !triedHang;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                    minimumSize: const Size(100, 100),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  child: triedHang
+                      ? const Icon(
+                          Icons.done,
+                          size: 44,
+                          color: Colors.white,
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          // Defense Row
+          SizedBox(
+            height: height / 3.5,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text(
+                  "Defense?",
+                  style: TextStyle(fontSize: 30),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      defensive = !defensive;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                    minimumSize: const Size(100, 100),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  child: defensive
+                      ? const Icon(
+                          Icons.done,
+                          size: 44,
+                          color: Colors.white,
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          // Grid of preset buttons
+          GridView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.all(width / 50),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 2.0,
+              crossAxisSpacing: width / 50,
+              mainAxisSpacing: width / 50,
+            ),
+            itemCount: keys.length,
+            itemBuilder: (context, index) {
+              String key = keys[index];
+              bool value = presets[key]!;
+              return ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    presets[key] = !value;
+                  });
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    value ? Colors.red : Colors.black,
+                  ),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    key,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+        ],
       ),
-      body: Center(
-        child: ListView(
-          children: [
-            // Attempt to Park Row
-            SizedBox(
-              height: height / 3.5,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  const Text(
-                    "Attempt to park?",
-                    style: TextStyle(fontSize: 30),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        triedHang = !triedHang;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                      minimumSize: const Size(100, 100),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
+    );
+  }
+
+  /// Desktop layout: three columns arranged in a Row.
+  Widget buildDesktopLayout(BoxConstraints constraints) {
+    final double availableWidth = constraints.maxWidth;
+    final double scaleFactor = availableWidth / 1200;
+    double height = MediaQuery.of(context).size.height;
+    final double dynamicFontSize = 30 * scaleFactor;
+    final double dynamicButtonSize = 100 * scaleFactor;
+    final double dynamicIconSize = 44 * scaleFactor;
+    final double dynamicPadding = (availableWidth / 50) * scaleFactor;
+    final double dynamicExcelNotesSize = 100 * scaleFactor;
+
+    return Padding(
+      padding: EdgeInsets.all(dynamicPadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left Column: "Attempt to park?" and "Defense?" arranged in vertical stacks.
+          Expanded(
+            flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Attempt to park section.
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Attempt to park?",
+                      style: TextStyle(fontSize: dynamicFontSize),
+                      textAlign: TextAlign.center,
                     ),
-                    child: triedHang
-                        ? const Icon(
-                            Icons.done,
-                            size: 44,
-                            color: Colors.white,
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(),
-            // Defense Row
-            SizedBox(
-              height: height / 3.5,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  const Text(
-                    "Defense?",
-                    style: TextStyle(fontSize: 30),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        defensive = !defensive;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                      minimumSize: const Size(100, 100),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+                    SizedBox(height: dynamicPadding / 2),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          triedHang = !triedHang;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        minimumSize: Size(dynamicButtonSize, dynamicButtonSize),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
                       ),
+                      child: triedHang
+                          ? Icon(
+                              Icons.done,
+                              size: dynamicIconSize,
+                              color: Colors.white,
+                            )
+                          : const SizedBox.shrink(),
                     ),
-                    child: defensive
-                        ? const Icon(
-                            Icons.done,
-                            size: 44,
-                            color: Colors.white,
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                SizedBox(height: dynamicPadding),
+                // Defense section.
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Defense?",
+                      style: TextStyle(fontSize: dynamicFontSize),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: dynamicPadding / 2),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          defensive = !defensive;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        minimumSize: Size(dynamicButtonSize, dynamicButtonSize),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      child: defensive
+                          ? Icon(
+                              Icons.done,
+                              size: dynamicIconSize,
+                              color: Colors.white,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const Divider(),
-            // Grid of preset buttons
-            GridView.builder(
+          ),
+          SizedBox(width: dynamicPadding * 2),
+          // Middle Column: Grid of preset buttons.
+          Expanded(
+            flex: 2,
+            child: GridView.builder(
               shrinkWrap: true,
-              padding: EdgeInsets.all(width / 50),
+              physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 childAspectRatio: 2.0,
-                crossAxisSpacing: width / 50,
-                mainAxisSpacing: width / 50,
+                crossAxisSpacing: dynamicPadding,
+                mainAxisSpacing: dynamicPadding,
               ),
               itemCount: keys.length,
               itemBuilder: (context, index) {
@@ -243,44 +376,127 @@ WHEN NOT MATCHED THEN
                       key,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: dynamicFontSize * 0.6,
                       ),
                     ),
                   ),
                 );
               },
             ),
-            const Divider(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          foregroundColor: Theme.of(context).colorScheme.secondary,
-          iconColor: Theme.of(context).colorScheme.secondary,
-        ),
-        iconAlignment: IconAlignment.end,
-        onPressed: () async {
-          _submitEndgameData();
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardPage(
-                teamName: widget.teamName,
-                channel: widget.webSocketService.channel,
-                onThemeChanged: widget.onThemeChanged,
-                webSocketService: widget.webSocketService,
-              ),
+          ),
+          SizedBox(width: dynamicPadding * 2),
+          // Right Column: Excel and Notes buttons.
+          Expanded(
+            flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    Text("Excel",
+                        style: TextStyle(fontSize: dynamicFontSize * 0.6)),
+                    SizedBox(height: dynamicPadding),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        minimumSize:
+                            Size(dynamicExcelNotesSize, dynamicExcelNotesSize),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {
+                        // Navigate to Excel functionality.
+                      },
+                      child: Icon(Icons.rectangle, size: dynamicIconSize),
+                    ),
+                  ],
+                ),
+                SizedBox(height: dynamicPadding * 2),
+                Column(
+                  children: [
+                    Text("Notes",
+                        style: TextStyle(fontSize: dynamicFontSize * 0.6)),
+                    SizedBox(height: dynamicPadding),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        minimumSize:
+                            Size(dynamicExcelNotesSize, dynamicExcelNotesSize),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      onPressed: () {
+                        // Open notes popup or navigate accordingly.
+                      },
+                      child: Icon(Icons.receipt, size: dynamicIconSize),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          );
-        },
-        icon: const Icon(Icons.arrow_forward_rounded),
-        label: const Text('Submit'),
+          ),
+        ],
       ),
     );
+  }
+
+  Widget buildBottomNavigationBar(double scaleFactor) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        foregroundColor: Theme.of(context).colorScheme.secondary,
+        iconColor: Theme.of(context).colorScheme.secondary,
+        minimumSize: Size(double.infinity, 60 * scaleFactor),
+      ),
+      iconAlignment: IconAlignment.end,
+      onPressed: () async {
+        _submitEndgameData();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardPage(
+              teamName: widget.teamName,
+              channel: widget.webSocketService.channel,
+              onThemeChanged: widget.onThemeChanged,
+              webSocketService: widget.webSocketService,
+            ),
+          ),
+        );
+      },
+      icon: const Icon(Icons.arrow_forward_rounded),
+      label: const Text('Submit'),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      bool isDesktop = constraints.maxWidth >= 800;
+      final double scaleFactor = isDesktop ? constraints.maxWidth / 1200 : 1.0;
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          centerTitle: true,
+          title: const Text(
+            "Endgame Phase",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: isDesktop
+            ? buildDesktopLayout(constraints)
+            : buildMobileLayout(constraints),
+        bottomNavigationBar: buildBottomNavigationBar(scaleFactor),
+      );
+    });
   }
 }
