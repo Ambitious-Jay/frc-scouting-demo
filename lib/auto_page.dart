@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
+import 'package:frc1148_2025_scouting_app/lead_scout_quick_edit_page.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -547,7 +548,9 @@ class _AutoPageState extends State<AutoPage> {
 
   /// Desktop Controls Section: shows a reef image next to counter buttons.
   Widget buildControlsSectionDesktop() {
-    const double reefSize = 400;
+    double availableWidth = MediaQuery.of(context).size.width / 2 - 24;
+    double fieldWidth = min(availableWidth, 400);
+    double fieldHeight = fieldWidth;
     return Column(
       children: [
         Row(
@@ -556,9 +559,9 @@ class _AutoPageState extends State<AutoPage> {
           children: [
             Row(
               children: [
-                const SizedBox(
-                  width: reefSize,
-                  height: reefSize,
+                SizedBox(
+                  width: fieldWidth,
+                  height: fieldHeight,
                   child: Image(
                     image: AssetImage('assets/reef.png'),
                     fit: BoxFit.contain,
@@ -576,7 +579,7 @@ class _AutoPageState extends State<AutoPage> {
                 ),
               ],
             ),
-            const SizedBox(width: 200),
+            SizedBox(width: availableWidth / 8),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -584,7 +587,7 @@ class _AutoPageState extends State<AutoPage> {
                 const SizedBox(height: 20),
                 buildCounterButton(
                     "Processor", processorCounter, doIncrement, 80),
-                const SizedBox(height: 20),
+                SizedBox(width: availableWidth / 16),
                 Column(
                   children: [
                     const Text("+/-", style: TextStyle(fontSize: 16)),
@@ -593,7 +596,7 @@ class _AutoPageState extends State<AutoPage> {
                         backgroundColor:
                             Theme.of(context).colorScheme.secondary,
                         foregroundColor: Theme.of(context).colorScheme.primary,
-                        maximumSize: const Size(80, 80),
+                        // maximumSize: const Size(80, 80),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
@@ -609,10 +612,10 @@ class _AutoPageState extends State<AutoPage> {
                 ),
               ],
             ),
-            const SizedBox(width: 300),
+            SizedBox(width: availableWidth / 8),
             Column(
               children: [
-                const Text("Excel", style: TextStyle(fontSize: 16)),
+                const Text("Capabilities", style: TextStyle(fontSize: 16)),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -623,7 +626,13 @@ class _AutoPageState extends State<AutoPage> {
                     ),
                   ),
                   onPressed: () {
-                    // Navigate to the excel functionality.
+                    showDialog(
+                      context: context,
+                      builder: (context) => LeadScoutQuickEdit(
+                        teamName: widget.teamName,
+                        channel: widget.channel, webSocketService: widget.webSocketService,
+                      ),
+                    );
                   },
                   child: const Icon(Icons.rectangle),
                 ),

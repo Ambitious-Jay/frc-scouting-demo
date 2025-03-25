@@ -4,6 +4,7 @@ import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/endgame.dart';
+import 'package:frc1148_2025_scouting_app/lead_scout_quick_edit_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ObjectivePage extends StatefulWidget {
@@ -269,7 +270,8 @@ class _ObjectivePageState extends State<ObjectivePage> {
                 // Group 3: Excel button (Notes are now at the bottom of the page).
                 Column(
                   children: [
-                    Text("Excel", style: TextStyle(fontSize: 16 * scaleFactor)),
+                    Text("Capabilities",
+                        style: TextStyle(fontSize: 16 * scaleFactor)),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
@@ -281,7 +283,13 @@ class _ObjectivePageState extends State<ObjectivePage> {
                         ),
                       ),
                       onPressed: () {
-                        // Navigate to the excel functionality.
+                        showDialog(
+                          context: context,
+                          builder: (context) => LeadScoutQuickEdit(
+                            teamName: widget.teamName,
+                            channel: widget.channel!, webSocketService: widget.webSocketService,
+                          ),
+                        );
                       },
                       child: Icon(Icons.rectangle, size: 24 * scaleFactor),
                     ),

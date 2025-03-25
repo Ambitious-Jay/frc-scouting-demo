@@ -4,6 +4,7 @@ import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
 import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
+import 'package:frc1148_2025_scouting_app/lead_scout_quick_edit_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 // Global variables for endgame/pit scouting presets
@@ -425,7 +426,13 @@ WHEN NOT MATCHED THEN
                     ),
                   ),
                   onPressed: () {
-                    // Navigate to Excel functionality.
+                    showDialog(
+                      context: context,
+                      builder: (context) => LeadScoutQuickEdit(
+                        teamName: widget.teamName,
+                        channel: widget.channel, webSocketService: widget.webSocketService,
+                      ),
+                    );
                   },
                   child: Text("Capabilities",
                       style: TextStyle(fontSize: dynamicFontSize * 0.6)),
@@ -436,7 +443,7 @@ WHEN NOT MATCHED THEN
                   controller: _commentsController,
                   maxLines: null,
                   decoration: const InputDecoration(
-                    labelText: "Comments",
+                    labelText: "Notes",
                     border: OutlineInputBorder(),
                   ),
                 ),
