@@ -135,7 +135,7 @@ class _ScatterPlotState extends State<ScatterPlot> {
       SELECT
         CAST(StatsboticsEPA.team AS varchar) AS team_number,
         'EPA' AS metric_name,
-        StatsboticsEPA.current_EPA AS metric_value
+        StatsboticsEPA.total_EPA AS metric_value
       FROM StatsboticsEPA
 
       ORDER BY team_number

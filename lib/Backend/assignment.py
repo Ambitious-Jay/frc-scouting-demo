@@ -431,36 +431,28 @@ class ScoutScheduler:
 
 def run_scout_scheduling():
     """Main function to run the scout assignment algorithm."""
-    scout_names = ['Emma',
-                   'Demir',
-                   'Felicia',
-                   'Hunter',
-                   'Jake',
-                   'Zidaan',
-                   'Vikram',
-                   'Asher',
-                   'Daniel',
-                   'Morgan',
-                   'Chase',
-                   'Thomas',
-                   'Gabrielle',
-                   'Matthew Ren',
-                   'Alex Gavin',
-                   'Michael',
-                   'Isabel',
-                   'Claudia',
-                   'Niko',
-                   'Aarush',
-                   'Alex Lee',
-                   'Alex Segor',
-                   ]
+    scout_names = [
+                    "Thomas",
+                    "Morgan",
+                    "Michael",
+                    "Matthew Ren",
+                    "Isabel",
+                    "Claudia",
+                    "Alex Segor",
+                    "Stevie",
+                    "Daniel",
+                    "Asher",
+                    "Zidaan",
+                    "Quinn",
+                    "Emma",
+                    "Chase",
+                    "Alex Gavin",
+                    "Jessica"
+                ]
+
     total_matches = 74
-    lead_scout_names = ['Dylan','Mattin','Joseph','Andrew']
+    lead_scout_names = ['CJ', 'Mattin']
     unavailability = {
-        'Felicia' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ,16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 40, 50, 56, 61, 66],
-        'Gabrielle' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ,16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 40, 50, 56, 61, 66],
-        'Hunter' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ,16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 40, 50, 56, 61, 66],
-        'Vikram': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ,16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 40, 50, 56, 61, 66],
     }
     breaks = [22, 55]
     scheduler = ScoutScheduler(
