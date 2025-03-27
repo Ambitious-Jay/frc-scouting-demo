@@ -68,9 +68,7 @@ class LeadScoutDataModel {
   final double autonCpmAvg; // Average of (l1+l2_l3+l4) from AutoScouting
 
   // Lead Scouting Notes
-  final String compatibility;
-  final String notableFeats;
-  final String humanPlayerNetAcc;
+  final String notes;
 
   const LeadScoutDataModel({
     required this.teamNumber,
@@ -120,9 +118,7 @@ class LeadScoutDataModel {
     required this.leaveAutoLine,
     required this.autonCpmAvg,
     // Lead scouting
-    required this.compatibility,
-    required this.notableFeats,
-    required this.humanPlayerNetAcc,
+    required this.notes,
   });
 
   LeadScoutDataModel copyWith({
@@ -168,9 +164,7 @@ class LeadScoutDataModel {
     String? autonomousCoral,
     String? leaveAutoLine,
     double? autonCpmAvg,
-    String? compatibility,
-    String? notableFeats,
-    String? humanPlayerNetAcc,
+    String? notes,
   }) {
     return LeadScoutDataModel(
       teamNumber: teamNumber ?? this.teamNumber,
@@ -215,9 +209,7 @@ class LeadScoutDataModel {
       autonomousCoral: autonomousCoral ?? this.autonomousCoral,
       leaveAutoLine: leaveAutoLine ?? this.leaveAutoLine,
       autonCpmAvg: autonCpmAvg ?? this.autonCpmAvg,
-      compatibility: compatibility ?? this.compatibility,
-      notableFeats: notableFeats ?? this.notableFeats,
-      humanPlayerNetAcc: humanPlayerNetAcc ?? this.humanPlayerNetAcc,
+      notes: notes ?? this.notes,
     );
   }
 }
@@ -354,9 +346,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
       leaveAutoLine: "",
       autonCpmAvg: 0,
       // Lead scouting
-      compatibility: "",
-      notableFeats: "",
-      humanPlayerNetAcc: "",
+      notes: "",
     );
   }
 
@@ -792,11 +782,11 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
     return base.copyWith(autonCpmAvg: autonCpmAvg);
   }
 
-  /// 7) Fetch lead scouting notes from LeadScoutingData (compatibility, feats, HP net ACC).
+  /// 7) Fetch lead scouting notes from LeadScoutingData (notes field).
   Future<LeadScoutDataModel> _fetchNotesData(
       String teamNum, LeadScoutDataModel base) async {
     final String sql = """
-      SELECT compatibility, notable_feats, human_player_net_acc
+      SELECT notes
       FROM LeadScoutingData
       WHERE team_number = 'frc$teamNum'
     """;
@@ -840,9 +830,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
     }
 
     return base.copyWith(
-      compatibility: row["compatibility"] ?? "",
-      notableFeats: row["notable_feats"] ?? "",
-      humanPlayerNetAcc: row["human_player_net_acc"] ?? "",
+      notes: row["notes"] ?? "",
     );
   }
 
@@ -1319,14 +1307,14 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
       child: Column(
         children: [
-          // Team Compatibility
+          // Lead Scout Notes
           Column(
             children: [
               Container(
                 height: height * 0.05,
                 alignment: Alignment.center,
                 child: const Text(
-                  'Team Compatibility',
+                  'Lead Scout Notes',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -1334,53 +1322,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 10.0, horizontal: 30.0),
                 child: Text(
-                  leadData!.compatibility,
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                ),
-              ),
-            ],
-          ),
-          const Divider(),
-          // Notable Feats
-          Column(
-            children: [
-              Container(
-                height: height * 0.05,
-                alignment: Alignment.center,
-                child: const Text(
-                  'Notable Feats',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 10.0, horizontal: 30.0),
-                child: Text(
-                  leadData!.notableFeats,
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                ),
-              ),
-            ],
-          ),
-          const Divider(),
-          // Human Player Net ACC
-          Column(
-            children: [
-              Container(
-                height: height * 0.05,
-                alignment: Alignment.center,
-                child: const Text(
-                  'Human Player Net ACC',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 10.0, horizontal: 30.0),
-                child: Text(
-                  leadData!.humanPlayerNetAcc,
+                  leadData!.notes,
                   textAlign: TextAlign.center,
                   softWrap: true,
                 ),

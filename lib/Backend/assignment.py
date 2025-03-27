@@ -22,7 +22,7 @@ class ScoutScheduler:
     def __init__(
         self,
         scout_names: List[str],
-        lead_scout_names: List[str],
+        # lead_scout_names: List[str],
         total_matches: int,
         unavailability: Dict[str, List[int]],
         breaks: List[int],
@@ -45,7 +45,8 @@ class ScoutScheduler:
         self.scout_names = scout_names
         self.total_matches = total_matches
         self.unavailability = unavailability
-        self.lead_scout_names = lead_scout_names
+        # Lead scout functionality removed:
+        # self.lead_scout_names = lead_scout_names
         self.breaks = breaks
         self.teams_to_scout = teams_to_scout or ["R1", "R2", "R3", "B1", "B2", "B3"]
         self.target_consecutive_matches = target_consecutive_matches
@@ -215,28 +216,22 @@ class ScoutScheduler:
 
     def to_dataframe(self) -> pd.DataFrame:
         """
-        Convert schedule to a pandas DataFrame with lead scout assignments.
+        Convert schedule to a pandas DataFrame.
         
-        Lead scouts are organized in pairs and rotated every 10 matches.
-        Each pair consists of one scout from leadscoutone and one from leadscouttwo.
+        Lead scout assignments have been removed.
         
         Returns:
-            DataFrame representation of the schedule with lead scout columns
+            DataFrame representation of the schedule without lead scout columns
         """
         data = []
-        num_pairs = len(self.lead_scout_names) // 2
-        leadscoutone = []
-        leadscouttwo = []
-        for i in range(0, len(self.lead_scout_names), 2):
-            leadscoutone.append(self.lead_scout_names[i])
-            leadscouttwo.append(self.lead_scout_names[i + 1])
         for match in range(1, self.total_matches + 1):
             row = {'Match': match}
             for team in self.teams_to_scout:
                 row[team] = self.schedule[match][team]
-            pair_index = ((match - 1) // 10) % num_pairs
-            row['Lead1'] = leadscoutone[pair_index]
-            row['Lead2'] = leadscouttwo[pair_index]
+            # Lead scout columns removed:
+            # pair_index = ((match - 1) // 10) % num_pairs
+            # row['Lead1'] = leadscoutone[pair_index]
+            # row['Lead2'] = leadscouttwo[pair_index]
             data.append(row)
         return pd.DataFrame(data)
 
@@ -431,33 +426,28 @@ class ScoutScheduler:
 
 def run_scout_scheduling():
     """Main function to run the scout assignment algorithm."""
-    scout_names = [
-                    "Thomas",
-                    "Morgan",
-                    "Michael",
-                    "Matthew Ren",
-                    "Isabel",
-                    "Claudia",
-                    "Alex Segor",
-                    "Stevie",
-                    "Daniel",
-                    "Asher",
-                    "Zidaan",
-                    "Quinn",
-                    "Emma",
-                    "Chase",
-                    "Alex Gavin",
-                    "Jessica"
-                ]
-
+    scout_names = ['Aarush',
+                   'Vikram',
+                   'Asher',
+                   'Jessie',
+                   'Isabel',
+                   'Demir',
+                   'Dylan',
+                   'Henry',
+                   'Mattin',
+                   'Max Ye',
+                   'Andrew',
+                   'Matthew Ren',
+                   'Matthew Ahn',
+                   'Michael',
+                   ]
     total_matches = 74
-    lead_scout_names = ['CJ', 'Mattin']
     unavailability = {
     }
     breaks = [22, 55]
     scheduler = ScoutScheduler(
         scout_names=scout_names,
-        lead_scout_names=lead_scout_names,
+        # lead_scout_names=lead_scout_names,
         total_matches=total_matches,
         unavailability=unavailability,
         breaks=breaks,
@@ -500,11 +490,11 @@ if __name__ == "__main__":
     engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
     
     # Rename DataFrame columns to match the target schema:
-    # 'Match' -> 'match_number', 'Lead1' -> 'blue_lead', 'Lead2' -> 'red_lead'
+    # Lead scout columns removed.
     df_to_save = schedule.rename(columns={
-        "Match": "match_number",
-        "Lead1": "blue_lead",
-        "Lead2": "red_lead"
+        # "Match": "match_number",
+        # "Lead1": "blue_lead",
+        # "Lead2": "red_lead"
     })
     
     # Save to the MSSQL table called 'Assignment'

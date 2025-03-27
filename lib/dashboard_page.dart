@@ -100,7 +100,8 @@ class _DashboardPageState extends State<DashboardPage> {
       bool already = await _teamAlreadyPitScouted(teamNumber);
       if (already) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Team $teamNumber has already been pit scouted.')),
+          SnackBar(
+              content: Text('Team $teamNumber has already been pit scouted.')),
         );
       } else {
         Navigator.push(
@@ -170,8 +171,10 @@ class _DashboardPageState extends State<DashboardPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => LeadScoutingPage(
-                          teamName: "red", // for example, lead scouts watch the "red" alliance
-                          matchNumber: "qm1", // default match number; adjust as needed
+                          teamName:
+                              "red", // for example, lead scouts watch the "red" alliance
+                          matchNumber:
+                              "qm1", // default match number; adjust as needed
                           // channel: widget.webSocketService.channel!,
                           onThemeChanged: widget.onThemeChanged,
                           webSocketService: widget.webSocketService,
