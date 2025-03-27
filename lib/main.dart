@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
-import 'package:frc1148_2025_scouting_app/auto_page.dart';
 import 'package:frc1148_2025_scouting_app/color_scheme.dart';
 import 'package:frc1148_2025_scouting_app/dashboard_page.dart';
-import 'package:frc1148_2025_scouting_app/endgame.dart';
-import 'package:frc1148_2025_scouting_app/lead_scout_notes_vis_page.dart';
 import 'package:frc1148_2025_scouting_app/login_page.dart';
-import 'package:frc1148_2025_scouting_app/objective_page.dart';
-import 'package:frc1148_2025_scouting_app/pit_scouting_page.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -60,39 +55,26 @@ class _MainAppState extends State<MyApp> {
       theme: ThemeData.from(colorScheme: lightColorScheme),
       darkTheme: ThemeData.from(colorScheme: darkColorScheme),
       themeMode: themeMode,
-      home: AutoPage(
-        teamName: "1148",
-        teamNickname: "Harvard-Westlake Robotics",
-        matchNumber: "1",
-        onThemeChanged: (ThemeMode mode) {
-          setState(() {
-            themeMode = mode;
-          });
-        },
-        webSocketService: _webSocketService,
-        channel: _webSocketService.channel!,
-      ),
-
-      // home: _isLoggedIn
-      //     ? DashboardPage(
-      //         channel: _webSocketService.channel,
-      //         onThemeChanged: (ThemeMode mode) {
-      //           setState(() {
-      //             themeMode = mode;
-      //           });
-      //         },
-      //         webSocketService: _webSocketService,
-      //         teamName: '',
-      //       )
-      //     : LoginPage(
-      //         channel: _webSocketService.channel,
-      //         onThemeChanged: (ThemeMode mode) {
-      //           setState(() {
-      //             themeMode = mode;
-      //           });
-      //         },
-      //         webSocketService: _webSocketService,
-      //       ),
+      home: _isLoggedIn
+          ? DashboardPage(
+              channel: _webSocketService.channel,
+              onThemeChanged: (ThemeMode mode) {
+                setState(() {
+                  themeMode = mode;
+                });
+              },
+              webSocketService: _webSocketService,
+              teamName: '',
+            )
+          : LoginPage(
+              channel: _webSocketService.channel,
+              onThemeChanged: (ThemeMode mode) {
+                setState(() {
+                  themeMode = mode;
+                });
+              },
+              webSocketService: _webSocketService,
+            ),
     );
   }
 }

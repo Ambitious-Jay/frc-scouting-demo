@@ -44,7 +44,7 @@ String climbType = "";
 List<String> climbOptions = ['Shallow', 'Deep', 'No Hang'];
 
 // Autonomous
-int coralPoints = 1;
+int coralPoints = 0;
 bool leavesStartLine = false;
 
 class MyCustomScrollBehavior extends ScrollBehavior {
@@ -113,7 +113,7 @@ class _PitScouting extends State<PitScouting> {
       processor = false;
       net = false;
       climbType = "";
-      coralPoints = 1;
+      coralPoints = 0;
       leavesStartLine = false;
     });
     _controller1.clear();
@@ -515,7 +515,7 @@ class _PitScouting extends State<PitScouting> {
               ],
             ),
             const SizedBox(height: 16),
-            // Autonomous - Coral Points as Spin Wheel out of 6
+            // Autonomous - Coral Points as Spin Wheel from 0 to 6
             const Center(
               child: Text(
                 "Autonomous",
@@ -531,16 +531,16 @@ class _PitScouting extends State<PitScouting> {
                   child: CupertinoPicker(
                     itemExtent: 32,
                     scrollController: FixedExtentScrollController(
-                      initialItem: coralPoints > 0 ? coralPoints - 1 : 0,
+                      initialItem: coralPoints,
                     ),
                     onSelectedItemChanged: (index) {
                       setState(() {
-                        coralPoints = index + 1;
+                        coralPoints = index;
                       });
                     },
                     children: List<Widget>.generate(
-                      6,
-                      (index) => Center(child: Text('${index + 1}')),
+                      7,
+                      (index) => Center(child: Text('$index')),
                     ),
                   ),
                 ),

@@ -196,7 +196,7 @@ class _AllianceDataState extends State<AllianceData> {
   Future<TeamDataModel> _fetchEPAData(String normalizedTeam) async {
     final int teamInt = parseTeamNumberAsInt(normalizedTeam);
     final String sql = """
-      SELECT team_name, current_EPA, max_EPA
+      SELECT team_name, total_epa, norm_epa_max
       FROM StatsboticsEPA
       WHERE team = $teamInt
     """;
@@ -288,8 +288,8 @@ class _AllianceDataState extends State<AllianceData> {
     return TeamDataModel(
       teamNumber: normalizedTeam,
       teamName: row["team_name"] ?? "Unknown",
-      epa: (row["current_EPA"] ?? 0).toDouble(),
-      maxEpa: (row["max_EPA"] ?? 0).toDouble(),
+      epa: (row["total_epa"] ?? 0).toDouble(),
+      maxEpa: (row["norm_epa_max"] ?? 0).toDouble(),
       rank: 0,
       wlr: "0-0-0",
       processor: false,
