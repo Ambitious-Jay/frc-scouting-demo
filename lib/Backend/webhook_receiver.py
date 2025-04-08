@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 # Replace with your webhook secret (the one you set when creating the webhook on TBA)
-WEBHOOK_SECRET = "81ad8a732d4f4fc0a2ab12b9810180ab"
+WEBHOOK_SECRET = "f63be5cf91694dc29d109b2a341e5c71"
 
 def verify_signature(payload: bytes, signature: str) -> bool:
     """

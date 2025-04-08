@@ -93,17 +93,46 @@ class _AutoPageState extends State<AutoPage> {
             : 'frc${widget.teamName}';
 
     final sql = '''
-      INSERT INTO AutoScouting (
-        team_number, match_number, start_position, l4_count, l2_l3_count, l1_count, net_count, processor_count,
-        in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
-      )
-      VALUES (
-        '${teamNumberWithPrefix}', '${widget.matchNumber}', '${startPos ?? ""}',
-        ${l4Counter.value}, ${l2l3Counter.value}, ${l1Counter.value},
-        ${netCounter.value}, ${processorCounter.value},
-        ${inCenterZone ? 1 : 0}, ${inLeftZone ? 1 : 0}, ${inRightZone ? 1 : 0},
-        ${isBlue ? 1 : 0}, ${fieldFlipped ? 1 : 0}
-      )
+      MERGE AutoScouting AS target
+      USING (
+        SELECT 
+          '${teamNumberWithPrefix}' AS team_number, 
+          '${widget.matchNumber}' AS match_number, 
+          '${startPos ?? ""}' AS start_position, 
+          ${l4Counter.value} AS l4_count, 
+          ${l2l3Counter.value} AS l2_l3_count, 
+          ${l1Counter.value} AS l1_count,
+          ${netCounter.value} AS net_count, 
+          ${processorCounter.value} AS processor_count,
+          ${inCenterZone ? 1 : 0} AS in_center_zone, 
+          ${inLeftZone ? 1 : 0} AS in_left_zone, 
+          ${inRightZone ? 1 : 0} AS in_right_zone,
+          ${isBlue ? 1 : 0} AS is_blue, 
+          ${fieldFlipped ? 1 : 0} AS field_flipped
+      ) AS source
+      ON (target.team_number = source.team_number AND target.match_number = source.match_number)
+      WHEN MATCHED THEN
+        UPDATE SET
+          start_position = source.start_position,
+          l4_count = source.l4_count,
+          l2_l3_count = source.l2_l3_count,
+          l1_count = source.l1_count,
+          net_count = source.net_count,
+          processor_count = source.processor_count,
+          in_center_zone = source.in_center_zone,
+          in_left_zone = source.in_left_zone,
+          in_right_zone = source.in_right_zone,
+          is_blue = source.is_blue,
+          field_flipped = source.field_flipped
+      WHEN NOT MATCHED THEN
+        INSERT (
+          team_number, match_number, start_position, l4_count, l2_l3_count, l1_count,
+          net_count, processor_count, in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
+        )
+        VALUES (
+          source.team_number, source.match_number, source.start_position, source.l4_count, source.l2_l3_count, source.l1_count,
+          source.net_count, source.processor_count, source.in_center_zone, source.in_left_zone, source.in_right_zone, source.is_blue, source.field_flipped
+        );
     ''';
 
     final cmd = {"type": "query", "text": sql};
@@ -136,7 +165,7 @@ class _AutoPageState extends State<AutoPage> {
 
     // Send the command
     widget.webSocketService.sendLengthPrefixed(cmd);
-    debugPrint('Sent auto scouting INSERT command: $sql');
+    debugPrint('Sent auto scouting MERGE command: $sql');
 
     try {
       // Wait for response with timeout
@@ -166,6 +195,7 @@ class _AutoPageState extends State<AutoPage> {
     final sql =
         "SELECT notes FROM LeadScoutingData WHERE team_number='$teamNumberWithPrefix'";
     final cmd = {"type": "query", "text": sql};
+
     final completer = Completer<Map<String, dynamic>?>();
     late StreamSubscription sub;
 
@@ -202,18 +232,26 @@ class _AutoPageState extends State<AutoPage> {
       final row = await completer.future
           .timeout(const Duration(seconds: 5), onTimeout: () => null);
 
-      if (row != null) {
+      if (row != null && row.containsKey("notes")) {
         final notes = row["notes"] ?? "";
-        debugPrint("Received lead scout notes: $notes");
+        debugPrint("Received lead scout notes: '$notes'");
 
         if (mounted) {
           setState(() {
             _notesValue = notes;
+            // Immediately update the controller text
             _notesController.text = notes;
           });
         }
       } else {
         debugPrint("No lead scouting notes found for team ${widget.teamName}");
+        // Set to empty string if no notes found
+        if (mounted) {
+          setState(() {
+            _notesValue = "";
+            _notesController.text = "";
+          });
+        }
       }
     } catch (e) {
       debugPrint("Error fetching lead scouting data: $e");
@@ -223,6 +261,8 @@ class _AutoPageState extends State<AutoPage> {
   }
 
   Future<void> _fetchPitScoutingData() async {
+    if (!mounted) return;
+
     // For PitScoutingData, remove 'frc' prefix if present
     final String normalizedTeamNumber =
         widget.teamName.toLowerCase().startsWith('frc')
@@ -246,32 +286,24 @@ class _AutoPageState extends State<AutoPage> {
         final int len = int.parse(rawMessage.substring(0, idx));
         final String jsonPart = rawMessage.substring(idx + 2);
 
-        // Guard against empty or "null" responses
         if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
           return;
         }
 
         if (jsonPart.length != len) return;
 
-        // Extra validation to prevent format errors
-        try {
-          final Map<String, dynamic> msg = jsonDecode(jsonPart);
-          if (msg["type"] == "query") {
-            final List<dynamic> rows = msg["rows"];
-            if (rows.isNotEmpty) {
-              debugPrint(
-                  "Received pit scouting data: ${jsonEncode(rows.first)}");
-              completer.complete(rows.first);
-            } else {
-              completer.complete(null);
-            }
+        final Map<String, dynamic> msg = jsonDecode(jsonPart);
+        if (msg["type"] == "query") {
+          final List<dynamic> rows = msg["rows"];
+          if (rows.isNotEmpty) {
+            debugPrint("Received pit scouting data: ${jsonEncode(rows.first)}");
+            completer.complete(rows.first);
+          } else {
+            completer.complete(null);
           }
-        } catch (e) {
-          debugPrint("Error processing pit scouting data JSON: $e");
-          completer.completeError(e);
         }
       } catch (e) {
-        debugPrint("Error parsing WebSocket message: $e");
+        debugPrint("Error processing pit scouting data: $e");
         completer.completeError(e);
       }
     });
@@ -279,57 +311,50 @@ class _AutoPageState extends State<AutoPage> {
     widget.webSocketService.sendLengthPrefixed(cmd);
 
     try {
-      final row = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () => null);
-
-      // Create default data map
-      final Map<String, dynamic> defaultData = {
-        'team_number': normalizedTeamNumber,
-        'robot_weight': "",
-        'drive_type': "",
-        'motor_type': "",
-        'motor_count': 0,
-        'bumper_quality': 0,
-        'coral_intake_type': "",
-        'algae_intake_type': "",
-        'L1': "false",
-        'L2': "false",
-        'L3': "false",
-        'L4': "false",
-        'processor': "false",
-        'net': "false",
-        'climb_type': "",
-        'autonomous_coral_points': 0,
-        'leaves_start_line': "false"
-      };
+      final row = await completer.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint("Timeout fetching pit scouting data");
+          return null;
+        },
+      );
 
       if (row != null) {
-        // Create a sanitized map by merging the response with defaults
-        final sanitizedData = Map<String, dynamic>.from(defaultData);
-
-        // Update with values from the response, with proper type conversion
-        row.forEach((key, value) {
-          sanitizedData[key] = value;
-        });
-
         if (mounted) {
           setState(() {
-            pitScoutingData = sanitizedData;
+            pitScoutingData = Map<String, dynamic>.from(row);
             debugPrint(
-                "Updated pit scouting data in state: ${jsonEncode(sanitizedData)}");
+                "Updated pit scouting data in state: ${jsonEncode(pitScoutingData)}");
           });
         }
       } else {
-        debugPrint("No pit scouting data found, using defaults");
+        debugPrint("No pit scouting data found for team $normalizedTeamNumber");
         if (mounted) {
           setState(() {
-            pitScoutingData = defaultData;
+            pitScoutingData = {
+              'team_number': normalizedTeamNumber,
+              'robot_weight': "",
+              'drive_type': "",
+              'motor_type': "",
+              'motor_count': 0,
+              'bumper_quality': 0,
+              'coral_intake_type': "",
+              'algae_intake_type': "",
+              'L1': "false",
+              'L2': "false",
+              'L3': "false",
+              'L4': "false",
+              'processor': "false",
+              'net': "false",
+              'climb_type': "",
+              'autonomous_coral_points': 0,
+              'leaves_start_line': "false"
+            };
           });
         }
       }
     } catch (e) {
       debugPrint("Error fetching pit scouting data: $e");
-      // Initialize with defaults on error
       if (mounted) {
         setState(() {
           pitScoutingData = {
@@ -360,7 +385,7 @@ class _AutoPageState extends State<AutoPage> {
 
   Future<void> _submitLeadScoutingNotes() async {
     // Get the current text from the controller
-    final String currentNotes = _notesController.text;
+    final String currentNotes = _notesController.text.trim();
 
     // Update the state variable to ensure it matches what the user entered
     _notesValue = currentNotes;
@@ -368,7 +393,7 @@ class _AutoPageState extends State<AutoPage> {
     // Escape single quotes in notes to prevent SQL injection
     final String escapedNotes = currentNotes.replaceAll("'", "''");
 
-    debugPrint("Submitting notes: $currentNotes");
+    debugPrint("Submitting notes: '$currentNotes'");
 
     // Add 'frc' prefix to team number for LeadScoutingData table
     final String teamNumberWithPrefix =
@@ -551,14 +576,13 @@ class _AutoPageState extends State<AutoPage> {
   void initState() {
     super.initState();
     _notesController = TextEditingController();
-    _notesValue = "";
     AuthService.getUsername().then((value) {
       setState(() {
         _username = value ?? "";
       });
     });
 
-    // Load all data once when the page is initialized
+    // Load all data when the page is initialized
     _loadAllData();
   }
 
@@ -626,10 +650,9 @@ class _AutoPageState extends State<AutoPage> {
                 // Always submit auto scouting data
                 await _submitAutoScoutingData();
 
-                // Only submit lead scouting data if the user is a lead scout
+                // Only submit lead scouting notes if the user is a lead scout
                 if (widget.isLeadScout) {
                   await _submitLeadScoutingNotes();
-                  await _submitPitScoutingData();
                 }
 
                 Navigator.push(
@@ -648,7 +671,7 @@ class _AutoPageState extends State<AutoPage> {
                 );
               },
         icon: const Icon(Icons.arrow_forward_rounded),
-        label: const Text('Submit'),
+        label: const Text('Next'),
       ),
     );
   }
@@ -1261,65 +1284,79 @@ class _AutoPageState extends State<AutoPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5)),
                     ),
-                    onPressed: () {
-                      // Check if pit data is properly loaded by looking for specific fields
-                      bool isDataComplete = pitScoutingData != null &&
-                          pitScoutingData!.containsKey('robot_weight') &&
-                          pitScoutingData!.containsKey('drive_type');
+                    onPressed: _isLoading
+                        ? null // Disable button while loading
+                        : () {
+                            // Check if pit data is properly loaded
+                            bool isDataComplete = pitScoutingData != null &&
+                                pitScoutingData!.containsKey('robot_weight') &&
+                                pitScoutingData!.containsKey('drive_type');
 
-                      if (!isDataComplete) {
-                        // Show loading indicator
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext context) {
-                            return const Dialog(
-                              child: Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(height: 16),
-                                    Text("Loading capabilities data..."),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-
-                        // Try to refetch the data
-                        _fetchPitScoutingData().then((_) {
-                          // Check if data was successfully loaded
-                          if (mounted) {
-                            Navigator.of(context).pop(); // Close loading dialog
-
-                            // Double check data was actually loaded
-                            if (pitScoutingData != null &&
-                                pitScoutingData!.containsKey('robot_weight')) {
-                              _showCapabilitiesEditDialog();
-                            } else {
-                              // Show error if data still not loaded
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        "Error loading data. Please try again.")),
+                            if (!isDataComplete) {
+                              // Show loading indicator
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return const Dialog(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(20.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CircularProgressIndicator(),
+                                          SizedBox(height: 16),
+                                          Text("Loading capabilities data..."),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
+
+                              // Try to refetch the data
+                              _fetchPitScoutingData().then((_) {
+                                if (mounted) {
+                                  Navigator.of(context)
+                                      .pop(); // Close loading dialog
+                                  if (pitScoutingData != null &&
+                                      pitScoutingData!
+                                          .containsKey('robot_weight')) {
+                                    setState(() {}); // Force a rebuild
+                                    _showCapabilitiesEditDialog();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            "Error loading data. Please try again."),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              });
+                            } else {
+                              _showCapabilitiesEditDialog();
                             }
-                          }
-                        });
-                      } else {
-                        // Data is already properly loaded, show dialog directly
-                        _showCapabilitiesEditDialog();
-                      }
-                    },
+                          },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.edit_attributes, size: 36),
-                        SizedBox(height: 8),
-                        Text("Capabilities", style: TextStyle(fontSize: 16)),
+                      children: [
+                        Icon(
+                          Icons.edit_attributes,
+                          size: 36,
+                          color: _isLoading
+                              ? Colors.grey
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Capabilities",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _isLoading ? Colors.grey : null,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1332,68 +1369,140 @@ class _AutoPageState extends State<AutoPage> {
     );
   }
 
+  // Method to load all data and track loading state
+  Future<void> _loadAllData() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
+    try {
+      // Fetch lead scouting notes first if user is a lead scout
+      if (widget.isLeadScout) {
+        await _fetchLeadScoutingData();
+      }
+
+      // Then fetch pit scouting data
+      await _fetchPitScoutingData();
+
+      // Force a rebuild to ensure the UI reflects the loaded data
+      if (mounted) {
+        setState(() {
+          // Ensure controller text is updated with fetched notes
+          if (widget.isLeadScout &&
+              _notesValue.isNotEmpty &&
+              _notesController.text != _notesValue) {
+            _notesController.text = _notesValue;
+          }
+        });
+      }
+
+      debugPrint(
+          "All data loaded. Notes: '$_notesValue', Controller: '${_notesController.text}'");
+    } catch (e) {
+      debugPrint("Error loading data: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Error loading data. Please try again."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // End loading
+        });
+      }
+    }
+  }
+
   // Method to show capabilities edit dialog
   void _showCapabilitiesEditDialog() {
     // Make sure we use the already fetched pit scouting data
     debugPrint(
         "Opening capabilities dialog with existing data: ${pitScoutingData != null ? 'data available' : 'no data'}");
 
-    // If no pit data is available (shouldn't happen since we load at init), use empty defaults
-    final Map<String, dynamic> dataToUse = pitScoutingData ??
-        {
-          'team_number': widget.teamName,
-          'robot_weight': "",
-          'drive_type': "",
-          'motor_type': "",
-          'motor_count': 0,
-          'bumper_quality': 0,
-          'coral_intake_type': "",
-          'algae_intake_type': "",
-          'L1': false,
-          'L2': false,
-          'L3': false,
-          'L4': false,
-          'processor': false,
-          'net': false,
-          'climb_type': "",
-          'autonomous_coral_points': 0,
-          'leaves_start_line': false
-        };
+    // If no pit data is available, show loading dialog and try to fetch
+    if (pitScoutingData == null) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Dialog(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text("Loading capabilities data..."),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      // Try to fetch the data
+      _fetchPitScoutingData().then((_) {
+        if (mounted) {
+          Navigator.of(context).pop(); // Close loading dialog
+          if (pitScoutingData != null) {
+            // Force a rebuild of the dialog with the new data
+            setState(() {}); // Trigger a rebuild of the parent widget
+            _showCapabilitiesEditDialog(); // Recursively show dialog with data
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Error loading data. Please try again."),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      });
+      return;
+    }
 
     // Create controllers with the data
-    final robotWeightController =
-        TextEditingController(text: safeString(dataToUse['robot_weight']));
+    final robotWeightController = TextEditingController(
+        text: safeString(pitScoutingData!['robot_weight']));
     final driveTypeController =
-        TextEditingController(text: safeString(dataToUse['drive_type']));
+        TextEditingController(text: safeString(pitScoutingData!['drive_type']));
     final motorTypeController =
-        TextEditingController(text: safeString(dataToUse['motor_type']));
-    final motorCountController =
-        TextEditingController(text: safeString(dataToUse['motor_count']));
-    final bumperQualityController =
-        TextEditingController(text: safeString(dataToUse['bumper_quality']));
-    final coralIntakeTypeController =
-        TextEditingController(text: safeString(dataToUse['coral_intake_type']));
-    final algaeIntakeTypeController =
-        TextEditingController(text: safeString(dataToUse['algae_intake_type']));
+        TextEditingController(text: safeString(pitScoutingData!['motor_type']));
+    final motorCountController = TextEditingController(
+        text: safeString(pitScoutingData!['motor_count']));
+    final bumperQualityController = TextEditingController(
+        text: safeString(pitScoutingData!['bumper_quality']));
+    final coralIntakeTypeController = TextEditingController(
+        text: safeString(pitScoutingData!['coral_intake_type']));
+    final algaeIntakeTypeController = TextEditingController(
+        text: safeString(pitScoutingData!['algae_intake_type']));
     final climbTypeController =
-        TextEditingController(text: safeString(dataToUse['climb_type']));
+        TextEditingController(text: safeString(pitScoutingData!['climb_type']));
     final autonomousCoralPointsController = TextEditingController(
-        text: safeString(dataToUse['autonomous_coral_points']));
+        text: safeString(pitScoutingData!['autonomous_coral_points']));
 
     // Set boolean values directly from the data
-    bool l1Capability = safeBool(dataToUse['L1']);
-    bool l2Capability = safeBool(dataToUse['L2']);
-    bool l3Capability = safeBool(dataToUse['L3']);
-    bool l4Capability = safeBool(dataToUse['L4']);
-    bool processorCapability = safeBool(dataToUse['processor']);
-    bool netCapability = safeBool(dataToUse['net']);
-    bool leavesStartLineCapability = safeBool(dataToUse['leaves_start_line']);
+    bool l1Capability = safeBool(pitScoutingData!['L1']);
+    bool l2Capability = safeBool(pitScoutingData!['L2']);
+    bool l3Capability = safeBool(pitScoutingData!['L3']);
+    bool l4Capability = safeBool(pitScoutingData!['L4']);
+    bool processorCapability = safeBool(pitScoutingData!['processor']);
+    bool netCapability = safeBool(pitScoutingData!['net']);
+    bool leavesStartLineCapability =
+        safeBool(pitScoutingData!['leaves_start_line']);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (context, setDialogState) {
             return Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
@@ -1437,31 +1546,32 @@ class _AutoPageState extends State<AutoPage> {
                       // Checkboxes for boolean fields
                       _buildDialogCheckbox("L1 Capability", l1Capability,
                           (value) {
-                        setState(() => l1Capability = value!);
+                        setDialogState(() => l1Capability = value!);
                       }),
                       _buildDialogCheckbox("L2 Capability", l2Capability,
                           (value) {
-                        setState(() => l2Capability = value!);
+                        setDialogState(() => l2Capability = value!);
                       }),
                       _buildDialogCheckbox("L3 Capability", l3Capability,
                           (value) {
-                        setState(() => l3Capability = value!);
+                        setDialogState(() => l3Capability = value!);
                       }),
                       _buildDialogCheckbox("L4 Capability", l4Capability,
                           (value) {
-                        setState(() => l4Capability = value!);
+                        setDialogState(() => l4Capability = value!);
                       }),
                       _buildDialogCheckbox("Processor", processorCapability,
                           (value) {
-                        setState(() => processorCapability = value!);
+                        setDialogState(() => processorCapability = value!);
                       }),
                       _buildDialogCheckbox("Net", netCapability, (value) {
-                        setState(() => netCapability = value!);
+                        setDialogState(() => netCapability = value!);
                       }),
                       _buildDialogCheckbox(
                           "Leaves Start Line", leavesStartLineCapability,
                           (value) {
-                        setState(() => leavesStartLineCapability = value!);
+                        setDialogState(
+                            () => leavesStartLineCapability = value!);
                       }),
 
                       const SizedBox(height: 20),
@@ -1477,9 +1587,9 @@ class _AutoPageState extends State<AutoPage> {
                             child: const Text("Cancel"),
                           ),
                           ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               // Save the edited data
-                              _saveCapabilitiesData(
+                              await _saveCapabilitiesData(
                                   robotWeightController.text,
                                   driveTypeController.text,
                                   motorTypeController.text,
@@ -1496,6 +1606,17 @@ class _AutoPageState extends State<AutoPage> {
                                   processorCapability,
                                   netCapability,
                                   leavesStartLineCapability);
+
+                              // Show success message
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text("Capabilities saved successfully"),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
                               Navigator.of(context).pop();
                             },
                             style: ElevatedButton.styleFrom(
@@ -1516,7 +1637,11 @@ class _AutoPageState extends State<AutoPage> {
       },
     ).then((_) {
       // After dialog is closed, refresh the pit scouting data to reflect any changes
-      _fetchPitScoutingData();
+      _fetchPitScoutingData().then((_) {
+        if (mounted) {
+          setState(() {}); // Force a rebuild of the parent widget
+        }
+      });
     });
   }
 
@@ -1721,39 +1846,5 @@ class _AutoPageState extends State<AutoPage> {
         _notesController.text = _notesValue;
       }
     });
-  }
-
-  // Add a method to load all data and track loading state
-  Future<void> _loadAllData() async {
-    setState(() {
-      _isLoading = true; // Start loading
-    });
-
-    try {
-      // Only fetch lead scouting data if the user is a lead scout
-      if (widget.isLeadScout) {
-        // Fetch both types of data in parallel
-        await Future.wait([
-          _fetchLeadScoutingData(),
-          _fetchPitScoutingData(),
-        ]);
-
-        // After all data is fetched, update the controller with the notes value
-        if (_notesController.text != _notesValue) {
-          _notesController.text = _notesValue;
-        }
-      } else {
-        // Non-lead scouts don't need to load this data
-        _isLoading = false;
-      }
-    } catch (e) {
-      debugPrint("Error loading data: $e");
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false; // End loading
-        });
-      }
-    }
   }
 }

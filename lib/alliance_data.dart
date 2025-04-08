@@ -178,15 +178,15 @@ class _AllianceDataState extends State<AllianceData> {
         await _fetchPitData(normalized, partialRank);
 
     // 5) Aggregator for CPM/APM from TBAMatchScores (avg only)
-    final TeamDataModel partialCpmApm =
+    final TeamDataModel finalData =
         await _fetchCpmApm(normalized, partialPit);
 
     // 6) Aggregator for L1, L2/3, L4, Net, Processor from MatchData
-    final TeamDataModel finalData =
-        await _fetchMatchDataAggregator(normalized, partialCpmApm);
+    final TeamDataModel finalData2 =
+        await _fetchMatchDataAggregator(normalized, finalData);
 
     setState(() {
-      _teamData[index] = finalData;
+      _teamData[index] = finalData2;
     });
   }
 
@@ -653,17 +653,17 @@ class _AllianceDataState extends State<AllianceData> {
     );
   }
 
-  // -----------------------------------------------------------
-  // 5) CPM/APM Aggregation (only average) - "frc" prefix in LIKE
-  // -----------------------------------------------------------
+  /// 5) CPM/APM Aggregation (only average) - "frc" prefix in LIKE
+  /// For CPM, sum l1Counter, l2l3Counter, and l4Counter for each match and average over the number of rows returned.
+  /// For APM, sum netCounter and processorCounter for each match and average similarly.
   Future<TeamDataModel> _fetchCpmApm(
       String normalizedTeam, TeamDataModel base) async {
     final String sql = """
-      SELECT teleop_coral_count, net_algae_count
-      FROM TBAMatchScores
-      WHERE team_keys LIKE '%frc$normalizedTeam%'
+      SELECT l1Counter, l2l3Counter, l4Counter, netCounter, processorCounter
+      FROM MatchData
+      WHERE team_number = 'frc$normalizedTeam'
     """;
-    print("Sending TBAMatchScores aggregator query: $sql");
+    print("Sending MatchData aggregator query: $sql");
 
     final Map<String, dynamic> queryCmd = {
       "type": "query",
@@ -696,39 +696,27 @@ class _AllianceDataState extends State<AllianceData> {
 
     final rows = await completer.future.timeout(const Duration(seconds: 5),
         onTimeout: () {
-      print("Timeout on TBAMatchScores query for team $normalizedTeam");
+      print("Timeout on MatchData query for team $normalizedTeam");
       return [];
     });
     await sub.cancel();
 
     if (rows.isEmpty) return base;
 
-    List<double> coralVals = [];
-    List<double> algaeVals = [];
-
+    double totalTeleop = 0;
+    double totalAP = 0;
     for (var r in rows) {
-      double cVal = 0;
-      if (r["teleop_coral_count"] != null) {
-        cVal = double.tryParse(r["teleop_coral_count"].toString()) ?? 0;
-      }
-      if (cVal > 0) coralVals.add(cVal);
-
-      double aVal = 0;
-      if (r["net_algae_count"] != null) {
-        aVal = double.tryParse(r["net_algae_count"].toString()) ?? 0;
-      }
-      if (aVal > 0) algaeVals.add(aVal);
+      double l1 = double.tryParse(r["l1Counter"]?.toString() ?? "0") ?? 0;
+      double l23 = double.tryParse(r["l2l3Counter"]?.toString() ?? "0") ?? 0;
+      double l4 = double.tryParse(r["l4Counter"]?.toString() ?? "0") ?? 0;
+      double net = double.tryParse(r["netCounter"]?.toString() ?? "0") ?? 0;
+      double processor = double.tryParse(r["processorCounter"]?.toString() ?? "0") ?? 0;
+      totalTeleop += (l1 + l23 + l4);
+      totalAP += (net + processor);
     }
-
-    double coralAvg = 0;
-    if (coralVals.isNotEmpty) {
-      coralAvg = coralVals.reduce((a, b) => a + b) / coralVals.length;
-    }
-
-    double algaeAvg = 0;
-    if (algaeVals.isNotEmpty) {
-      algaeAvg = algaeVals.reduce((a, b) => a + b) / algaeVals.length;
-    }
+    int numMatches = rows.length;
+    double teleopAvg = numMatches > 0 ? totalTeleop / numMatches : 0;
+    double apAvg = numMatches > 0 ? totalAP / numMatches : 0;
 
     return TeamDataModel(
       teamNumber: base.teamNumber,
@@ -747,8 +735,8 @@ class _AllianceDataState extends State<AllianceData> {
       coralIntakeType: base.coralIntakeType,
       algaeIntakeType: base.algaeIntakeType,
       leavesAuto: base.leavesAuto,
-      cpmAvg: coralAvg,
-      apmAvg: algaeAvg,
+      cpmAvg: teleopAvg,
+      apmAvg: apAvg,
       teamOpr: base.teamOpr,
       l1Min: base.l1Min,
       l1Max: base.l1Max,

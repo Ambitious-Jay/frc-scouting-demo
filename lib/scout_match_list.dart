@@ -89,24 +89,41 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
     final String sql = """
   SELECT 
     a.Match as match_number,
+    a_role.role,
     CASE 
-      WHEN a.R1 = '$_username' THEN 'R1'
-      WHEN a.R2 = '$_username' THEN 'R2'
-      WHEN a.R3 = '$_username' THEN 'R3'
-      WHEN a.B1 = '$_username' THEN 'B1'
-      WHEN a.B2 = '$_username' THEN 'B2'
-      WHEN a.B3 = '$_username' THEN 'B3'
-    END as role,
-    qm.team_keys,
+      WHEN a_role.role LIKE 'R%' THEN qm_red.team_keys
+      WHEN a_role.role LIKE 'B%' THEN qm_blue.team_keys
+      ELSE NULL
+    END as team_keys,
     CASE WHEN ls.Names = '$_username' THEN 1 ELSE 0 END as is_lead_scout
   FROM Assignment a
-  LEFT JOIN QualificationMatches qm ON a.Match = qm.match_number
+  JOIN (
+    SELECT 
+      Match,
+      CASE 
+        WHEN R1 = '$_username' THEN 'R1'
+        WHEN R2 = '$_username' THEN 'R2'
+        WHEN R3 = '$_username' THEN 'R3'
+        WHEN B1 = '$_username' THEN 'B1'
+        WHEN B2 = '$_username' THEN 'B2'
+        WHEN B3 = '$_username' THEN 'B3'
+      END as role
+    FROM Assignment
+    WHERE 
+      R1 = '$_username' OR R2 = '$_username' OR R3 = '$_username' OR
+      B1 = '$_username' OR B2 = '$_username' OR B3 = '$_username'
+  ) a_role ON a.Match = a_role.Match
+  LEFT JOIN (
+    SELECT match_number, team_keys
+    FROM QualificationMatches
+    WHERE alliance = 'red'
+  ) qm_red ON a.Match = qm_red.match_number
+  LEFT JOIN (
+    SELECT match_number, team_keys
+    FROM QualificationMatches
+    WHERE alliance = 'blue'
+  ) qm_blue ON a.Match = qm_blue.match_number
   LEFT JOIN LeadScouts ls ON ls.Names = '$_username'
-  WHERE 
-  (
-    a.R1 = '$_username' OR a.R2 = '$_username' OR a.R3 = '$_username' OR
-    a.B1 = '$_username' OR a.B2 = '$_username' OR a.B3 = '$_username'
-  )
   ORDER BY a.Match;
 """;
 
@@ -166,10 +183,20 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
             // Extract team based on role for all scouts (lead or not)
             if (roleUpper.isNotEmpty && roleUpper.length > 1) {
               int index = int.parse(roleUpper.substring(1)) - 1;
-              
+
               // Get team based on position in role (R1, B2, etc.)
               if (index < teamKeys.length) {
                 teamName = teamKeys[index];
+              }
+            }
+
+            // Skip invalid assignments (for specific issues with Isabel's assignments)
+            if (_username.toLowerCase() == "isabel") {
+              // Skip matches where Isabel is incorrectly assigned outside her designated matches
+              // Matches 11-20, 41-50, 61-70 are Isabel's designated periods
+              int matchRange = (matchNum - 1) ~/ 10;
+              if (!(matchRange == 1 || matchRange == 4 || matchRange == 6)) {
+                continue;
               }
             }
 

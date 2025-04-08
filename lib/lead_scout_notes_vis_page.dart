@@ -61,6 +61,12 @@ class LeadScoutDataModel {
   final String algaeIntakeType;
   final String climbType;
 
+  // Robot Capabilities (from PitScoutingData)
+  final String canL1;
+  final String canL2;
+  final String canL3;
+  final String canL4;
+
   // Autonomous (from PitScoutingData and AutoScouting)
   final String
       autonomousCoral; // Fetched from PitScoutingData.autonomous_coral_points
@@ -113,6 +119,11 @@ class LeadScoutDataModel {
     required this.coralIntakeType,
     required this.algaeIntakeType,
     required this.climbType,
+    // Robot capabilities
+    required this.canL1,
+    required this.canL2,
+    required this.canL3,
+    required this.canL4,
     // Auto data
     required this.autonomousCoral,
     required this.leaveAutoLine,
@@ -161,6 +172,10 @@ class LeadScoutDataModel {
     String? coralIntakeType,
     String? algaeIntakeType,
     String? climbType,
+    String? canL1,
+    String? canL2,
+    String? canL3,
+    String? canL4,
     String? autonomousCoral,
     String? leaveAutoLine,
     double? autonCpmAvg,
@@ -206,6 +221,10 @@ class LeadScoutDataModel {
       coralIntakeType: coralIntakeType ?? this.coralIntakeType,
       algaeIntakeType: algaeIntakeType ?? this.algaeIntakeType,
       climbType: climbType ?? this.climbType,
+      canL1: canL1 ?? this.canL1,
+      canL2: canL2 ?? this.canL2,
+      canL3: canL3 ?? this.canL3,
+      canL4: canL4 ?? this.canL4,
       autonomousCoral: autonomousCoral ?? this.autonomousCoral,
       leaveAutoLine: leaveAutoLine ?? this.leaveAutoLine,
       autonCpmAvg: autonCpmAvg ?? this.autonCpmAvg,
@@ -341,6 +360,11 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
       coralIntakeType: "",
       algaeIntakeType: "",
       climbType: "",
+      // Robot capabilities
+      canL1: "FALSE",
+      canL2: "FALSE",
+      canL3: "FALSE",
+      canL4: "FALSE",
       // Auto data
       autonomousCoral: "",
       leaveAutoLine: "",
@@ -661,7 +685,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
     final String sql = """
       SELECT robot_weight, drive_type, motor_type, motor_count, bumper_quality,
              coral_intake_type, algae_intake_type, climb_type, leaves_start_line,
-             processor, net, autonomous_coral_points
+             processor, net, autonomous_coral_points, L1, L2, L3, L4
       FROM PitScoutingData
       WHERE team_number = '$teamNum'
     """;
@@ -717,6 +741,11 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
       algaeIntakeType: row["algae_intake_type"] ?? "",
       climbType: row["climb_type"] ?? "",
       leaveAutoLine: parseBool(row["leaves_start_line"]) ? "TRUE" : "FALSE",
+      // Robot capabilities from PitScoutingData
+      canL1: row["L1"] ?? "FALSE",
+      canL2: row["L2"] ?? "FALSE",
+      canL3: row["L3"] ?? "FALSE",
+      canL4: row["L4"] ?? "FALSE",
       // Fetched from PitScoutingData (stored as autonomous_coral_points)
       autonomousCoral: row["autonomous_coral_points"]?.toString() ?? "0",
     );
@@ -1265,6 +1294,32 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
               Expanded(
                   child: _buildStatItem(
                       "Climb Type", leadData!.climbType, height)),
+            ],
+          ),
+          // Robot Capabilities
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0, top: 10.0, bottom: 5.0),
+            child: Text(
+              "Robot Capabilities",
+              style: TextStyle(
+                  fontSize: height * 0.02, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                  child:
+                      _buildStatItem("Can Score L1", leadData!.canL1, height)),
+              Expanded(
+                  child:
+                      _buildStatItem("Can Score L2", leadData!.canL2, height)),
+              Expanded(
+                  child:
+                      _buildStatItem("Can Score L3", leadData!.canL3, height)),
+              Expanded(
+                  child:
+                      _buildStatItem("Can Score L4", leadData!.canL4, height)),
             ],
           ),
           // Autonomous Specs

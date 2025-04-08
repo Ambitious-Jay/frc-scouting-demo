@@ -18,6 +18,19 @@ class QualificationMatch {
   });
 }
 
+/// Model representing an elimination match with red and blue alliances.
+class ElimMatch {
+  final String matchNumber;
+  final List<String> redAlliance;
+  final List<String> blueAlliance;
+
+  ElimMatch({
+    required this.matchNumber,
+    required this.redAlliance,
+    required this.blueAlliance,
+  });
+}
+
 class MatchList extends StatefulWidget {
   final WebSocketService webSocketService;
   const MatchList({Key? key, required this.webSocketService}) : super(key: key);
@@ -30,6 +43,8 @@ class _MatchListState extends State<MatchList> {
   final TextEditingController searchController = TextEditingController();
   List<QualificationMatch> matches = [];
   List<QualificationMatch> filteredMatches = [];
+  List<ElimMatch> elimMatches = [];
+  List<ElimMatch> filteredElimMatches = [];
   // Timer? autoRefreshTimer;
   StreamSubscription? querySubscription;
 
@@ -41,6 +56,7 @@ class _MatchListState extends State<MatchList> {
     //   _fillMatches();
     // });
     _fillMatches();
+    _createElimMatches();
     searchController.addListener(filterMatches);
   }
 
@@ -103,17 +119,84 @@ class _MatchListState extends State<MatchList> {
 
     try {
       final result = await completer.future;
+      
       // Update the matches in setState...
       setState(() {
         matches = result;
         // Do NOT override filteredMatches here!
       });
-      // ...then re-apply the user’s search so the highlights remain.
+      // ...then re-apply the user's search so the highlights remain.
       filterMatches();
     } catch (e) {
       print("Error fetching matches: $e");
     }
     querySubscription?.cancel();
+  }
+
+  /// Creates hardcoded elimination matches.
+  void _createElimMatches() {
+    elimMatches = [
+      ElimMatch(
+        matchNumber: "1",
+        redAlliance: ["359", "2122", "3859"],
+        blueAlliance: ["2594", "4944", "5933"],
+      ),
+      ElimMatch(
+        matchNumber: "2",
+        redAlliance: ["3309", "8", "4175"],
+        blueAlliance: ["696", "115", "192"],
+      ),
+      ElimMatch(
+        matchNumber: "3",
+        redAlliance: ["3045", "2813", "3245"],
+        blueAlliance: ["5461", "6487", "6364"],
+      ),
+      ElimMatch(
+        matchNumber: "4",
+        redAlliance: ["1148", "3006", "6358"],
+        blueAlliance: ["9044", "3216", "399"],
+      ),
+      // Add semifinal matches from the image
+      ElimMatch(
+        matchNumber: "5", // Semis 5-1
+        redAlliance: ["4944", "2594", "5933"],
+        blueAlliance: ["3309", "8", "4175"],
+      ),
+      ElimMatch(
+        matchNumber: "6", // Semis 6-1
+        redAlliance: ["6364", "5461", "6487"],
+        blueAlliance: ["399", "9044", "3216"],
+      ),
+      ElimMatch(
+        matchNumber: "7", // Semis 7-1
+        redAlliance: ["359", "3859", "2122"],
+        blueAlliance: ["115", "192", "696"],
+      ),
+      ElimMatch(
+        matchNumber: "8",
+        redAlliance: ["3045", "2813", "3245"],
+        blueAlliance: ["1148", "3006", "6358"],
+      ),
+      // Semifinal matches
+      ElimMatch(
+        matchNumber: "9",
+        redAlliance: ["115", "192", "696"],
+        blueAlliance: ["399", "9044", "3216"],
+      ),
+      ElimMatch(
+        matchNumber: "10",
+        redAlliance: ["3045", "3245", "2813"],
+        blueAlliance: ["3309", "8", "4175"],
+      ),
+      ElimMatch(
+        matchNumber: "11",
+        redAlliance: ["359", "3859", "2122"],
+        blueAlliance: ["1148", "3006", "6358"],
+      ),
+    ];
+    
+    // Initialize filtered elimination matches
+    filteredElimMatches = List.from(elimMatches);
   }
 
   /// Filters the matches based on the search query.
@@ -124,16 +207,29 @@ class _MatchListState extends State<MatchList> {
     if (query.isEmpty) {
       setState(() {
         filteredMatches = List.from(matches);
+        filteredElimMatches = List.from(elimMatches);
       });
     } else if (query.length < 3) {
       setState(() {
         filteredMatches =
             matches.where((m) => m.matchNumber.contains(query)).toList();
+        filteredElimMatches =
+            elimMatches.where((m) => m.matchNumber.contains(query)).toList();
       });
     } else {
       String lowerQuery = query.toLowerCase();
       setState(() {
         filteredMatches = matches.where((m) {
+          bool inRed = m.redAlliance.any(
+            (team) => team.toLowerCase().contains(lowerQuery),
+          );
+          bool inBlue = m.blueAlliance.any(
+            (team) => team.toLowerCase().contains(lowerQuery),
+          );
+          return inRed || inBlue;
+        }).toList();
+        
+        filteredElimMatches = elimMatches.where((m) {
           bool inRed = m.redAlliance.any(
             (team) => team.toLowerCase().contains(lowerQuery),
           );
@@ -192,91 +288,219 @@ class _MatchListState extends State<MatchList> {
           ),
           const Divider(),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(8),
-              itemCount: filteredMatches.length,
-              itemBuilder: (BuildContext context, int index) {
-                final match = filteredMatches[index];
-                // Determine whether the searched team is in each alliance.
-                bool teamInBlue = false;
-                bool teamInRed = false;
-                if (isTeamSearch) {
-                  teamInBlue = match.blueAlliance.any((team) =>
-                      team.trim().toLowerCase().contains(searchQuery));
-                  teamInRed = match.redAlliance.any((team) =>
-                      team.trim().toLowerCase().contains(searchQuery));
-                }
-
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white),
-                  ),
-                  child: SizedBox(
-                    height: height / 12,
-                    width: width / 20,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Display the match number.
-                        Text(
-                          "Match ${match.matchNumber}",
-                          style: const TextStyle(fontSize: 20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (filteredElimMatches.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "Elimination Matches",
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        // Blue alliance button.
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            side:
-                                const BorderSide(color: Colors.grey, width: 1),
-                            backgroundColor: blueColor,
-                            // If the searched team is in the blue alliance, change text color to black.
-                            foregroundColor: teamInBlue
-                                ? highlightedTextColor
-                                : defaultTextColor,
-                          ),
-                          child: const Text("Blue"),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AllianceData(
-                                  allianceNames: match.blueAlliance.join(","),
-                                  webSocketService: widget.webSocketService,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        // Red alliance button.
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            side:
-                                const BorderSide(color: Colors.grey, width: 1),
-                            backgroundColor: redColor,
-                            // If the searched team is in the red alliance, change text color to black.
-                            foregroundColor: teamInRed
-                                ? highlightedTextColor
-                                : defaultTextColor,
-                          ),
-                          child: const Text("Red"),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AllianceData(
-                                  allianceNames: match.redAlliance.join(","),
-                                  webSocketService: widget.webSocketService,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) =>
-                  SizedBox(height: height / 150),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(8),
+                      itemCount: filteredElimMatches.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final match = filteredElimMatches[index];
+                        // Determine whether the searched team is in each alliance.
+                        bool teamInBlue = false;
+                        bool teamInRed = false;
+                        if (isTeamSearch) {
+                          teamInBlue = match.blueAlliance.any((team) =>
+                              team.trim().toLowerCase().contains(searchQuery));
+                          teamInRed = match.redAlliance.any((team) =>
+                              team.trim().toLowerCase().contains(searchQuery));
+                        }
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white),
+                          ),
+                          child: SizedBox(
+                            height: height / 12,
+                            width: width / 20,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // Display the match number.
+                                Text(
+                                  "Elims Match ${match.matchNumber}",
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                // Blue alliance button.
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    backgroundColor: blueColor,
+                                    // If the searched team is in the blue alliance, change text color to black.
+                                    foregroundColor: teamInBlue
+                                        ? highlightedTextColor
+                                        : defaultTextColor,
+                                  ),
+                                  child: const Text("Blue"),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AllianceData(
+                                          allianceNames: match.blueAlliance.join(","),
+                                          webSocketService: widget.webSocketService,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                // Red alliance button.
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    backgroundColor: redColor,
+                                    // If the searched team is in the red alliance, change text color to black.
+                                    foregroundColor: teamInRed
+                                        ? highlightedTextColor
+                                        : defaultTextColor,
+                                  ),
+                                  child: const Text("Red"),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AllianceData(
+                                          allianceNames: match.redAlliance.join(","),
+                                          webSocketService: widget.webSocketService,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) =>
+                          SizedBox(height: height / 150),
+                    ),
+                    const Divider(thickness: 2),
+                  ],
+                  
+                  if (filteredMatches.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "Qualification Matches",
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(8),
+                      itemCount: filteredMatches.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final match = filteredMatches[index];
+                        // Determine whether the searched team is in each alliance.
+                        bool teamInBlue = false;
+                        bool teamInRed = false;
+                        if (isTeamSearch) {
+                          teamInBlue = match.blueAlliance.any((team) =>
+                              team.trim().toLowerCase().contains(searchQuery));
+                          teamInRed = match.redAlliance.any((team) =>
+                              team.trim().toLowerCase().contains(searchQuery));
+                        }
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white),
+                          ),
+                          child: SizedBox(
+                            height: height / 12,
+                            width: width / 20,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // Display the match number.
+                                Text(
+                                  "Match ${match.matchNumber}",
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                // Blue alliance button.
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    backgroundColor: blueColor,
+                                    // If the searched team is in the blue alliance, change text color to black.
+                                    foregroundColor: teamInBlue
+                                        ? highlightedTextColor
+                                        : defaultTextColor,
+                                  ),
+                                  child: const Text("Blue"),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AllianceData(
+                                          allianceNames: match.blueAlliance.join(","),
+                                          webSocketService: widget.webSocketService,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                // Red alliance button.
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    backgroundColor: redColor,
+                                    // If the searched team is in the red alliance, change text color to black.
+                                    foregroundColor: teamInRed
+                                        ? highlightedTextColor
+                                        : defaultTextColor,
+                                  ),
+                                  child: const Text("Red"),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AllianceData(
+                                          allianceNames: match.redAlliance.join(","),
+                                          webSocketService: widget.webSocketService,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) =>
+                          SizedBox(height: height / 150),
+                    ),
+                  ],
+                  
+                  if (filteredMatches.isEmpty && filteredElimMatches.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                          "No matches found",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],

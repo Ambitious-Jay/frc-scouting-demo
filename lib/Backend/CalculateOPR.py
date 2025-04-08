@@ -134,7 +134,7 @@ try:
         return opr_results
 
     if __name__ == '__main__':
-        event = "2025cala"
+        event = "2025idbo"
         opr_results = calculateAllOPRs(event)
         print("Calculated OPRs:", opr_results)
 
