@@ -52,7 +52,7 @@ class _AutoPageState extends State<AutoPage> {
   IntegerWrapper processorCounter = IntegerWrapper(0);
 
   bool doIncrement = true;
-  String? startPos = "Option one";
+  String? startPos = "Not pressed";
 
   late final TextEditingController _notesController;
   String _notesValue = "";
@@ -790,46 +790,73 @@ class _AutoPageState extends State<AutoPage> {
                       left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
                       top: fieldHeight / 4,
                       child: SizedBox(
-                        width: 80,
+                        width: 120,
                         height: fieldHeight / 3 * 2,
                         child: Column(
                           children: [
-                            ListTile(
-                              title: const Text(""),
-                              leading: Radio<String>(
-                                value: "rightStart",
-                                groupValue: startPos,
-                                onChanged: (String? value) {
-                                  setState(() {
-                                    startPos = value;
-                                  });
-                                },
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  startPos = "rightStart";
+                                });
+                              },
+                              child: ListTile(
+                                title: const Text("Right",
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.black)),
+                                leading: Radio<String>(
+                                  value: "rightStart",
+                                  groupValue: startPos,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      startPos = value;
+                                    });
+                                  },
+                                ),
                               ),
                             ),
-                            SizedBox(height: max(0, fieldHeight / 4 - 75)),
-                            ListTile(
-                              title: const Text(""),
-                              leading: Radio<String>(
-                                value: "centerStart",
-                                groupValue: startPos,
-                                onChanged: (String? value) {
-                                  setState(() {
-                                    startPos = value;
-                                  });
-                                },
+                            SizedBox(height: max(0, fieldHeight / 4 - 95)),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  startPos = "centerStart";
+                                });
+                              },
+                              child: ListTile(
+                                title: const Text("Center",
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.black)),
+                                leading: Radio<String>(
+                                  value: "centerStart",
+                                  groupValue: startPos,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      startPos = value;
+                                    });
+                                  },
+                                ),
                               ),
                             ),
-                            SizedBox(height: max(0, fieldHeight / 4 - 75)),
-                            ListTile(
-                              title: const Text(""),
-                              leading: Radio<String>(
-                                value: "leftStart",
-                                groupValue: startPos,
-                                onChanged: (String? value) {
-                                  setState(() {
-                                    startPos = value;
-                                  });
-                                },
+                            SizedBox(height: max(0, fieldHeight / 4 - 95)),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  startPos = "leftStart";
+                                });
+                              },
+                              child: ListTile(
+                                title: const Text("Left",
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.black)),
+                                leading: Radio<String>(
+                                  value: "leftStart",
+                                  groupValue: startPos,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      startPos = value;
+                                    });
+                                  },
+                                ),
                               ),
                             ),
                           ],
@@ -1156,46 +1183,70 @@ class _AutoPageState extends State<AutoPage> {
             left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
             top: fieldHeight / 4,
             child: SizedBox(
-              width: 80,
+              width: 120,
               height: fieldHeight / 3 * 2,
               child: Column(
                 children: [
-                  ListTile(
-                    title: const Text(""),
-                    leading: Radio<String>(
-                      value: "rightStart",
-                      groupValue: startPos,
-                      onChanged: (String? value) {
-                        setState(() {
-                          startPos = value;
-                        });
-                      },
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        startPos = "rightStart";
+                      });
+                    },
+                    child: ListTile(
+                      title: const Text("Right",
+                          style: TextStyle(fontSize: 14, color: Colors.black)),
+                      leading: Radio<String>(
+                        value: "rightStart",
+                        groupValue: startPos,
+                        onChanged: (String? value) {
+                          setState(() {
+                            startPos = value;
+                          });
+                        },
+                      ),
                     ),
                   ),
-                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
-                  ListTile(
-                    title: const Text(""),
-                    leading: Radio<String>(
-                      value: "centerStart",
-                      groupValue: startPos,
-                      onChanged: (String? value) {
-                        setState(() {
-                          startPos = value;
-                        });
-                      },
+                  SizedBox(height: max(0, fieldHeight / 4 - 95)),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        startPos = "centerStart";
+                      });
+                    },
+                    child: ListTile(
+                      title: const Text("Center",
+                          style: TextStyle(fontSize: 14, color: Colors.black)),
+                      leading: Radio<String>(
+                        value: "centerStart",
+                        groupValue: startPos,
+                        onChanged: (String? value) {
+                          setState(() {
+                            startPos = value;
+                          });
+                        },
+                      ),
                     ),
                   ),
-                  SizedBox(height: max(0, fieldHeight / 4 - 75)),
-                  ListTile(
-                    title: const Text(""),
-                    leading: Radio<String>(
-                      value: "leftStart",
-                      groupValue: startPos,
-                      onChanged: (String? value) {
-                        setState(() {
-                          startPos = value;
-                        });
-                      },
+                  SizedBox(height: max(0, fieldHeight / 4 - 95)),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        startPos = "leftStart";
+                      });
+                    },
+                    child: ListTile(
+                      title: const Text("Left",
+                          style: TextStyle(fontSize: 14, color: Colors.black)),
+                      leading: Radio<String>(
+                        value: "leftStart",
+                        groupValue: startPos,
+                        onChanged: (String? value) {
+                          setState(() {
+                            startPos = value;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ],

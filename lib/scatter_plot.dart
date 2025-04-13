@@ -74,69 +74,315 @@ class _ScatterPlotState extends State<ScatterPlot> {
       isLoading = true;
     });
 
-    const String sql = """
-      -- Coral Per Match
-      SELECT
-        OPR.Team AS team_number,
-        'Coral' AS metric_name,
-        OPR.OPR_teleop_coral_count AS metric_value
-      FROM OPR
+    // Game metrics explanation:
+    // - Coral: Game pieces that can be scored in L1, L2/3, and L4 scoring locations
+    // - Algae: Game pieces that can be processed through Net and Processor mechanisms
+    // - CPM (Coral Per Match): Average of L1 + L2/3 + L4 coral pieces scored per match
+    // - APM (Algae Per Match): Average of Net + Processor algae pieces processed per match
 
-      UNION ALL
-      -- L4 OPR Count
+    const String sql = """
+      -- L4 OPR
       SELECT
         OPR.Team AS team_number,
-        'L4 OPR Count' AS metric_name,
+        'L4 OPR' AS metric_name,
         OPR.OPR_teleop_reef_top_count AS metric_value
       FROM OPR
 
       UNION ALL
-      -- L3/L2 OPR Count
+      -- L3/L2 OPR
       SELECT
         OPR.Team AS team_number,
-        'L3/L2 OPR Count' AS metric_name,
+        'L3/L2 OPR' AS metric_name,
         OPR.OPR_teleop_reef_mid_count AS metric_value
       FROM OPR
 
       UNION ALL
-      -- L1 OPR Count
+      -- L1 OPR
       SELECT
         OPR.Team AS team_number,
-        'L1 OPR Count' AS metric_name,
-        OPR.OPR_teleop_reef_bottom_count AS metric_value
+        'L1 OPR' AS metric_name,
+        OPR.OPR_teleop_trough_count AS metric_value
       FROM OPR
 
       UNION ALL
-      -- Algae Per Match
+      -- Net OPR
       SELECT
         OPR.Team AS team_number,
-        'Algae' AS metric_name,
-        OPR.OPR_algae_points AS metric_value
-      FROM OPR
-
-      UNION ALL
-      -- Net OPR Count
-      SELECT
-        OPR.Team AS team_number,
-        'Net OPR Count' AS metric_name,
+        'Net OPR' AS metric_name,
         OPR.OPR_net_algae_count AS metric_value
       FROM OPR
 
-      -- UNION ALL
-      -- Processor OPR Count
-      -- SELECT
-      --   OPR.Team AS team_number,
-      --   'Processor OPR Count' AS metric_name,
-      --   OPR_processor_count AS metric_value
-      -- FROM OPR
+      UNION ALL
+      -- Processor OPR (using Wall Algae data)
+      SELECT
+        OPR.Team AS team_number,
+        'Processor OPR' AS metric_name,
+        OPR.OPR_wall_algae_count AS metric_value
+      FROM OPR
 
       UNION ALL
       -- EPA
       SELECT
         CAST(StatsboticsEPA.team AS varchar) AS team_number,
         'EPA' AS metric_name,
-        StatsboticsEPA.total_EPA AS metric_value
+        StatsboticsEPA.total_epa AS metric_value
       FROM StatsboticsEPA
+
+      -- Get average L1 from MatchData
+      UNION ALL
+      SELECT
+        REPLACE(md.team_number, 'frc', '') AS team_number,
+        'L1 Average' AS metric_name,
+        AVG(CAST(md.l1Counter AS FLOAT)) AS metric_value
+      FROM MatchData md
+      GROUP BY md.team_number
+
+      -- Get average L2/3 from MatchData
+      UNION ALL
+      SELECT
+        REPLACE(md.team_number, 'frc', '') AS team_number,
+        'L2/3 Average' AS metric_name,
+        AVG(CAST(md.l2l3Counter AS FLOAT)) AS metric_value
+      FROM MatchData md
+      GROUP BY md.team_number
+
+      -- Get average L4 from MatchData
+      UNION ALL
+      SELECT
+        REPLACE(md.team_number, 'frc', '') AS team_number,
+        'L4 Average' AS metric_name,
+        AVG(CAST(md.l4Counter AS FLOAT)) AS metric_value
+      FROM MatchData md
+      GROUP BY md.team_number
+
+      -- Get CPM (Average of L1+L2/3+L4)
+      UNION ALL
+      SELECT
+        REPLACE(md.team_number, 'frc', '') AS team_number,
+        'CPM' AS metric_name,
+        AVG(CAST(md.l1Counter AS FLOAT) + CAST(md.l2l3Counter AS FLOAT) + CAST(md.l4Counter AS FLOAT)) AS metric_value
+      FROM MatchData md
+      GROUP BY md.team_number
+
+      -- Get average Net from MatchData
+      UNION ALL
+      SELECT
+        REPLACE(md.team_number, 'frc', '') AS team_number,
+        'Net Average' AS metric_name,
+        AVG(CAST(md.netCounter AS FLOAT)) AS metric_value
+      FROM MatchData md
+      GROUP BY md.team_number
+
+      -- Get average Processor from MatchData
+      UNION ALL
+      SELECT
+        REPLACE(md.team_number, 'frc', '') AS team_number,
+        'Processor Average' AS metric_name,
+        AVG(CAST(md.processorCounter AS FLOAT)) AS metric_value
+      FROM MatchData md
+      GROUP BY md.team_number
+
+      -- Get APM (Average of Net+Processor)
+      UNION ALL
+      SELECT
+        REPLACE(md.team_number, 'frc', '') AS team_number,
+        'APM' AS metric_name,
+        AVG(CAST(md.netCounter AS FLOAT) + CAST(md.processorCounter AS FLOAT)) AS metric_value
+      FROM MatchData md
+      GROUP BY md.team_number
+
+      -- Get Auton L1 Average from AutoScouting
+      UNION ALL
+      SELECT
+        REPLACE(auto.team_number, 'frc', '') AS team_number,
+        'Auton L1 Average' AS metric_name,
+        AVG(CAST(auto.l1_count AS FLOAT)) AS metric_value
+      FROM AutoScouting auto
+      GROUP BY auto.team_number
+
+      -- Get Auton L2/L3 Average from AutoScouting
+      UNION ALL
+      SELECT
+        REPLACE(auto.team_number, 'frc', '') AS team_number,
+        'Auton L2/L3 Average' AS metric_name,
+        AVG(CAST(auto.l2_l3_count AS FLOAT)) AS metric_value
+      FROM AutoScouting auto
+      GROUP BY auto.team_number
+
+      -- Get Auton L4 Average from AutoScouting
+      UNION ALL
+      SELECT
+        REPLACE(auto.team_number, 'frc', '') AS team_number,
+        'Auton L4 Average' AS metric_name,
+        AVG(CAST(auto.l4_count AS FLOAT)) AS metric_value
+      FROM AutoScouting auto
+      GROUP BY auto.team_number
+
+      -- Get Auton Total Coral (Average of L1+L2/L3+L4 in Auton)
+      UNION ALL
+      SELECT
+        REPLACE(auto.team_number, 'frc', '') AS team_number,
+        'Auton Total Coral' AS metric_name,
+        AVG(CAST(auto.l1_count AS FLOAT) + CAST(auto.l2_l3_count AS FLOAT) + CAST(auto.l4_count AS FLOAT)) AS metric_value
+      FROM AutoScouting auto
+      GROUP BY auto.team_number
+
+      -- End Game Average - robot 1
+      UNION ALL 
+      SELECT
+        team AS team_number,
+        'End Game Average' AS metric_name,
+        AVG(
+          CASE 
+            WHEN end_game = 'None' THEN 0
+            WHEN end_game = 'Parked' THEN 1
+            WHEN end_game = 'ShallowCage' THEN 2
+            WHEN end_game = 'DeepCage' THEN 3
+            ELSE 0
+          END
+        ) AS metric_value
+      FROM (
+        SELECT 
+          SUBSTRING(tba.team_keys, 4, CHARINDEX(',', tba.team_keys + ',') - 4) AS team,
+          tba.end_game_robot_1 AS end_game
+        FROM TBAMatchScores tba
+        WHERE tba.end_game_robot_1 IS NOT NULL AND tba.team_keys LIKE 'frc%'
+      ) AS t
+      GROUP BY team
+
+      -- End Game Average - robot 2
+      UNION ALL 
+      SELECT
+        team AS team_number,
+        'End Game Average' AS metric_name,
+        AVG(
+          CASE 
+            WHEN end_game = 'None' THEN 0
+            WHEN end_game = 'Parked' THEN 1
+            WHEN end_game = 'ShallowCage' THEN 2
+            WHEN end_game = 'DeepCage' THEN 3
+            ELSE 0
+          END
+        ) AS metric_value
+      FROM (
+        SELECT 
+          SUBSTRING(
+            tba.team_keys, 
+            CHARINDEX(',', tba.team_keys) + 4, 
+            CHARINDEX(',', tba.team_keys, CHARINDEX(',', tba.team_keys) + 1) - CHARINDEX(',', tba.team_keys) - 4
+          ) AS team,
+          tba.end_game_robot_2 AS end_game
+        FROM TBAMatchScores tba
+        WHERE tba.end_game_robot_2 IS NOT NULL 
+          AND tba.team_keys LIKE 'frc%' 
+          AND CHARINDEX(',', tba.team_keys) > 0
+      ) AS t
+      WHERE team != ''
+      GROUP BY team
+
+      -- End Game Average - robot 3
+      UNION ALL 
+      SELECT
+        team AS team_number,
+        'End Game Average' AS metric_name,
+        AVG(
+          CASE 
+            WHEN end_game = 'None' THEN 0
+            WHEN end_game = 'Parked' THEN 1
+            WHEN end_game = 'ShallowCage' THEN 2
+            WHEN end_game = 'DeepCage' THEN 3
+            ELSE 0
+          END
+        ) AS metric_value
+      FROM (
+        SELECT 
+          SUBSTRING(
+            tba.team_keys, 
+            CHARINDEX(',', tba.team_keys, CHARINDEX(',', tba.team_keys) + 1) + 4,
+            LEN(tba.team_keys)
+          ) AS team,
+          tba.end_game_robot_3 AS end_game
+        FROM TBAMatchScores tba
+        WHERE tba.end_game_robot_3 IS NOT NULL 
+          AND tba.team_keys LIKE 'frc%'
+          AND CHARINDEX(',', tba.team_keys, CHARINDEX(',', tba.team_keys) + 1) > 0
+      ) AS t
+      WHERE team != ''
+      GROUP BY team
+
+      -- Auto Line Percentage - robot 1
+      UNION ALL 
+      SELECT
+        team AS team_number,
+        'Auto Line Percentage' AS metric_name,
+        AVG(
+          CASE 
+            WHEN auto_line = 'Yes' THEN 1
+            ELSE 0
+          END
+        ) * 100 AS metric_value
+      FROM (
+        SELECT 
+          SUBSTRING(tba.team_keys, 4, CHARINDEX(',', tba.team_keys + ',') - 4) AS team,
+          tba.auto_line_robot_1 AS auto_line
+        FROM TBAMatchScores tba
+        WHERE tba.auto_line_robot_1 IS NOT NULL AND tba.team_keys LIKE 'frc%'
+      ) AS t
+      GROUP BY team
+
+      -- Auto Line Percentage - robot 2
+      UNION ALL 
+      SELECT
+        team AS team_number,
+        'Auto Line Percentage' AS metric_name,
+        AVG(
+          CASE 
+            WHEN auto_line = 'Yes' THEN 1
+            ELSE 0
+          END
+        ) * 100 AS metric_value
+      FROM (
+        SELECT 
+          SUBSTRING(
+            tba.team_keys, 
+            CHARINDEX(',', tba.team_keys) + 4, 
+            CHARINDEX(',', tba.team_keys, CHARINDEX(',', tba.team_keys) + 1) - CHARINDEX(',', tba.team_keys) - 4
+          ) AS team,
+          tba.auto_line_robot_2 AS auto_line
+        FROM TBAMatchScores tba
+        WHERE tba.auto_line_robot_2 IS NOT NULL 
+          AND tba.team_keys LIKE 'frc%' 
+          AND CHARINDEX(',', tba.team_keys) > 0
+      ) AS t
+      WHERE team != ''
+      GROUP BY team
+
+      -- Auto Line Percentage - robot 3
+      UNION ALL 
+      SELECT
+        team AS team_number,
+        'Auto Line Percentage' AS metric_name,
+        AVG(
+          CASE 
+            WHEN auto_line = 'Yes' THEN 1
+            ELSE 0
+          END
+        ) * 100 AS metric_value
+      FROM (
+        SELECT 
+          SUBSTRING(
+            tba.team_keys, 
+            CHARINDEX(',', tba.team_keys, CHARINDEX(',', tba.team_keys) + 1) + 4,
+            LEN(tba.team_keys)
+          ) AS team,
+          tba.auto_line_robot_3 AS auto_line
+        FROM TBAMatchScores tba
+        WHERE tba.auto_line_robot_3 IS NOT NULL 
+          AND tba.team_keys LIKE 'frc%'
+          AND CHARINDEX(',', tba.team_keys, CHARINDEX(',', tba.team_keys) + 1) > 0
+      ) AS t
+      WHERE team != ''
+      GROUP BY team
 
       ORDER BY team_number
     """;
@@ -400,8 +646,8 @@ class _ScatterPlotState extends State<ScatterPlot> {
               // Chart with moderate padding and adjusted axis settings
               Expanded(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.only(left: 16, right: 8, bottom: 16, top: 8),
+                  padding: const EdgeInsets.only(
+                      left: 16, right: 8, bottom: 16, top: 8),
                   child: ScatterChart(
                     ScatterChartData(
                       clipData: FlClipData.none(), // disable clipping
@@ -411,7 +657,8 @@ class _ScatterPlotState extends State<ScatterPlot> {
                           getTooltipItems: (touchedSpot) {
                             final match = allSpots.firstWhere(
                               (ts) =>
-                                  ts.x == touchedSpot.x && ts.y == touchedSpot.y,
+                                  ts.x == touchedSpot.x &&
+                                  ts.y == touchedSpot.y,
                               orElse: () => TeamSpotData(
                                 teamNumber: 'Unknown',
                                 x: 0,

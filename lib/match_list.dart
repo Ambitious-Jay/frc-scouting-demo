@@ -119,7 +119,7 @@ class _MatchListState extends State<MatchList> {
 
     try {
       final result = await completer.future;
-      
+
       // Update the matches in setState...
       setState(() {
         matches = result;
@@ -136,65 +136,13 @@ class _MatchListState extends State<MatchList> {
   /// Creates hardcoded elimination matches.
   void _createElimMatches() {
     elimMatches = [
-      ElimMatch(
-        matchNumber: "1",
-        redAlliance: ["359", "2122", "3859"],
-        blueAlliance: ["2594", "4944", "5933"],
-      ),
-      ElimMatch(
-        matchNumber: "2",
-        redAlliance: ["3309", "8", "4175"],
-        blueAlliance: ["696", "115", "192"],
-      ),
-      ElimMatch(
-        matchNumber: "3",
-        redAlliance: ["3045", "2813", "3245"],
-        blueAlliance: ["5461", "6487", "6364"],
-      ),
-      ElimMatch(
-        matchNumber: "4",
-        redAlliance: ["1148", "3006", "6358"],
-        blueAlliance: ["9044", "3216", "399"],
-      ),
-      // Add semifinal matches from the image
-      ElimMatch(
-        matchNumber: "5", // Semis 5-1
-        redAlliance: ["4944", "2594", "5933"],
-        blueAlliance: ["3309", "8", "4175"],
-      ),
-      ElimMatch(
-        matchNumber: "6", // Semis 6-1
-        redAlliance: ["6364", "5461", "6487"],
-        blueAlliance: ["399", "9044", "3216"],
-      ),
-      ElimMatch(
-        matchNumber: "7", // Semis 7-1
-        redAlliance: ["359", "3859", "2122"],
-        blueAlliance: ["115", "192", "696"],
-      ),
-      ElimMatch(
-        matchNumber: "8",
-        redAlliance: ["3045", "2813", "3245"],
-        blueAlliance: ["1148", "3006", "6358"],
-      ),
-      // Semifinal matches
-      ElimMatch(
-        matchNumber: "9",
-        redAlliance: ["115", "192", "696"],
-        blueAlliance: ["399", "9044", "3216"],
-      ),
-      ElimMatch(
-        matchNumber: "10",
-        redAlliance: ["3045", "3245", "2813"],
-        blueAlliance: ["3309", "8", "4175"],
-      ),
-      ElimMatch(
-        matchNumber: "11",
-        redAlliance: ["359", "3859", "2122"],
-        blueAlliance: ["1148", "3006", "6358"],
-      ),
+      // ElimMatch(
+      //   matchNumber: "1",
+      //   redAlliance: ["359", "2122", "3859"],
+      //   blueAlliance: ["2594", "4944", "5933"],
+      // ),
     ];
-    
+
     // Initialize filtered elimination matches
     filteredElimMatches = List.from(elimMatches);
   }
@@ -228,7 +176,7 @@ class _MatchListState extends State<MatchList> {
           );
           return inRed || inBlue;
         }).toList();
-        
+
         filteredElimMatches = elimMatches.where((m) {
           bool inRed = m.redAlliance.any(
             (team) => team.toLowerCase().contains(lowerQuery),
@@ -298,8 +246,8 @@ class _MatchListState extends State<MatchList> {
                       child: Text(
                         "Elimination Matches",
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     ),
                     ListView.separated(
@@ -337,7 +285,8 @@ class _MatchListState extends State<MatchList> {
                                 // Blue alliance button.
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    side: const BorderSide(
+                                        color: Colors.grey, width: 1),
                                     backgroundColor: blueColor,
                                     // If the searched team is in the blue alliance, change text color to black.
                                     foregroundColor: teamInBlue
@@ -350,8 +299,10 @@ class _MatchListState extends State<MatchList> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => AllianceData(
-                                          allianceNames: match.blueAlliance.join(","),
-                                          webSocketService: widget.webSocketService,
+                                          allianceNames:
+                                              match.blueAlliance.join(","),
+                                          webSocketService:
+                                              widget.webSocketService,
                                         ),
                                       ),
                                     );
@@ -360,7 +311,8 @@ class _MatchListState extends State<MatchList> {
                                 // Red alliance button.
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    side: const BorderSide(
+                                        color: Colors.grey, width: 1),
                                     backgroundColor: redColor,
                                     // If the searched team is in the red alliance, change text color to black.
                                     foregroundColor: teamInRed
@@ -373,8 +325,10 @@ class _MatchListState extends State<MatchList> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => AllianceData(
-                                          allianceNames: match.redAlliance.join(","),
-                                          webSocketService: widget.webSocketService,
+                                          allianceNames:
+                                              match.redAlliance.join(","),
+                                          webSocketService:
+                                              widget.webSocketService,
                                         ),
                                       ),
                                     );
@@ -390,15 +344,14 @@ class _MatchListState extends State<MatchList> {
                     ),
                     const Divider(thickness: 2),
                   ],
-                  
                   if (filteredMatches.isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         "Qualification Matches",
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     ),
                     ListView.separated(
@@ -436,7 +389,8 @@ class _MatchListState extends State<MatchList> {
                                 // Blue alliance button.
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    side: const BorderSide(
+                                        color: Colors.grey, width: 1),
                                     backgroundColor: blueColor,
                                     // If the searched team is in the blue alliance, change text color to black.
                                     foregroundColor: teamInBlue
@@ -449,8 +403,10 @@ class _MatchListState extends State<MatchList> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => AllianceData(
-                                          allianceNames: match.blueAlliance.join(","),
-                                          webSocketService: widget.webSocketService,
+                                          allianceNames:
+                                              match.blueAlliance.join(","),
+                                          webSocketService:
+                                              widget.webSocketService,
                                         ),
                                       ),
                                     );
@@ -459,7 +415,8 @@ class _MatchListState extends State<MatchList> {
                                 // Red alliance button.
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(color: Colors.grey, width: 1),
+                                    side: const BorderSide(
+                                        color: Colors.grey, width: 1),
                                     backgroundColor: redColor,
                                     // If the searched team is in the red alliance, change text color to black.
                                     foregroundColor: teamInRed
@@ -472,8 +429,10 @@ class _MatchListState extends State<MatchList> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => AllianceData(
-                                          allianceNames: match.redAlliance.join(","),
-                                          webSocketService: widget.webSocketService,
+                                          allianceNames:
+                                              match.redAlliance.join(","),
+                                          webSocketService:
+                                              widget.webSocketService,
                                         ),
                                       ),
                                     );
@@ -488,7 +447,6 @@ class _MatchListState extends State<MatchList> {
                           SizedBox(height: height / 150),
                     ),
                   ],
-                  
                   if (filteredMatches.isEmpty && filteredElimMatches.isEmpty)
                     const Center(
                       child: Padding(
