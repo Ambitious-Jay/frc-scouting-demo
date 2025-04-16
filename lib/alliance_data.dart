@@ -55,13 +55,19 @@ class TeamDataModel {
 
   // Overall OPR
   final double teamOpr;
+  final double autoOpr;
 
   // Aggregator from MatchData for L1, L2/3, L4, Net, Processor
   final double l1Min, l1Max, l1Avg;
+  final double l1AutoMin, l1AutoMax, l1AutoAvg;
   final double l23Min, l23Max, l23Avg;
+  final double l23AutoMin, l23AutoMax, l23AutoAvg;
   final double l4Min, l4Max, l4Avg;
+  final double l4AutoMin, l4AutoMax, l4AutoAvg;
   final double netMin, netMax, netAvg;
+  final double netAutoMin, netAutoMax, netAutoAvg;
   final double processorMin, processorMax, processorAvg;
+  final double processorAutoMin, processorAutoMax, processorAutoAvg;
 
   // OPR fields for each row
   final double oprL1;
@@ -70,49 +76,76 @@ class TeamDataModel {
   final double oprL4;
   final double oprProcessor;
   final double oprNet;
+  final double autoOprL1;
+  final double autoOprL2;
+  final double autoOprL3;
+  final double autoOprL4;
+  final double autoOprProcessor;
+  final double autoOprNet;
 
-  const TeamDataModel({
-    required this.teamNumber,
-    required this.teamName,
-    required this.epa,
-    required this.maxEpa,
-    required this.rank,
-    required this.wlr,
-    required this.processor,
-    required this.net,
-    required this.hang,
-    required this.l1,
-    required this.l2,
-    required this.l3,
-    required this.l4,
-    required this.coralIntakeType,
-    required this.algaeIntakeType,
-    required this.leavesAuto,
-    required this.cpmAvg,
-    required this.apmAvg,
-    required this.teamOpr,
-    required this.l1Min,
-    required this.l1Max,
-    required this.l1Avg,
-    required this.l23Min,
-    required this.l23Max,
-    required this.l23Avg,
-    required this.l4Min,
-    required this.l4Max,
-    required this.l4Avg,
-    required this.netMin,
-    required this.netMax,
-    required this.netAvg,
-    required this.processorMin,
-    required this.processorMax,
-    required this.processorAvg,
-    required this.oprL1,
-    required this.oprL2,
-    required this.oprL3,
-    required this.oprL4,
-    required this.oprProcessor,
-    required this.oprNet,
-  });
+  const TeamDataModel(
+      {required this.teamNumber,
+      required this.teamName,
+      required this.epa,
+      required this.maxEpa,
+      required this.rank,
+      required this.wlr,
+      required this.processor,
+      required this.net,
+      required this.hang,
+      required this.l1,
+      required this.l2,
+      required this.l3,
+      required this.l4,
+      required this.coralIntakeType,
+      required this.algaeIntakeType,
+      required this.leavesAuto,
+      required this.cpmAvg,
+      required this.apmAvg,
+      required this.teamOpr,
+      required this.autoOpr,
+      required this.l1Min,
+      required this.l1Max,
+      required this.l1Avg,
+      required this.l1AutoMin,
+      required this.l1AutoMax,
+      required this.l1AutoAvg,
+      required this.l23Min,
+      required this.l23Max,
+      required this.l23Avg,
+      required this.l23AutoMin,
+      required this.l23AutoMax,
+      required this.l23AutoAvg,
+      required this.l4Min,
+      required this.l4Max,
+      required this.l4Avg,
+      required this.l4AutoMin,
+      required this.l4AutoMax,
+      required this.l4AutoAvg,
+      required this.netMin,
+      required this.netMax,
+      required this.netAvg,
+      required this.netAutoMin,
+      required this.netAutoMax,
+      required this.netAutoAvg,
+      required this.processorMin,
+      required this.processorMax,
+      required this.processorAvg,
+      required this.processorAutoMin,
+      required this.processorAutoMax,
+      required this.processorAutoAvg,
+      required this.oprL1,
+      required this.oprL2,
+      required this.oprL3,
+      required this.oprL4,
+      required this.oprProcessor,
+      required this.oprNet,
+      required this.autoOprL1,
+      required this.autoOprL2,
+      required this.autoOprL3,
+      required this.autoOprL4,
+      required this.autoOprProcessor,
+      required this.autoOprNet});
 }
 
 class AllianceData extends StatefulWidget {
@@ -132,6 +165,9 @@ class AllianceData extends StatefulWidget {
 class _AllianceDataState extends State<AllianceData> {
   late List<String> _teamNumbers; // e.g. ["1148","254","1678"]
   List<TeamDataModel?> _teamData = [null, null, null];
+  List<bool> displayTeamAutoData = [false, false, false];
+  // bool displayTeamTwoAutoData = false;
+  // bool displayTeamThreeAutoData = false;
 
   @override
   void initState() {
@@ -178,8 +214,7 @@ class _AllianceDataState extends State<AllianceData> {
         await _fetchPitData(normalized, partialRank);
 
     // 5) Aggregator for CPM/APM from TBAMatchScores (avg only)
-    final TeamDataModel finalData =
-        await _fetchCpmApm(normalized, partialPit);
+    final TeamDataModel finalData = await _fetchCpmApm(normalized, partialPit);
 
     // 6) Aggregator for L1, L2/3, L4, Net, Processor from MatchData
     final TeamDataModel finalData2 =
@@ -261,27 +296,49 @@ class _AllianceDataState extends State<AllianceData> {
         cpmAvg: 0,
         apmAvg: 0,
         teamOpr: 0.0,
+        autoOpr: 0.0,
         l1Min: 0,
         l1Max: 0,
         l1Avg: 0,
+        l1AutoMin: 0,
+        l1AutoMax: 0,
+        l1AutoAvg: 0,
         l23Min: 0,
         l23Max: 0,
         l23Avg: 0,
+        l23AutoMin: 0,
+        l23AutoMax: 0,
+        l23AutoAvg: 0,
         l4Min: 0,
         l4Max: 0,
         l4Avg: 0,
+        l4AutoMin: 0,
+        l4AutoMax: 0,
+        l4AutoAvg: 0,
         netMin: 0,
         netMax: 0,
         netAvg: 0,
+        netAutoMin: 0,
+        netAutoMax: 0,
+        netAutoAvg: 0,
         processorMin: 0,
         processorMax: 0,
         processorAvg: 0,
+        processorAutoMin: 0,
+        processorAutoMax: 0,
+        processorAutoAvg: 0,
         oprL1: 0.0,
         oprL2: 0.0,
         oprL3: 0.0,
         oprL4: 0.0,
         oprProcessor: 0.0,
         oprNet: 0.0,
+        autoOprL1: 0.0,
+        autoOprL2: 0.0,
+        autoOprL3: 0.0,
+        autoOprL4: 0.0,
+        autoOprProcessor: 0.0,
+        autoOprNet: 0.0,
       );
     }
 
@@ -305,27 +362,49 @@ class _AllianceDataState extends State<AllianceData> {
       cpmAvg: 0,
       apmAvg: 0,
       teamOpr: 0.0,
+      autoOpr: 0.0,
       l1Min: 0,
       l1Max: 0,
       l1Avg: 0,
+      l1AutoMin: 0,
+      l1AutoMax: 0,
+      l1AutoAvg: 0,
       l23Min: 0,
       l23Max: 0,
       l23Avg: 0,
+      l23AutoMin: 0,
+      l23AutoMax: 0,
+      l23AutoAvg: 0,
       l4Min: 0,
       l4Max: 0,
       l4Avg: 0,
+      l4AutoMin: 0,
+      l4AutoMax: 0,
+      l4AutoAvg: 0,
       netMin: 0,
       netMax: 0,
       netAvg: 0,
+      netAutoMin: 0,
+      netAutoMax: 0,
+      netAutoAvg: 0,
       processorMin: 0,
       processorMax: 0,
       processorAvg: 0,
+      processorAutoMin: 0,
+      processorAutoMax: 0,
+      processorAutoAvg: 0,
       oprL1: 0.0,
       oprL2: 0.0,
       oprL3: 0.0,
       oprL4: 0.0,
       oprProcessor: 0.0,
       oprNet: 0.0,
+      autoOprL1: 0.0,
+      autoOprL2: 0.0,
+      autoOprL3: 0.0,
+      autoOprL4: 0.0,
+      autoOprProcessor: 0.0,
+      autoOprNet: 0.0,
     );
   }
 
@@ -422,27 +501,49 @@ class _AllianceDataState extends State<AllianceData> {
       cpmAvg: base.cpmAvg,
       apmAvg: base.apmAvg,
       teamOpr: oprScore, // store the overall OPR
+      autoOpr: 0.0,
       l1Min: base.l1Min,
       l1Max: base.l1Max,
       l1Avg: base.l1Avg,
+      l1AutoMin: 0,
+      l1AutoMax: 0,
+      l1AutoAvg: 0,
       l23Min: base.l23Min,
       l23Max: base.l23Max,
       l23Avg: base.l23Avg,
+      l23AutoMin: 0,
+      l23AutoMax: 0,
+      l23AutoAvg: 0,
       l4Min: base.l4Min,
       l4Max: base.l4Max,
       l4Avg: base.l4Avg,
+      l4AutoMin: 0,
+      l4AutoMax: 0,
+      l4AutoAvg: 0,
       netMin: base.netMin,
       netMax: base.netMax,
       netAvg: base.netAvg,
+      netAutoMin: 0,
+      netAutoMax: 0,
+      netAutoAvg: 0,
       processorMin: base.processorMin,
       processorMax: base.processorMax,
       processorAvg: base.processorAvg,
+      processorAutoMin: 0,
+      processorAutoMax: 0,
+      processorAutoAvg: 0,
       oprL1: oprL1,
       oprL2: oprL2,
       oprL3: oprL3,
       oprL4: oprL4,
       oprProcessor: oprProcessor,
       oprNet: oprNet,
+      autoOprL1: 0.0,
+      autoOprL2: 0.0,
+      autoOprL3: 0.0,
+      autoOprL4: 0.0,
+      autoOprProcessor: 0.0,
+      autoOprNet: 0.0,
     );
   }
 
@@ -517,27 +618,49 @@ class _AllianceDataState extends State<AllianceData> {
       cpmAvg: base.cpmAvg,
       apmAvg: base.apmAvg,
       teamOpr: base.teamOpr,
+      autoOpr: 0.0,
       l1Min: base.l1Min,
       l1Max: base.l1Max,
       l1Avg: base.l1Avg,
+      l1AutoMin: 0,
+      l1AutoMax: 0,
+      l1AutoAvg: 0,
       l23Min: base.l23Min,
       l23Max: base.l23Max,
       l23Avg: base.l23Avg,
+      l23AutoMin: 0,
+      l23AutoMax: 0,
+      l23AutoAvg: 0,
       l4Min: base.l4Min,
       l4Max: base.l4Max,
       l4Avg: base.l4Avg,
+      l4AutoMin: 0,
+      l4AutoMax: 0,
+      l4AutoAvg: 0,
       netMin: base.netMin,
       netMax: base.netMax,
       netAvg: base.netAvg,
+      netAutoMin: 0,
+      netAutoMax: 0,
+      netAutoAvg: 0,
       processorMin: base.processorMin,
       processorMax: base.processorMax,
       processorAvg: base.processorAvg,
+      processorAutoMin: 0,
+      processorAutoMax: 0,
+      processorAutoAvg: 0,
       oprL1: base.oprL1,
       oprL2: base.oprL2,
       oprL3: base.oprL3,
       oprL4: base.oprL4,
       oprProcessor: base.oprProcessor,
       oprNet: base.oprNet,
+      autoOprL1: 0.0,
+      autoOprL2: 0.0,
+      autoOprL3: 0.0,
+      autoOprL4: 0.0,
+      autoOprProcessor: 0.0,
+      autoOprNet: 0.0,
     );
   }
 
@@ -629,27 +752,49 @@ class _AllianceDataState extends State<AllianceData> {
       cpmAvg: base.cpmAvg,
       apmAvg: base.apmAvg,
       teamOpr: base.teamOpr,
+      autoOpr: 0.0,
       l1Min: base.l1Min,
       l1Max: base.l1Max,
       l1Avg: base.l1Avg,
+      l1AutoMin: 0,
+      l1AutoMax: 0,
+      l1AutoAvg: 0,
       l23Min: base.l23Min,
       l23Max: base.l23Max,
       l23Avg: base.l23Avg,
+      l23AutoMin: 0,
+      l23AutoMax: 0,
+      l23AutoAvg: 0,
       l4Min: base.l4Min,
       l4Max: base.l4Max,
       l4Avg: base.l4Avg,
+      l4AutoMin: 0,
+      l4AutoMax: 0,
+      l4AutoAvg: 0,
       netMin: base.netMin,
       netMax: base.netMax,
       netAvg: base.netAvg,
+      netAutoMin: 0,
+      netAutoMax: 0,
+      netAutoAvg: 0,
       processorMin: base.processorMin,
       processorMax: base.processorMax,
       processorAvg: base.processorAvg,
+      processorAutoMin: 0,
+      processorAutoMax: 0,
+      processorAutoAvg: 0,
       oprL1: base.oprL1,
       oprL2: base.oprL2,
       oprL3: base.oprL3,
       oprL4: base.oprL4,
       oprProcessor: base.oprProcessor,
       oprNet: base.oprNet,
+      autoOprL1: 0.0,
+      autoOprL2: 0.0,
+      autoOprL3: 0.0,
+      autoOprL4: 0.0,
+      autoOprProcessor: 0.0,
+      autoOprNet: 0.0,
     );
   }
 
@@ -710,7 +855,8 @@ class _AllianceDataState extends State<AllianceData> {
       double l23 = double.tryParse(r["l2l3Counter"]?.toString() ?? "0") ?? 0;
       double l4 = double.tryParse(r["l4Counter"]?.toString() ?? "0") ?? 0;
       double net = double.tryParse(r["netCounter"]?.toString() ?? "0") ?? 0;
-      double processor = double.tryParse(r["processorCounter"]?.toString() ?? "0") ?? 0;
+      double processor =
+          double.tryParse(r["processorCounter"]?.toString() ?? "0") ?? 0;
       totalTeleop += (l1 + l23 + l4);
       totalAP += (net + processor);
     }
@@ -738,27 +884,49 @@ class _AllianceDataState extends State<AllianceData> {
       cpmAvg: teleopAvg,
       apmAvg: apAvg,
       teamOpr: base.teamOpr,
+      autoOpr: 0.0,
       l1Min: base.l1Min,
       l1Max: base.l1Max,
       l1Avg: base.l1Avg,
+      l1AutoMin: 0,
+      l1AutoMax: 0,
+      l1AutoAvg: 0,
       l23Min: base.l23Min,
       l23Max: base.l23Max,
       l23Avg: base.l23Avg,
+      l23AutoMin: 0,
+      l23AutoMax: 0,
+      l23AutoAvg: 0,
       l4Min: base.l4Min,
       l4Max: base.l4Max,
       l4Avg: base.l4Avg,
+      l4AutoMin: 0,
+      l4AutoMax: 0,
+      l4AutoAvg: 0,
       netMin: base.netMin,
       netMax: base.netMax,
       netAvg: base.netAvg,
+      netAutoMin: 0,
+      netAutoMax: 0,
+      netAutoAvg: 0,
       processorMin: base.processorMin,
       processorMax: base.processorMax,
       processorAvg: base.processorAvg,
+      processorAutoMin: 0,
+      processorAutoMax: 0,
+      processorAutoAvg: 0,
       oprL1: base.oprL1,
       oprL2: base.oprL2,
       oprL3: base.oprL3,
       oprL4: base.oprL4,
       oprProcessor: base.oprProcessor,
       oprNet: base.oprNet,
+      autoOprL1: 0.0,
+      autoOprL2: 0.0,
+      autoOprL3: 0.0,
+      autoOprL4: 0.0,
+      autoOprProcessor: 0.0,
+      autoOprNet: 0.0,
     );
   }
 
@@ -900,27 +1068,49 @@ class _AllianceDataState extends State<AllianceData> {
       cpmAvg: base.cpmAvg,
       apmAvg: base.apmAvg,
       teamOpr: base.teamOpr,
+      autoOpr: 0.0,
       l1Min: l1Min,
       l1Max: l1Max,
       l1Avg: l1Avg,
+      l1AutoMin: 0,
+      l1AutoMax: 0,
+      l1AutoAvg: 0,
       l23Min: l23Min,
       l23Max: l23Max,
       l23Avg: l23Avg,
+      l23AutoMin: 0,
+      l23AutoMax: 0,
+      l23AutoAvg: 0,
       l4Min: l4Min,
       l4Max: l4Max,
       l4Avg: l4Avg,
+      l4AutoMin: 0,
+      l4AutoMax: 0,
+      l4AutoAvg: 0,
       netMin: netMin,
       netMax: netMax,
       netAvg: netAvg,
+      netAutoMin: 0,
+      netAutoMax: 0,
+      netAutoAvg: 0,
       processorMin: procMin,
       processorMax: procMax,
       processorAvg: procAvg,
+      processorAutoMin: 0,
+      processorAutoMax: 0,
+      processorAutoAvg: 0,
       oprL1: base.oprL1,
       oprL2: base.oprL2,
       oprL3: base.oprL3,
       oprL4: base.oprL4,
       oprProcessor: base.oprProcessor,
       oprNet: base.oprNet,
+      autoOprL1: 0.0,
+      autoOprL2: 0.0,
+      autoOprL3: 0.0,
+      autoOprL4: 0.0,
+      autoOprProcessor: 0.0,
+      autoOprNet: 0.0,
     );
   }
 
@@ -948,6 +1138,9 @@ class _AllianceDataState extends State<AllianceData> {
   Widget buildTeamContainer(TeamDataModel team, double width, double height) {
     // Adjust font size based on width, clamped to [12..16].
     final double fontSize = (width * 0.03).clamp(12, 16).toDouble();
+    // print(_teamNumbers);
+    final int teamIndex = _teamNumbers.indexOf("frc${team.teamNumber}");
+    final bool relevantShowAutoData = displayTeamAutoData[teamIndex];
 
     return Container(
       width: width,
@@ -1026,97 +1219,130 @@ class _AllianceDataState extends State<AllianceData> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
             ),
             SizedBox(height: height * 0.01),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                // Reducing spacing to prevent overflow
-                columnSpacing: 8.0,
-                horizontalMargin: 8.0,
-                dataRowHeight: 32.0,
-                columns: [
-                  DataColumn(
-                      label:
-                          Text("Stat", style: TextStyle(fontSize: fontSize))),
-                  DataColumn(
-                      label: Text("Average",
-                          style: TextStyle(fontSize: fontSize))),
-                  DataColumn(
-                      label: Text("OPR", style: TextStyle(fontSize: fontSize))),
-                  DataColumn(
-                      label: Text("Min", style: TextStyle(fontSize: fontSize))),
-                  DataColumn(
-                      label: Text("Max", style: TextStyle(fontSize: fontSize))),
-                ],
-                rows: [
-                  // L1
-                  DataRow(cells: [
-                    DataCell(Text("L1", style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l1Avg.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.oprL1.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l1Min.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l1Max.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                  ]),
-                  // L2/3
-                  DataRow(cells: [
-                    DataCell(
-                        Text("L2/3", style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l23Avg.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    // OPR for L2/3 is "L2 OPR / L3 OPR"
-                    DataCell(Text(
-                      "${team.oprL2.toStringAsFixed(2)} / ${team.oprL3.toStringAsFixed(2)}",
-                      style: TextStyle(fontSize: fontSize),
-                    )),
-                    DataCell(Text(team.l23Min.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l23Max.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                  ]),
-                  // L4
-                  DataRow(cells: [
-                    DataCell(Text("L4", style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l4Avg.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.oprL4.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l4Min.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.l4Max.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                  ]),
-                  // Processor
-                  DataRow(cells: [
-                    DataCell(Text("Processor",
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.processorAvg.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.oprProcessor.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.processorMin.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.processorMax.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                  ]),
-                  // Net
-                  DataRow(cells: [
-                    DataCell(Text("Net", style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.netAvg.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.oprNet.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.netMin.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                    DataCell(Text(team.netMax.toStringAsFixed(2),
-                        style: TextStyle(fontSize: fontSize))),
-                  ]),
-                ],
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Column(children: [
+                const Text("Show Auto Data"),
+                Checkbox(
+                  value: displayTeamAutoData[teamIndex],
+                  checkColor: Colors.white,
+                  activeColor: Colors.black,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      displayTeamAutoData[teamIndex] = value!;
+                    });
+                  },
+                ),
+              ]),
+              SizedBox(
+                width: width * 0.05,
               ),
-            ),
-
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  // Reducing spacing to prevent overflow
+                  columnSpacing: 8.0,
+                  horizontalMargin: 8.0,
+                  dataRowHeight: 32.0,
+                  columns: [
+                    DataColumn(
+                        label:
+                            Text("Stat", style: TextStyle(fontSize: fontSize))),
+                    DataColumn(
+                        label: Text("Average",
+                            style: TextStyle(fontSize: fontSize))),
+                    DataColumn(
+                        label:
+                            Text("OPR", style: TextStyle(fontSize: fontSize))),
+                    DataColumn(
+                        label:
+                            Text("Min", style: TextStyle(fontSize: fontSize))),
+                    DataColumn(
+                        label:
+                            Text("Max", style: TextStyle(fontSize: fontSize))),
+                  ],
+                  rows: [
+                    // L1
+                    DataRow(cells: [
+                      DataCell(
+                          Text("L1", style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l1AutoAvg : team.l1Avg).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text(
+                          (relevantShowAutoData ? team.autoOprL1 : team.oprL1)
+                              .toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l1AutoMin : team.l1Min).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l1AutoMax : team.l1Max).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                    ]),
+                    // L2/3
+                    DataRow(cells: [
+                      DataCell(
+                          Text("L2/3", style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l23AutoAvg : team.l23Avg).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      // OPR for L2/3 is "L2 OPR / L3 OPR"
+                      DataCell(Text(
+                        "${(relevantShowAutoData ? team.autoOprL2 : team.oprL2).toStringAsFixed(2)} / ${(relevantShowAutoData ? team.autoOprL3 : team.oprL3).toStringAsFixed(2)}",
+                        style: TextStyle(fontSize: fontSize),
+                      )),
+                      DataCell(Text((relevantShowAutoData ? team.l23AutoMin : team.l23Min).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l23AutoMax : team.l23Max).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                    ]),
+                    // L4
+                    DataRow(cells: [
+                      DataCell(
+                          Text("L4", style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l4AutoAvg : team.l4Avg).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text(
+                          (relevantShowAutoData ? team.autoOprL4 : team.oprL4)
+                              .toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l4AutoMin : team.l4Min).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.l4AutoMax : team.l4Max).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                    ]),
+                    // Processor
+                    DataRow(cells: [
+                      DataCell(Text("Processor",
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.processorAutoAvg : team.processorAvg).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text(
+                          (relevantShowAutoData
+                                  ? team.autoOprProcessor
+                                  : team.oprProcessor)
+                              .toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.processorAutoMin : team.processorMin).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.processorAutoMax : team.processorMax).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                    ]),
+                    // Net
+                    DataRow(cells: [
+                      DataCell(
+                          Text("Net", style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.netAutoAvg : team.netAvg).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text(
+                          (relevantShowAutoData ? team.autoOprNet : team.oprNet)
+                              .toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.netAutoMin : team.netMin).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                      DataCell(Text((relevantShowAutoData ? team.netAutoMax : team.netMax).toStringAsFixed(2),
+                          style: TextStyle(fontSize: fontSize))),
+                    ]),
+                  ],
+                ),
+              ),
+            ]),
             SizedBox(height: height * 0.02),
 
             // Overall OPR (if you want to show it separately)

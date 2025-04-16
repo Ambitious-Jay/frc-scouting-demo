@@ -253,7 +253,9 @@ class LeadScoutNotesVisPage extends StatefulWidget {
 }
 
 class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
+  bool displayAutoData = false;
   LeadScoutDataModel? leadData;
+  LeadScoutDataModel? leadAutoData;
 
   @override
   void initState() {
@@ -266,6 +268,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
   Future<void> _fetchLeadData() async {
     final String normalized = normalizeTeamNumber(widget.teamNumber);
     LeadScoutDataModel data = await _fetchPerformanceData(normalized);
+    // Replace this with a version of LeadScoutData that has the auto data for the necessary data points
     data = await _fetchRankData(normalized, data);
     data = await _fetchOPRData(normalized, data);
     data = await _fetchTBAMatchData(normalized, data);
@@ -276,6 +279,54 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
 
     setState(() {
       leadData = data;
+      leadAutoData = const LeadScoutDataModel(
+          teamNumber: "0",
+          teamName: "0",
+          epa: 0,
+          rank: 0,
+          wlr: "0",
+          processor: false,
+          net: false,
+          cpmAvg: 0,
+          apmAvg: 0,
+          oprL1: 0,
+          oprL2: 0,
+          oprL3: 0,
+          oprL4: 0,
+          oprProcessor: 0,
+          oprNet: 0,
+          teamOpr: 0,
+          l1Min: 0,
+          l1Max: 0,
+          l1Avg: 0,
+          l23Min: 0,
+          l23Max: 0,
+          l23Avg: 0,
+          l4Min: 0,
+          l4Max: 0,
+          l4Avg: 0,
+          netMin: 0,
+          netMax: 0,
+          netAvg: 0,
+          processorMin: 0,
+          processorMax: 0,
+          processorAvg: 0,
+          robotWeight: 0,
+          driveType: "Swerve",
+          motorType: "Kraken",
+          motorCount: 0,
+          bumperQuality: 0,
+          coralIntakeType: "Source",
+          algaeIntakeType: "Reef",
+          climbType: "Deep",
+          canL1: "true",
+          canL2: "true",
+          canL3: "true",
+          canL4: "true",
+          autonomousCoral: "true",
+          leaveAutoLine: "true",
+          autonCpmAvg: 0,
+          notes: "");
     });
   }
 
@@ -921,6 +972,7 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
   // Build the top stats container
   Widget buildStatsContainer(double width, double height) {
     final double fontSize = (width * 0.03).clamp(12, 16).toDouble();
+    LeadScoutDataModel? relevantTableData = displayAutoData ? leadAutoData : leadData;
     return Container(
       width: width,
       padding: EdgeInsets.all(width * 0.02),
@@ -1005,134 +1057,154 @@ class _LeadScoutNotesVisPageState extends State<LeadScoutNotesVisPage> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
           ),
           SizedBox(height: height * 0.01),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columnSpacing: 8.0,
-              horizontalMargin: 8.0,
-              dataRowHeight: 32.0,
-              columns: [
-                DataColumn(
-                  label: Text("Stat", style: TextStyle(fontSize: fontSize)),
-                ),
-                DataColumn(
-                  label: Text("Average", style: TextStyle(fontSize: fontSize)),
-                ),
-                DataColumn(
-                  label: Text("OPR", style: TextStyle(fontSize: fontSize)),
-                ),
-                DataColumn(
-                  label: Text("Min", style: TextStyle(fontSize: fontSize)),
-                ),
-                DataColumn(
-                  label: Text("Max", style: TextStyle(fontSize: fontSize)),
-                ),
-              ],
-              rows: [
-                // L1
-                DataRow(cells: [
-                  DataCell(Text("L1", style: TextStyle(fontSize: fontSize))),
-                  DataCell(Text(
-                    leadData!.l1Avg.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.oprL1.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.l1Min.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.l1Max.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                ]),
-                // L2/3
-                DataRow(cells: [
-                  DataCell(Text("L2/3", style: TextStyle(fontSize: fontSize))),
-                  DataCell(Text(
-                    leadData!.l23Avg.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    "${leadData!.oprL2.toStringAsFixed(2)} / ${leadData!.oprL3.toStringAsFixed(2)}",
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.l23Min.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.l23Max.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                ]),
-                // L4
-                DataRow(cells: [
-                  DataCell(Text("L4", style: TextStyle(fontSize: fontSize))),
-                  DataCell(Text(
-                    leadData!.l4Avg.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.oprL4.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.l4Min.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.l4Max.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                ]),
-                // Processor
-                DataRow(cells: [
-                  DataCell(
-                      Text("Processor", style: TextStyle(fontSize: fontSize))),
-                  DataCell(Text(
-                    leadData!.processorAvg.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.oprProcessor.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.processorMin.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.processorMax.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                ]),
-                // Net
-                DataRow(cells: [
-                  DataCell(Text("Net", style: TextStyle(fontSize: fontSize))),
-                  DataCell(Text(
-                    leadData!.netAvg.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.oprNet.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.netMin.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                  DataCell(Text(
-                    leadData!.netMax.toStringAsFixed(2),
-                    style: TextStyle(fontSize: fontSize),
-                  )),
-                ]),
-              ],
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Column(children: [
+              const Text("Show Auto Data"),
+              Checkbox(
+                value: displayAutoData,
+                checkColor: Colors.white,
+                activeColor: Colors.black,
+                onChanged: (bool? value) {
+                  setState(() {
+                    displayAutoData = value!;
+                  });
+                },
+              ),
+            ]),
+            SizedBox(
+              width: width * 0.05,
             ),
-          ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columnSpacing: 8.0,
+                horizontalMargin: 8.0,
+                dataRowHeight: 32.0,
+                columns: [
+                  DataColumn(
+                    label: Text("Stat", style: TextStyle(fontSize: fontSize)),
+                  ),
+                  DataColumn(
+                    label:
+                        Text("Average", style: TextStyle(fontSize: fontSize)),
+                  ),
+                  DataColumn(
+                    label: Text("OPR", style: TextStyle(fontSize: fontSize)),
+                  ),
+                  DataColumn(
+                    label: Text("Min", style: TextStyle(fontSize: fontSize)),
+                  ),
+                  DataColumn(
+                    label: Text("Max", style: TextStyle(fontSize: fontSize)),
+                  ),
+                ],
+                rows: [
+                  // L1
+                  DataRow(cells: [
+                    DataCell(Text("L1", style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(
+                      relevantTableData!.l1Avg.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.oprL1.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.l1Min.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.l1Max.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                  ]),
+                  // L2/3
+                  DataRow(cells: [
+                    DataCell(
+                        Text("L2/3", style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(
+                      relevantTableData!.l23Avg.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      "${relevantTableData!.oprL2.toStringAsFixed(2)} / ${relevantTableData!.oprL3.toStringAsFixed(2)}",
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.l23Min.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.l23Max.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                  ]),
+                  // L4
+                  DataRow(cells: [
+                    DataCell(Text("L4", style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(
+                      relevantTableData!.l4Avg.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.oprL4.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.l4Min.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.l4Max.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                  ]),
+                  // Processor
+                  DataRow(cells: [
+                    DataCell(Text("Processor",
+                        style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(
+                      relevantTableData!.processorAvg.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.oprProcessor.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.processorMin.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.processorMax.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                  ]),
+                  // Net
+                  DataRow(cells: [
+                    DataCell(Text("Net", style: TextStyle(fontSize: fontSize))),
+                    DataCell(Text(
+                      relevantTableData!.netAvg.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.oprNet.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.netMin.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                    DataCell(Text(
+                      relevantTableData!.netMax.toStringAsFixed(2),
+                      style: TextStyle(fontSize: fontSize),
+                    )),
+                  ]),
+                ],
+              ),
+            ),
+          ]),
           SizedBox(height: height * 0.02),
           // Overall OPR row
           Row(
