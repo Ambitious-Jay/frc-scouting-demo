@@ -18,6 +18,9 @@ class _MainAppState extends State<MyApp> {
   bool _isLoggedIn = false;
   bool _loginChecked = false;
 
+  // Fake user data for testing
+  String _fakeTeamName = "Andrew Jo";
+
   @override
   void initState() {
     super.initState();
@@ -30,8 +33,12 @@ class _MainAppState extends State<MyApp> {
   }
 
   Future<void> _checkLoginStatus() async {
-    _isLoggedIn = await AuthService.isLoggedIn();
-    print('[MainApp] User is ${_isLoggedIn ? "" : "not "}logged in.');
+    // 🔹 Instead of calling AuthService, force logged in
+    // _isLoggedIn = await AuthService.isLoggedIn();
+    await Future.delayed(const Duration(milliseconds: 500)); // fake network delay
+    _isLoggedIn = true; // always logged in during testing
+
+    print('[MainApp] Fake login applied. User is logged in as $_fakeTeamName');
   }
 
   @override
@@ -46,7 +53,7 @@ class _MainAppState extends State<MyApp> {
     if (!_loginChecked) {
       return MaterialApp(
         home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+          body: const Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -64,7 +71,7 @@ class _MainAppState extends State<MyApp> {
                 });
               },
               webSocketService: _webSocketService,
-              teamName: '',
+              teamName: _fakeTeamName, // inject fake user/team data
             )
           : LoginPage(
               channel: _webSocketService.channel,

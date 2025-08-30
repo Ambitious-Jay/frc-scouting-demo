@@ -34,58 +34,26 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   final TextEditingController _teamController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _injectFakeUser();
+  }
+
+  Future<void> _injectFakeUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Demo user (not a lead scout since no "%")
+    await prefs.setString('username', 'scoutUser01');
+  }
+
   Future<String> _getUsername() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('username') ?? 'Unknown';
   }
 
-  /// Determines if the user is a lead scout.
-  /// (For example, if the username contains '%')
   Future<bool> isLeadScout() async {
     final username = await _getUsername();
     return username.contains('%');
-  }
-
-  /// Checks if the team has already been pit-scouted.
-  /// Returns true if a record exists.
-  Future<bool> _teamAlreadyPitScouted(String teamNumber) async {
-    // Build query to check if the team has been pitscouted.
-    final String sql =
-        "SELECT TOP 1 team_number FROM PitScoutingData WHERE team_number = '$teamNumber'";
-    final Map<String, dynamic> queryCmd = {
-      "type": "query",
-      "text": sql,
-    };
-
-    // We'll use a completer to wait for a one‑off response.
-    final completer = Completer<bool>();
-
-    // Create a one‑time subscription to the WebSocket stream.
-    final subscription = widget.webSocketService.stream?.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return; // invalid message
-        final String lenStr = rawMessage.substring(0, idx);
-        final int len = int.parse(lenStr);
-        final String jsonPart = rawMessage.substring(idx + 2);
-        if (jsonPart.length != len) return;
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          final List<dynamic> rows = msg["rows"];
-          // If rows is not empty, the team has already been pitscouted.
-          completer.complete(rows.isNotEmpty);
-        }
-      } catch (e) {
-        completer.completeError(e);
-      }
-    });
-
-    // Send the query
-    widget.webSocketService.sendLengthPrefixed(queryCmd);
-
-    final result = await completer.future;
-    subscription?.cancel();
-    return result;
   }
 
   Future<void> _onPitScoutingPressed() async {
@@ -96,30 +64,18 @@ class _DashboardPageState extends State<DashboardPage> {
       );
       return;
     }
-    try {
-      bool already = await _teamAlreadyPitScouted(teamNumber);
-      if (already) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Team $teamNumber has already been pit scouted.')),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PitScouting(
-              teamName: teamNumber,
-              channel: widget.webSocketService.channel!,
-              webSocketService: widget.webSocketService,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error checking pit scouting status: $e')),
-      );
-    }
+
+    // Demo mode: just always open pit scouting page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PitScouting(
+          teamName: teamNumber,
+          channel: widget.webSocketService.channel!,
+          webSocketService: widget.webSocketService,
+        ),
+      ),
+    );
   }
 
   Future<void> _logOut(BuildContext context) async {
@@ -141,10 +97,11 @@ class _DashboardPageState extends State<DashboardPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Dashboard (Demo)'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -159,40 +116,21 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // "Next Match" button remains as before.
+            // 🔹 Next Match button → ScoutMatchList (demo data)
             SizedBox(
               height: height / 6,
               child: ElevatedButton(
                 onPressed: () async {
-                  final username = await _getUsername();
-                  if (await isLeadScout()) {
-                    // Navigate to lead scouting page.
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LeadScoutingPage(
-                          teamName:
-                              "red", // for example, lead scouts watch the "red" alliance
-                          matchNumber:
-                              "qm1", // default match number; adjust as needed
-                          // channel: widget.webSocketService.channel!,
-                          onThemeChanged: widget.onThemeChanged,
-                          webSocketService: widget.webSocketService,
-                        ),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ScoutMatchList(
+                        webSocketService: widget.webSocketService,
+                        onThemeChanged: widget.onThemeChanged,
+                        // if your ScoutMatchList takes data, stub it here
                       ),
-                    );
-                  } else {
-                    // Navigate to ScoutMatchList.
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ScoutMatchList(
-                          webSocketService: widget.webSocketService,
-                          onThemeChanged: widget.onThemeChanged,
-                        ),
-                      ),
-                    );
-                  }
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
@@ -216,7 +154,8 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
             SizedBox(height: height / 16),
-            // Team number input for pit scouting.
+
+            // 🔹 Team number input for pit scouting
             TextField(
               controller: _teamController,
               decoration: InputDecoration(
@@ -232,7 +171,8 @@ class _DashboardPageState extends State<DashboardPage> {
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: height / 24),
-            // Pit Scouting button
+
+            // 🔹 Pit Scouting button
             SizedBox(
               height: height / 6,
               child: ElevatedButton(
@@ -259,7 +199,8 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
             SizedBox(height: height / 16),
-            // Info button remains unchanged.
+
+            // 🔹 Info button → InfoPage
             SizedBox(
               height: height / 6,
               child: ElevatedButton(
