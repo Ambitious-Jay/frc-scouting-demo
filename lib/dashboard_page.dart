@@ -43,7 +43,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> _injectFakeUser() async {
     final prefs = await SharedPreferences.getInstance();
     // Demo user (not a lead scout since no "%")
-    await prefs.setString('username', 'scoutUser01');
+    await prefs.setString('username', 'Scout User');
   }
 
   Future<String> _getUsername() async {
@@ -79,17 +79,17 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _logOut(BuildContext context) async {
-    await AuthService.logOut();
-    widget.webSocketService.disconnect();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LoginPage(
-          webSocketService: widget.webSocketService,
-          onThemeChanged: widget.onThemeChanged,
-        ),
-      ),
-    );
+    // await AuthService.logOut();
+    // widget.webSocketService.disconnect();
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (_) => LoginPage(
+    //       webSocketService: widget.webSocketService,
+    //       onThemeChanged: widget.onThemeChanged,
+    //     ),
+    //   ),
+    // );
   }
 
   @override
@@ -205,15 +205,15 @@ class _DashboardPageState extends State<DashboardPage> {
               height: height / 6,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => InfoPage(
-                        onThemeChanged: widget.onThemeChanged,
-                        webSocketService: widget.webSocketService,
-                      ),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => InfoPage(
+                  //       onThemeChanged: widget.onThemeChanged,
+                  //       webSocketService: widget.webSocketService,
+                  //     ),
+                  //   ),
+                  // );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,

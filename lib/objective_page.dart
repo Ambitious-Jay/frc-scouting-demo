@@ -77,90 +77,27 @@ class _ObjectivePageState extends State<ObjectivePage> {
   }
 
   Future<void> _submitObjectiveScoutingData() async {
-    final String teamNumberWithPrefix =
-        widget.teamName.toLowerCase().startsWith('frc')
-            ? widget.teamName
-            : 'frc${widget.teamName}';
+  final String teamNumberWithPrefix =
+      widget.teamName.toLowerCase().startsWith('frc')
+          ? widget.teamName
+          : 'frc${widget.teamName}';
 
-    final sql = '''
-      MERGE MatchData AS target
-      USING (
-        SELECT 
-          '${teamNumberWithPrefix}' AS team_number, 
-          '${widget.matchNumber}' AS match_number, 
-          ${l4Counter.value} AS l4Counter, 
-          ${l2l3Counter.value} AS l2l3Counter, 
-          ${l1Counter.value} AS l1Counter,
-          ${netCounter.value} AS netCounter, 
-          ${processorCounter.value} AS processorCounter
-      ) AS source
-      ON (target.team_number = source.team_number AND target.match_number = source.match_number)
-      WHEN MATCHED THEN
-        UPDATE SET
-          l4Counter = source.l4Counter,
-          l2l3Counter = source.l2l3Counter,
-          l1Counter = source.l1Counter,
-          netCounter = source.netCounter,
-          processorCounter = source.processorCounter
-      WHEN NOT MATCHED THEN
-        INSERT (
-          team_number, match_number, l4Counter, l2l3Counter, l1Counter, netCounter, processorCounter
-        )
-        VALUES (
-          source.team_number, source.match_number, source.l4Counter, source.l2l3Counter, source.l1Counter, 
-          source.netCounter, source.processorCounter
-        );
-    ''';
+  final Map<String, dynamic> fakeData = {
+    'team': teamNumberWithPrefix,
+    'match': widget.matchNumber,
+    'scout': _username,
+    'L4': l4Counter.value,
+    'L2L3': l2l3Counter.value,
+    'L1': l1Counter.value,
+    'Net': netCounter.value,
+    'Processor': processorCounter.value,
+  };
 
-    final cmd = {"type": "query", "text": sql};
+  debugPrint("🔹 [FAKE SUBMIT] Objective scouting data: ${jsonEncode(fakeData)}");
 
-    // Create a completer to handle the response
-    final completer = Completer<bool>();
-    late StreamSubscription sub;
-
-    // Set up a listener for the response
-    sub = widget.webSocketService.stream!.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return;
-        final int len = int.parse(rawMessage.substring(0, idx));
-        final String jsonPart = rawMessage.substring(idx + 2);
-        // Guard against empty or "null" responses
-        if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
-          return;
-        }
-        if (jsonPart.length != len) return;
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          // Successfully received response for the query
-          completer.complete(true);
-        }
-      } catch (e) {
-        completer.completeError(e);
-      }
-    });
-
-    // Send the command
-    widget.webSocketService.sendLengthPrefixed(cmd);
-    debugPrint('Sent objective scouting MERGE command: $sql');
-
-    try {
-      // Wait for response with timeout
-      final success = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () => false);
-      if (success) {
-        debugPrint(
-            'Successfully submitted objective scouting data for ${widget.teamName}');
-      } else {
-        debugPrint(
-            'Timeout or error submitting objective scouting data for ${widget.teamName}');
-      }
-    } catch (e) {
-      debugPrint('Error submitting objective scouting data: $e');
-    } finally {
-      sub.cancel();
-    }
-  }
+  // Simulate async wait
+  await Future.delayed(const Duration(milliseconds: 500));
+}
 
   Future<void> _loadAllData() async {
     if (!mounted) return;
@@ -202,245 +139,79 @@ class _ObjectivePageState extends State<ObjectivePage> {
   }
 
   Future<void> _fetchPitScoutingData() async {
-    if (!mounted) return;
+  debugPrint("🔹 [FAKE FETCH] Returning placeholder pit scouting data...");
 
-    // For PitScoutingData, remove 'frc' prefix if present
-    final String normalizedTeamNumber =
-        widget.teamName.toLowerCase().startsWith('frc')
-            ? widget.teamName.substring(3)
-            : widget.teamName;
+  await Future.delayed(const Duration(milliseconds: 500));
 
-    final sql = """
-      SELECT * FROM PitScoutingData WHERE team_number='$normalizedTeamNumber'
-    """;
-
-    final cmd = {"type": "query", "text": sql};
-    final completer = Completer<Map<String, dynamic>?>();
-    late StreamSubscription sub;
-
-    debugPrint('Fetching pit scouting data for team $normalizedTeamNumber');
-
-    sub = widget.webSocketService.stream!.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return;
-        final int len = int.parse(rawMessage.substring(0, idx));
-        final String jsonPart = rawMessage.substring(idx + 2);
-
-        if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
-          return;
-        }
-
-        if (jsonPart.length != len) return;
-
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          final List<dynamic> rows = msg["rows"];
-          if (rows.isNotEmpty) {
-            debugPrint("Received pit scouting data: ${jsonEncode(rows.first)}");
-            completer.complete(rows.first);
-          } else {
-            completer.complete(null);
-          }
-        }
-      } catch (e) {
-        debugPrint("Error processing pit scouting data: $e");
-        completer.completeError(e);
-      }
-    });
-
-    widget.webSocketService.sendLengthPrefixed(cmd);
-
-    try {
-      final row = await completer.future.timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          debugPrint("Timeout fetching pit scouting data");
-          return null;
-        },
-      );
-
-      if (row != null) {
-        if (mounted) {
-          setState(() {
-            pitScoutingData = Map<String, dynamic>.from(row);
-            debugPrint("Updated pit scouting data in state: ${jsonEncode(pitScoutingData)}");
-          });
-        }
-      } else {
-        debugPrint("No pit scouting data found for team $normalizedTeamNumber");
-        if (mounted) {
-          setState(() {
-            pitScoutingData = {
-              'team_number': normalizedTeamNumber,
-              'robot_weight': "",
-              'drive_type': "",
-              'motor_type': "",
-              'motor_count': 0,
-              'bumper_quality': 0,
-              'coral_intake_type': "",
-              'algae_intake_type': "",
-              'L1': "false",
-              'L2': "false",
-              'L3': "false",
-              'L4': "false",
-              'processor': "false",
-              'net': "false",
-              'climb_type': "",
-              'autonomous_coral_points': 0,
-              'leaves_start_line': "false"
-            };
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint("Error fetching pit scouting data: $e");
-      if (mounted) {
-        setState(() {
-          pitScoutingData = {
-            'team_number': normalizedTeamNumber,
-            'robot_weight': "",
-            'drive_type': "",
-            'motor_type': "",
-            'motor_count': 0,
-            'bumper_quality': 0,
-            'coral_intake_type': "",
-            'algae_intake_type': "",
-            'L1': "false",
-            'L2': "false",
-            'L3': "false",
-            'L4': "false",
-            'processor': "false",
-            'net': "false",
-            'climb_type': "",
-            'autonomous_coral_points': 0,
-            'leaves_start_line': "false"
-          };
-        });
-      }
-    } finally {
-      sub.cancel();
-    }
-  }
+  setState(() {
+    pitScoutingData = {
+      'team_number': widget.teamName,
+      'robot_weight': "120",
+      'drive_type': "swerve",
+      'motor_type': "NEO",
+      'motor_count': 8,
+      'bumper_quality': 3,
+      'coral_intake_type': "ground",
+      'algae_intake_type': "over the bumper",
+      'L1': "true",
+      'L2': "true",
+      'L3': "true",
+      'L4': "false",
+      'processor': "true",
+      'net': "false",
+      'climb_type': "trap",
+      'autonomous_coral_points': 12,
+      'leaves_start_line': "true",
+    };
+  });
+}
 
   // NEW: Method to save capabilities data to the database
   Future<void> _saveCapabilitiesData(
-      String robotWeight,
-      String driveType,
-      String motorType,
-      String motorCount,
-      String bumperQuality,
-      String coralIntakeType,
-      String algaeIntakeType,
-      String climbType,
-      String autonomousCoralPoints,
-      bool l1,
-      bool l2,
-      bool l3,
-      bool l4,
-      bool processor,
-      bool net,
-      bool leavesStartLine) async {
-    // For PitScoutingData, remove 'frc' prefix if present
-    final String normalizedTeamNumber =
-        widget.teamName.toLowerCase().startsWith('frc')
-            ? widget.teamName.substring(3)
-            : widget.teamName;
+  String robotWeight,
+  String driveType,
+  String motorType,
+  String motorCount,
+  String bumperQuality,
+  String coralIntakeType,
+  String algaeIntakeType,
+  String climbType,
+  String autonomousCoralPoints,
+  bool l1Capability,
+  bool l2Capability,
+  bool l3Capability,
+  bool l4Capability,
+  bool processorCapability,
+  bool netCapability,
+  bool leavesStartLineCapability,
+) async {
+  final fakeData = {
+    'robot_weight': robotWeight,
+    'drive_type': driveType,
+    'motor_type': motorType,
+    'motor_count': motorCount,
+    'bumper_quality': bumperQuality,
+    'coral_intake_type': coralIntakeType,
+    'algae_intake_type': algaeIntakeType,
+    'climb_type': climbType,
+    'autonomous_coral_points': autonomousCoralPoints,
+    'L1': l1Capability,
+    'L2': l2Capability,
+    'L3': l3Capability,
+    'L4': l4Capability,
+    'processor': processorCapability,
+    'net': netCapability,
+    'leaves_start_line': leavesStartLineCapability,
+  };
 
-    final sql = '''
-    MERGE PitScoutingData AS target
-    USING (SELECT
-      '$normalizedTeamNumber' AS team_number,
-      '$robotWeight' AS robot_weight,
-      '$driveType' AS drive_type,
-      '$motorType' AS motor_type,
-      ${safeInt(motorCount)} AS motor_count,
-      ${safeInt(bumperQuality)} AS bumper_quality,
-      '$coralIntakeType' AS coral_intake_type,
-      '$algaeIntakeType' AS algae_intake_type,
-      '${l1.toString()}' AS L1,
-      '${l2.toString()}' AS L2,
-      '${l3.toString()}' AS L3,
-      '${l4.toString()}' AS L4,
-      '${processor.toString()}' AS processor,
-      '${net.toString()}' AS net,
-      '$climbType' AS climb_type,
-      ${safeInt(autonomousCoralPoints)} AS autonomous_coral_points,
-      '${leavesStartLine.toString()}' AS leaves_start_line
-    ) AS source
-    ON (target.team_number = source.team_number)
-    WHEN MATCHED THEN
-      UPDATE SET
-        robot_weight = source.robot_weight,
-        drive_type = source.drive_type,
-        motor_type = source.motor_type,
-        motor_count = source.motor_count,
-        bumper_quality = source.bumper_quality,
-        coral_intake_type = source.coral_intake_type,
-        algae_intake_type = source.algae_intake_type,
-        L1 = source.L1,
-        L2 = source.L2,
-        L3 = source.L3,
-        L4 = source.L4,
-        processor = source.processor,
-        net = source.net,
-        climb_type = source.climb_type,
-        autonomous_coral_points = source.autonomous_coral_points,
-        leaves_start_line = source.leaves_start_line
-    WHEN NOT MATCHED THEN
-      INSERT (team_number, robot_weight, drive_type, motor_type, motor_count, bumper_quality, coral_intake_type, algae_intake_type, L1, L2, L3, L4, processor, net, climb_type, autonomous_coral_points, leaves_start_line)
-      VALUES (source.team_number, source.robot_weight, source.drive_type, source.motor_type, source.motor_count, source.bumper_quality, source.coral_intake_type, source.algae_intake_type, source.L1, source.L2, source.L3, source.L4, source.processor, source.net, source.climb_type, source.autonomous_coral_points, source.leaves_start_line);
-    ''';
+  debugPrint("🔹 [FAKE SAVE] Updated capabilities data: ${jsonEncode(fakeData)}");
 
-    final cmd = {"type": "query", "text": sql};
+  setState(() {
+    pitScoutingData = fakeData;
+  });
 
-    // Create a completer to handle the response
-    final completer = Completer<bool>();
-    late StreamSubscription sub;
-
-    // Set up a listener for the response
-    sub = widget.webSocketService.stream!.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return;
-        final int len = int.parse(rawMessage.substring(0, idx));
-        final String jsonPart = rawMessage.substring(idx + 2);
-        // Guard against empty or "null" responses
-        if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
-          return;
-        }
-        if (jsonPart.length != len) return;
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          // Successfully received response for the query
-          completer.complete(true);
-        }
-      } catch (e) {
-        completer.completeError(e);
-      }
-    });
-
-    // Send the command
-    widget.webSocketService.sendLengthPrefixed(cmd);
-    debugPrint('Sent pit scouting MERGE command: $sql');
-
-    try {
-      // Wait for response with timeout
-      final success = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () => false);
-      if (success) {
-        debugPrint(
-            'Successfully submitted pit scouting data for ${widget.teamName}');
-      } else {
-        debugPrint(
-            'Timeout or error submitting pit scouting data for ${widget.teamName}');
-      }
-    } catch (e) {
-      debugPrint('Error submitting pit scouting data: $e');
-    } finally {
-      sub.cancel();
-    }
-  }
+  await Future.delayed(const Duration(milliseconds: 300));
+}
 
   // NEW: Method to show capabilities edit dialog
   void _showCapabilitiesEditDialog() {

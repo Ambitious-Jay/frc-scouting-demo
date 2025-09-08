@@ -46,7 +46,7 @@ class ScoutMatchList extends StatefulWidget {
 
 class _ScoutMatchListState extends State<ScoutMatchList> {
   List<AssignmentItem> _assignments = [];
-  String _username = "scoutUser01"; // demo username
+  String _username = "Scout User"; // demo username
   bool _loading = false;
   String? _errorMessage;
 
@@ -61,21 +61,21 @@ class _ScoutMatchListState extends State<ScoutMatchList> {
     setState(() {
       _assignments = [
         AssignmentItem(
-          matchNumber: "qm1",
-          teamNumber: "1148",
+          matchNumber: "qm121",
+          teamNumber: "3061",
           role: "Scout",
         ),
-        AssignmentItem(
-          matchNumber: "qm2",
-          teamNumber: "254",
-          role: "Scout",
-        ),
-        AssignmentItem(
-          matchNumber: "qm3",
-          teamNumber: "1678",
-          role: "Lead Scout",
-          isLeadScout: true,
-        ),
+        // AssignmentItem(
+        //   matchNumber: "qm2",
+        //   teamNumber: "254",
+        //   role: "Scout",
+        // ),
+        // AssignmentItem(
+        //   matchNumber: "qm3",
+        //   teamNumber: "1678",
+        //   role: "Lead Scout",
+        //   isLeadScout: true,
+        // ),
       ];
       _loading = false;
       _errorMessage = null;

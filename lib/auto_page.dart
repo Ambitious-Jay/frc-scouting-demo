@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frc1148_2025_scouting_app/Backend/auth_service.dart';
 import 'package:frc1148_2025_scouting_app/Backend/websocket_service.dart';
-import 'package:frc1148_2025_scouting_app/lead_scout_quick_edit_page.dart';
 import 'package:frc1148_2025_scouting_app/objective_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -86,104 +85,25 @@ class _AutoPageState extends State<AutoPage> {
   }
 
   Future<void> _submitAutoScoutingData() async {
-    // For AutoScouting data, we need to add 'frc' prefix if not present
-    final String teamNumberWithPrefix =
-        widget.teamName.toLowerCase().startsWith('frc')
-            ? widget.teamName
-            : 'frc${widget.teamName}';
+  final fakeData = {
+    "team": widget.teamName,
+    "match": widget.matchNumber,
+    "L4": l4Counter.value,
+    "L2/L3": l2l3Counter.value,
+    "L1": l1Counter.value,
+    "Net": netCounter.value,
+    "Processor": processorCounter.value,
+    "StartPos": startPos,
+    "Zones": {
+      "Center": inCenterZone,
+      "Left": inLeftZone,
+      "Right": inRightZone,
+    },
+  };
 
-    final sql = '''
-      MERGE AutoScouting AS target
-      USING (
-        SELECT 
-          '${teamNumberWithPrefix}' AS team_number, 
-          '${widget.matchNumber}' AS match_number, 
-          '${startPos ?? ""}' AS start_position, 
-          ${l4Counter.value} AS l4_count, 
-          ${l2l3Counter.value} AS l2_l3_count, 
-          ${l1Counter.value} AS l1_count,
-          ${netCounter.value} AS net_count, 
-          ${processorCounter.value} AS processor_count,
-          ${inCenterZone ? 1 : 0} AS in_center_zone, 
-          ${inLeftZone ? 1 : 0} AS in_left_zone, 
-          ${inRightZone ? 1 : 0} AS in_right_zone,
-          ${isBlue ? 1 : 0} AS is_blue, 
-          ${fieldFlipped ? 1 : 0} AS field_flipped
-      ) AS source
-      ON (target.team_number = source.team_number AND target.match_number = source.match_number)
-      WHEN MATCHED THEN
-        UPDATE SET
-          start_position = source.start_position,
-          l4_count = source.l4_count,
-          l2_l3_count = source.l2_l3_count,
-          l1_count = source.l1_count,
-          net_count = source.net_count,
-          processor_count = source.processor_count,
-          in_center_zone = source.in_center_zone,
-          in_left_zone = source.in_left_zone,
-          in_right_zone = source.in_right_zone,
-          is_blue = source.is_blue,
-          field_flipped = source.field_flipped
-      WHEN NOT MATCHED THEN
-        INSERT (
-          team_number, match_number, start_position, l4_count, l2_l3_count, l1_count,
-          net_count, processor_count, in_center_zone, in_left_zone, in_right_zone, is_blue, field_flipped
-        )
-        VALUES (
-          source.team_number, source.match_number, source.start_position, source.l4_count, source.l2_l3_count, source.l1_count,
-          source.net_count, source.processor_count, source.in_center_zone, source.in_left_zone, source.in_right_zone, source.is_blue, source.field_flipped
-        );
-    ''';
-
-    final cmd = {"type": "query", "text": sql};
-
-    // Create a completer to handle the response
-    final completer = Completer<bool>();
-    late StreamSubscription sub;
-
-    // Set up a listener for the response
-    sub = widget.webSocketService.stream!.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return;
-        final int len = int.parse(rawMessage.substring(0, idx));
-        final String jsonPart = rawMessage.substring(idx + 2);
-        // Guard against empty or "null" responses
-        if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
-          return;
-        }
-        if (jsonPart.length != len) return;
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          // Successfully received response for the query
-          completer.complete(true);
-        }
-      } catch (e) {
-        completer.completeError(e);
-      }
-    });
-
-    // Send the command
-    widget.webSocketService.sendLengthPrefixed(cmd);
-    debugPrint('Sent auto scouting MERGE command: $sql');
-
-    try {
-      // Wait for response with timeout
-      final success = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () => false);
-      if (success) {
-        debugPrint(
-            'Successfully submitted auto scouting data for ${widget.teamName}');
-      } else {
-        debugPrint(
-            'Timeout or error submitting auto scouting data for ${widget.teamName}');
-      }
-    } catch (e) {
-      debugPrint('Error submitting auto scouting data: $e');
-    } finally {
-      sub.cancel();
-    }
-  }
+  debugPrint("🚫 [FAKE SUBMIT] Auto scouting data (not sent): $fakeData");
+  await Future.delayed(const Duration(milliseconds: 500)); // pretend delay
+}
 
   Future<void> _fetchLeadScoutingData() async {
     // Add 'frc' prefix to team number for querying LeadScoutingData table
@@ -384,193 +304,15 @@ class _AutoPageState extends State<AutoPage> {
   }
 
   Future<void> _submitLeadScoutingNotes() async {
-    // Get the current text from the controller
-    final String currentNotes = _notesController.text.trim();
-
-    // Update the state variable to ensure it matches what the user entered
-    _notesValue = currentNotes;
-
-    // Escape single quotes in notes to prevent SQL injection
-    final String escapedNotes = currentNotes.replaceAll("'", "''");
-
-    debugPrint("Submitting notes: '$currentNotes'");
-
-    // Add 'frc' prefix to team number for LeadScoutingData table
-    final String teamNumberWithPrefix =
-        widget.teamName.toLowerCase().startsWith('frc')
-            ? widget.teamName
-            : 'frc${widget.teamName}';
-
-    final sql = '''
-    MERGE LeadScoutingData AS target
-    USING (SELECT '$teamNumberWithPrefix' AS team_number, '$escapedNotes' AS notes) AS source
-    ON (target.team_number = source.team_number)
-    WHEN MATCHED THEN
-      UPDATE SET notes = source.notes
-    WHEN NOT MATCHED THEN
-      INSERT (team_number, notes)
-      VALUES (source.team_number, source.notes);
-    ''';
-
-    final cmd = {"type": "query", "text": sql};
-
-    // Create a completer to handle the response
-    final completer = Completer<bool>();
-    late StreamSubscription sub;
-
-    // Set up a listener for the response
-    sub = widget.webSocketService.stream!.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return;
-        final int len = int.parse(rawMessage.substring(0, idx));
-        final String jsonPart = rawMessage.substring(idx + 2);
-        // Guard against empty or "null" responses
-        if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
-          return;
-        }
-        if (jsonPart.length != len) return;
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          // Successfully received response for the query
-          completer.complete(true);
-        }
-      } catch (e) {
-        completer.completeError(e);
-      }
-    });
-
-    // Send the command
-    widget.webSocketService.sendLengthPrefixed(cmd);
-    debugPrint('Sent lead scouting notes MERGE command: $sql');
-
-    try {
-      // Wait for response with timeout
-      final success = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () => false);
-      if (success) {
-        debugPrint(
-            'Successfully submitted lead scouting notes for ${widget.teamName}');
-      } else {
-        debugPrint(
-            'Timeout or error submitting lead scouting notes for ${widget.teamName}');
-      }
-    } catch (e) {
-      debugPrint('Error submitting lead scouting notes: $e');
-    } finally {
-      sub.cancel();
-    }
-  }
+  debugPrint(
+      "🚫 [FAKE SUBMIT] Lead scouting notes for ${widget.teamName}: $_notesValue");
+  await Future.delayed(const Duration(milliseconds: 300));
+}
 
   Future<void> _submitPitScoutingData() async {
-    // For PitScoutingData, remove 'frc' prefix if present
-    final String normalizedTeamNumber =
-        widget.teamName.toLowerCase().startsWith('frc')
-            ? widget.teamName.substring(3)
-            : widget.teamName;
-
-    // Helper functions for safe type conversion
-    String safeString(dynamic value) => value != null ? value.toString() : "";
-    int safeInt(dynamic value) {
-      if (value == null) return 0;
-      if (value is int) return value;
-      return int.tryParse(value.toString()) ?? 0;
-    }
-
-    final sql = '''
-  MERGE PitScoutingData AS target
-  USING (SELECT
-    '$normalizedTeamNumber' AS team_number,
-      '${safeString(pitScoutingData?['robot_weight'])}' AS robot_weight,
-      '${safeString(pitScoutingData?['drive_type'])}' AS drive_type,
-      '${safeString(pitScoutingData?['motor_type'])}' AS motor_type,
-      ${safeInt(pitScoutingData?['motor_count'])} AS motor_count,
-      ${safeInt(pitScoutingData?['bumper_quality'])} AS bumper_quality,
-      '${safeString(pitScoutingData?['coral_intake_type'])}' AS coral_intake_type,
-      '${safeString(pitScoutingData?['algae_intake_type'])}' AS algae_intake_type,
-      '${safeString(pitScoutingData?['L1'])}' AS L1,
-      '${safeString(pitScoutingData?['L2'])}' AS L2,
-      '${safeString(pitScoutingData?['L3'])}' AS L3,
-      '${safeString(pitScoutingData?['L4'])}' AS L4,
-      '${safeString(pitScoutingData?['processor'])}' AS processor,
-      '${safeString(pitScoutingData?['net'])}' AS net,
-      '${safeString(pitScoutingData?['climb_type'])}' AS climb_type,
-      ${safeInt(pitScoutingData?['autonomous_coral_points'])} AS autonomous_coral_points,
-      '${safeString(pitScoutingData?['leaves_start_line'])}' AS leaves_start_line
-  ) AS source
-  ON (target.team_number = source.team_number)
-  WHEN MATCHED THEN
-    UPDATE SET
-      robot_weight = source.robot_weight,
-      drive_type = source.drive_type,
-      motor_type = source.motor_type,
-      motor_count = source.motor_count,
-      bumper_quality = source.bumper_quality,
-      coral_intake_type = source.coral_intake_type,
-      algae_intake_type = source.algae_intake_type,
-      L1 = source.L1,
-      L2 = source.L2,
-      L3 = source.L3,
-      L4 = source.L4,
-      processor = source.processor,
-      net = source.net,
-      climb_type = source.climb_type,
-      autonomous_coral_points = source.autonomous_coral_points,
-      leaves_start_line = source.leaves_start_line
-  WHEN NOT MATCHED THEN
-    INSERT (team_number, robot_weight, drive_type, motor_type, motor_count, bumper_quality, coral_intake_type, algae_intake_type, L1, L2, L3, L4, processor, net, climb_type, autonomous_coral_points, leaves_start_line)
-    VALUES (source.team_number, source.robot_weight, source.drive_type, source.motor_type, source.motor_count, source.bumper_quality, source.coral_intake_type, source.algae_intake_type, source.L1, source.L2, source.L3, source.L4, source.processor, source.net, source.climb_type, source.autonomous_coral_points, source.leaves_start_line);
-    ''';
-
-    final cmd = {"type": "query", "text": sql};
-
-    // Create a completer to handle the response
-    final completer = Completer<bool>();
-    late StreamSubscription sub;
-
-    // Set up a listener for the response
-    sub = widget.webSocketService.stream!.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return;
-        final int len = int.parse(rawMessage.substring(0, idx));
-        final String jsonPart = rawMessage.substring(idx + 2);
-        // Guard against empty or "null" responses
-        if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
-          return;
-        }
-        if (jsonPart.length != len) return;
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          // Successfully received response for the query
-          completer.complete(true);
-        }
-      } catch (e) {
-        completer.completeError(e);
-      }
-    });
-
-    // Send the command
-    widget.webSocketService.sendLengthPrefixed(cmd);
-    debugPrint('Sent pit scouting MERGE command: $sql');
-
-    try {
-      // Wait for response with timeout
-      final success = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () => false);
-      if (success) {
-        debugPrint(
-            'Successfully submitted pit scouting data for ${widget.teamName}');
-      } else {
-        debugPrint(
-            'Timeout or error submitting pit scouting data for ${widget.teamName}');
-      }
-    } catch (e) {
-      debugPrint('Error submitting pit scouting data: $e');
-    } finally {
-      sub.cancel();
-    }
-  }
+  debugPrint("🚫 [FAKE SUBMIT] Pit scouting data requested (no DB call).");
+  await Future.delayed(const Duration(milliseconds: 300));
+}
 
   @override
   void initState() {
@@ -717,7 +459,7 @@ class _AutoPageState extends State<AutoPage> {
                       ),
                     ),
                     Positioned(
-                      top: fieldHeight / 2 - 25,
+                      top: 3 * fieldHeight / 4 - 25,
                       right:
                           (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) -
                               25,
@@ -787,10 +529,10 @@ class _AutoPageState extends State<AutoPage> {
                       ),
                     ),
                     Positioned(
-                      left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
+                      left: (fieldFlipped ? 1 : 4) * fieldWidth / 5 - 40,
                       top: fieldHeight / 4,
                       child: SizedBox(
-                        width: 120,
+                        width: 150,
                         height: fieldHeight / 3 * 2,
                         child: Column(
                           children: [
@@ -1039,13 +781,13 @@ class _AutoPageState extends State<AutoPage> {
           child: Row(
             children: [
               // Left side: Field view.
-              Expanded(
-                flex: 1,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(12),
-                  child: buildFieldSectionDesktop(),
-                ),
-              ),
+              // Expanded(
+              //   flex: 1,
+              //   child: SingleChildScrollView(
+              //     padding: const EdgeInsets.all(12),
+              //     child: buildFieldSectionDesktop(),
+              //   ),
+              // ),
               // Right side: Controls.
               Expanded(
                 flex: 2,
@@ -1089,174 +831,6 @@ class _AutoPageState extends State<AutoPage> {
     );
   }
 
-  Widget buildFieldSectionDesktop() {
-    double availableWidth = MediaQuery.of(context).size.width / 2 - 24;
-    double fieldWidth = min(availableWidth, 400);
-    double fieldHeight = fieldWidth;
-
-    AssetImage bg = isBlue
-        ? const AssetImage('assets/reefscape_blue_field.jpg')
-        : const AssetImage('assets/reefscape_red_field.jpg');
-
-    return Container(
-      alignment: Alignment.center,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: fieldWidth,
-            height: fieldHeight,
-            child: Transform.rotate(
-              angle: fieldFlipped ? 3.14159265 : 0,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: bg,
-                    fit: BoxFit.fitWidth,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Center zone.
-          Positioned(
-            top: fieldHeight / 2 - 25,
-            right: (fieldFlipped ? fieldWidth * 4 / 5 : fieldWidth / 4) - 25,
-            child: Column(
-              children: [
-                const Text("Center", style: TextStyle(color: Colors.black)),
-                Checkbox(
-                  value: inCenterZone,
-                  checkColor: Colors.black,
-                  activeColor: Colors.black,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      inCenterZone = value!;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Left and Right zones.
-          Positioned(
-            left: (fieldFlipped ? 2 : 1) * fieldWidth / 3 - 25,
-            top: fieldHeight / 4 - 25,
-            child: Column(
-              children: [
-                Column(
-                  children: [
-                    const Text("Left", style: TextStyle(color: Colors.black)),
-                    Checkbox(
-                      value: inLeftZone,
-                      checkColor: Colors.black,
-                      activeColor: Colors.black,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          inLeftZone = value!;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: fieldHeight / 2 - 50),
-                Column(
-                  children: [
-                    const Text("Right", style: TextStyle(color: Colors.black)),
-                    Checkbox(
-                      value: inRightZone,
-                      checkColor: Colors.black,
-                      activeColor: Colors.black,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          inRightZone = value!;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Radio buttons for start position.
-          Positioned(
-            left: (fieldFlipped ? 1 : 7) * fieldWidth / 8 - 40,
-            top: fieldHeight / 4,
-            child: SizedBox(
-              width: 120,
-              height: fieldHeight / 3 * 2,
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        startPos = "rightStart";
-                      });
-                    },
-                    child: ListTile(
-                      title: const Text("Right",
-                          style: TextStyle(fontSize: 14, color: Colors.black)),
-                      leading: Radio<String>(
-                        value: "rightStart",
-                        groupValue: startPos,
-                        onChanged: (String? value) {
-                          setState(() {
-                            startPos = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: max(0, fieldHeight / 4 - 95)),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        startPos = "centerStart";
-                      });
-                    },
-                    child: ListTile(
-                      title: const Text("Center",
-                          style: TextStyle(fontSize: 14, color: Colors.black)),
-                      leading: Radio<String>(
-                        value: "centerStart",
-                        groupValue: startPos,
-                        onChanged: (String? value) {
-                          setState(() {
-                            startPos = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: max(0, fieldHeight / 4 - 95)),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        startPos = "leftStart";
-                      });
-                    },
-                    child: ListTile(
-                      title: const Text("Left",
-                          style: TextStyle(fontSize: 14, color: Colors.black)),
-                      leading: Radio<String>(
-                        value: "leftStart",
-                        groupValue: startPos,
-                        onChanged: (String? value) {
-                          setState(() {
-                            startPos = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget buildControlsSectionDesktop() {
     double availableWidth = MediaQuery.of(context).size.width / 2 - 24;
@@ -1374,7 +948,7 @@ class _AutoPageState extends State<AutoPage> {
                                       pitScoutingData!
                                           .containsKey('robot_weight')) {
                                     setState(() {}); // Force a rebuild
-                                    _showCapabilitiesEditDialog();
+                                    // _showCapabilitiesEditDialog();
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -1387,7 +961,7 @@ class _AutoPageState extends State<AutoPage> {
                                 }
                               });
                             } else {
-                              _showCapabilitiesEditDialog();
+                              // _showCapabilitiesEditDialog();
                             }
                           },
                     child: Column(
@@ -1470,232 +1044,6 @@ class _AutoPageState extends State<AutoPage> {
     }
   }
 
-  // Method to show capabilities edit dialog
-  void _showCapabilitiesEditDialog() {
-    // Make sure we use the already fetched pit scouting data
-    debugPrint(
-        "Opening capabilities dialog with existing data: ${pitScoutingData != null ? 'data available' : 'no data'}");
-
-    // If no pit data is available, show loading dialog and try to fetch
-    if (pitScoutingData == null) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const Dialog(
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text("Loading capabilities data..."),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-
-      // Try to fetch the data
-      _fetchPitScoutingData().then((_) {
-        if (mounted) {
-          Navigator.of(context).pop(); // Close loading dialog
-          if (pitScoutingData != null) {
-            // Force a rebuild of the dialog with the new data
-            setState(() {}); // Trigger a rebuild of the parent widget
-            _showCapabilitiesEditDialog(); // Recursively show dialog with data
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Error loading data. Please try again."),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      });
-      return;
-    }
-
-    // Create controllers with the data
-    final robotWeightController = TextEditingController(
-        text: safeString(pitScoutingData!['robot_weight']));
-    final driveTypeController =
-        TextEditingController(text: safeString(pitScoutingData!['drive_type']));
-    final motorTypeController =
-        TextEditingController(text: safeString(pitScoutingData!['motor_type']));
-    final motorCountController = TextEditingController(
-        text: safeString(pitScoutingData!['motor_count']));
-    final bumperQualityController = TextEditingController(
-        text: safeString(pitScoutingData!['bumper_quality']));
-    final coralIntakeTypeController = TextEditingController(
-        text: safeString(pitScoutingData!['coral_intake_type']));
-    final algaeIntakeTypeController = TextEditingController(
-        text: safeString(pitScoutingData!['algae_intake_type']));
-    final climbTypeController =
-        TextEditingController(text: safeString(pitScoutingData!['climb_type']));
-    final autonomousCoralPointsController = TextEditingController(
-        text: safeString(pitScoutingData!['autonomous_coral_points']));
-
-    // Set boolean values directly from the data
-    bool l1Capability = safeBool(pitScoutingData!['L1']);
-    bool l2Capability = safeBool(pitScoutingData!['L2']);
-    bool l3Capability = safeBool(pitScoutingData!['L3']);
-    bool l4Capability = safeBool(pitScoutingData!['L4']);
-    bool processorCapability = safeBool(pitScoutingData!['processor']);
-    bool netCapability = safeBool(pitScoutingData!['net']);
-    bool leavesStartLineCapability =
-        safeBool(pitScoutingData!['leaves_start_line']);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Edit Team ${widget.teamName} Capabilities",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Text inputs for string and numeric fields
-                      _buildDialogTextField(
-                          robotWeightController, "Robot Weight"),
-                      _buildDialogTextField(driveTypeController, "Drive Type"),
-                      _buildDialogTextField(motorTypeController, "Motor Type"),
-                      _buildDialogTextField(motorCountController, "Motor Count",
-                          isNumeric: true),
-                      _buildDialogTextField(
-                          bumperQualityController, "Bumper Quality (1-10)",
-                          isNumeric: true),
-                      _buildDialogTextField(
-                          coralIntakeTypeController, "Coral Intake Type"),
-                      _buildDialogTextField(
-                          algaeIntakeTypeController, "Algae Intake Type"),
-                      _buildDialogTextField(climbTypeController, "Climb Type"),
-                      _buildDialogTextField(
-                          autonomousCoralPointsController, "Auto Coral Points",
-                          isNumeric: true),
-
-                      const Divider(height: 20),
-
-                      // Checkboxes for boolean fields
-                      _buildDialogCheckbox("L1 Capability", l1Capability,
-                          (value) {
-                        setDialogState(() => l1Capability = value!);
-                      }),
-                      _buildDialogCheckbox("L2 Capability", l2Capability,
-                          (value) {
-                        setDialogState(() => l2Capability = value!);
-                      }),
-                      _buildDialogCheckbox("L3 Capability", l3Capability,
-                          (value) {
-                        setDialogState(() => l3Capability = value!);
-                      }),
-                      _buildDialogCheckbox("L4 Capability", l4Capability,
-                          (value) {
-                        setDialogState(() => l4Capability = value!);
-                      }),
-                      _buildDialogCheckbox("Processor", processorCapability,
-                          (value) {
-                        setDialogState(() => processorCapability = value!);
-                      }),
-                      _buildDialogCheckbox("Net", netCapability, (value) {
-                        setDialogState(() => netCapability = value!);
-                      }),
-                      _buildDialogCheckbox(
-                          "Leaves Start Line", leavesStartLineCapability,
-                          (value) {
-                        setDialogState(
-                            () => leavesStartLineCapability = value!);
-                      }),
-
-                      const SizedBox(height: 20),
-
-                      // Action buttons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text("Cancel"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              // Save the edited data
-                              await _saveCapabilitiesData(
-                                  robotWeightController.text,
-                                  driveTypeController.text,
-                                  motorTypeController.text,
-                                  motorCountController.text,
-                                  bumperQualityController.text,
-                                  coralIntakeTypeController.text,
-                                  algaeIntakeTypeController.text,
-                                  climbTypeController.text,
-                                  autonomousCoralPointsController.text,
-                                  l1Capability,
-                                  l2Capability,
-                                  l3Capability,
-                                  l4Capability,
-                                  processorCapability,
-                                  netCapability,
-                                  leavesStartLineCapability);
-
-                              // Show success message
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text("Capabilities saved successfully"),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              }
-                              Navigator.of(context).pop();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                            ),
-                            child: const Text("Save"),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).then((_) {
-      // After dialog is closed, refresh the pit scouting data to reflect any changes
-      _fetchPitScoutingData().then((_) {
-        if (mounted) {
-          setState(() {}); // Force a rebuild of the parent widget
-        }
-      });
-    });
-  }
-
   Widget _buildDialogTextField(TextEditingController controller, String label,
       {bool isNumeric = false}) {
     return Padding(
@@ -1745,122 +1093,46 @@ class _AutoPageState extends State<AutoPage> {
 
   // Method to save capabilities data to the database
   Future<void> _saveCapabilitiesData(
-      String robotWeight,
-      String driveType,
-      String motorType,
-      String motorCount,
-      String bumperQuality,
-      String coralIntakeType,
-      String algaeIntakeType,
-      String climbType,
-      String autonomousCoralPoints,
-      bool l1,
-      bool l2,
-      bool l3,
-      bool l4,
-      bool processor,
-      bool net,
-      bool leavesStartLine) async {
-    // For PitScoutingData, remove 'frc' prefix if present
-    final String normalizedTeamNumber =
-        widget.teamName.toLowerCase().startsWith('frc')
-            ? widget.teamName.substring(3)
-            : widget.teamName;
-
-    final sql = '''
-    MERGE PitScoutingData AS target
-    USING (SELECT
-      '$normalizedTeamNumber' AS team_number,
-      '$robotWeight' AS robot_weight,
-      '$driveType' AS drive_type,
-      '$motorType' AS motor_type,
-      ${safeInt(motorCount)} AS motor_count,
-      ${safeInt(bumperQuality)} AS bumper_quality,
-      '$coralIntakeType' AS coral_intake_type,
-      '$algaeIntakeType' AS algae_intake_type,
-      '${l1.toString()}' AS L1,
-      '${l2.toString()}' AS L2,
-      '${l3.toString()}' AS L3,
-      '${l4.toString()}' AS L4,
-      '${processor.toString()}' AS processor,
-      '${net.toString()}' AS net,
-      '$climbType' AS climb_type,
-      ${safeInt(autonomousCoralPoints)} AS autonomous_coral_points,
-      '${leavesStartLine.toString()}' AS leaves_start_line
-    ) AS source
-    ON (target.team_number = source.team_number)
-    WHEN MATCHED THEN
-      UPDATE SET
-        robot_weight = source.robot_weight,
-        drive_type = source.drive_type,
-        motor_type = source.motor_type,
-        motor_count = source.motor_count,
-        bumper_quality = source.bumper_quality,
-        coral_intake_type = source.coral_intake_type,
-        algae_intake_type = source.algae_intake_type,
-        L1 = source.L1,
-        L2 = source.L2,
-        L3 = source.L3,
-        L4 = source.L4,
-        processor = source.processor,
-        net = source.net,
-        climb_type = source.climb_type,
-        autonomous_coral_points = source.autonomous_coral_points,
-        leaves_start_line = source.leaves_start_line
-    WHEN NOT MATCHED THEN
-      INSERT (team_number, robot_weight, drive_type, motor_type, motor_count, bumper_quality, coral_intake_type, algae_intake_type, L1, L2, L3, L4, processor, net, climb_type, autonomous_coral_points, leaves_start_line)
-      VALUES (source.team_number, source.robot_weight, source.drive_type, source.motor_type, source.motor_count, source.bumper_quality, source.coral_intake_type, source.algae_intake_type, source.L1, source.L2, source.L3, source.L4, source.processor, source.net, source.climb_type, source.autonomous_coral_points, source.leaves_start_line);
-    ''';
-
-    final cmd = {"type": "query", "text": sql};
-
-    // Create a completer to handle the response
-    final completer = Completer<bool>();
-    late StreamSubscription sub;
-
-    // Set up a listener for the response
-    sub = widget.webSocketService.stream!.listen((rawMessage) {
-      try {
-        final int idx = rawMessage.indexOf('\r\n');
-        if (idx < 0) return;
-        final int len = int.parse(rawMessage.substring(0, idx));
-        final String jsonPart = rawMessage.substring(idx + 2);
-        // Guard against empty or "null" responses
-        if (jsonPart.trim().isEmpty || jsonPart.trim() == "null") {
-          return;
-        }
-        if (jsonPart.length != len) return;
-        final Map<String, dynamic> msg = jsonDecode(jsonPart);
-        if (msg["type"] == "query") {
-          // Successfully received response for the query
-          completer.complete(true);
-        }
-      } catch (e) {
-        completer.completeError(e);
-      }
-    });
-
-    // Send the command
-    widget.webSocketService.sendLengthPrefixed(cmd);
-    debugPrint('Sent pit scouting MERGE command: $sql');
-
-    try {
-      // Wait for response with timeout
-      final success = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () => false);
-      if (success) {
-        debugPrint(
-            'Successfully submitted pit scouting data for ${widget.teamName}');
-      } else {
-        debugPrint(
-            'Timeout or error submitting pit scouting data for ${widget.teamName}');
-      }
-    } catch (e) {
-      debugPrint('Error submitting pit scouting data: $e');
-    } finally {
-      sub.cancel();
+    String robotWeight,
+    String driveType,
+    String motorType,
+    String motorCount,
+    String bumperQuality,
+    String coralIntakeType,
+    String algaeIntakeType,
+    String climbType,
+    String autonomousCoralPoints,
+    bool l1,
+    bool l2,
+    bool l3,
+    bool l4,
+    bool processor,
+    bool net,
+    bool leavesStartLine) async {
+  final fakeCaps = {
+    "robotWeight": robotWeight,
+    "driveType": driveType,
+    "motorType": motorType,
+    "motorCount": motorCount,
+    "bumperQuality": bumperQuality,
+    "coralIntakeType": coralIntakeType,
+    "algaeIntakeType": algaeIntakeType,
+    "climbType": climbType,
+    "autoCoralPoints": autonomousCoralPoints,
+    "capabilities": {
+      "L1": l1,
+      "L2": l2,
+      "L3": l3,
+      "L4": l4,
+      "Processor": processor,
+      "Net": net,
+      "LeavesStartLine": leavesStartLine,
     }
-  }
+  };
+
+  debugPrint("🚫 [FAKE SUBMIT] Pit capabilities (not saved): $fakeCaps");
+  await Future.delayed(const Duration(milliseconds: 500));
+}
 
   Widget buildCounterButton(String label, IntegerWrapper counter,
       bool doIncrement, double buttonSize) {
